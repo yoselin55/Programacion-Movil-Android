@@ -23,7 +23,7 @@ fun calcularTotal(subtotal: Double, igv: Double): Double {
 }
 
 fun mostrarDetalle(productos: List<Producto>) {
-    println("--------- DETALLE DEL CARRITO ---------")
+    println("-------- DETALLE DEL CARRITO --------")
     var i = 1
     for (p in productos) {
         val importe = p.precio * p.cantidad
