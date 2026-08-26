@@ -5,7 +5,6 @@ data class Producto(
     val precio: Double,
     var cantidad: Int
 )
-
 fun calcularSubtotal(productos: List<Producto>): Double {
     var subtotal = 0.0
     for (p in productos) {
@@ -13,17 +12,23 @@ fun calcularSubtotal(productos: List<Producto>): Double {
     }
     return subtotal
 }
-
 fun calcularIGV(subtotal: Double): Double {
     return subtotal * 0.18
 }
-
 fun calcularTotal(subtotal: Double, igv: Double): Double {
     return subtotal + igv
 }
 
+fun calcularDescuento(total: Double): Double {
+    return when {
+        total > 5000 -> total * 0.10
+        total > 3000 -> total * 0.05
+        else -> 0.0
+    }
+}
+
 fun mostrarDetalle(productos: List<Producto>) {
-    println("-------- DETALLE DEL CARRITO --------")
+    println("--------- DETALLE DEL CARRITO ---------")
     var i = 1
     for (p in productos) {
         val importe = p.precio * p.cantidad
@@ -55,7 +60,7 @@ fun main() {
     println()
 
     mostrarDetalle(carrito)
-    println("Cantidad de productos en lista: ${carrito.size}\n")
+    println("Cantidad de productos: ${carrito.size}\n")
 
     val subtotal = calcularSubtotal(carrito)
     val igv = calcularIGV(subtotal)
@@ -64,4 +69,22 @@ fun main() {
     println(String.format("Subtotal : S/ %8.2f", subtotal))
     println(String.format("IGV (18%%): S/ %8.2f", igv))
     println(String.format("TOTAL    : S/ %8.2f", total))
+    println()
+
+    val masCaro = carrito.maxByOrNull { it.precio }
+    if (masCaro != null) {
+        println("Producto mas caro: ${masCaro.nombre} " +
+                String.format("(S/ %.2f)", masCaro.precio))
+    }
+
+    val descuento = calcularDescuento(total)
+    val totalConDescuento = total - descuento
+
+    if (descuento > 0.0) {
+        val porcentaje = if (total > 5000) "10%" else "5%"
+        println(String.format("Descuento (%s): S/ %8.2f", porcentaje, descuento))
+        println(String.format("TOTAL CON DESCUENTO: S/ %8.2f", totalConDescuento))
+    } else {
+        println("Descuento: No aplica (Total menor a S/ 3000.00)")
+    }
 }
