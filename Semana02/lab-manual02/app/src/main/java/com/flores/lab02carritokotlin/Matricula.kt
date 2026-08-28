@@ -10,6 +10,9 @@ fun main() {
     print("Ingrese el valor de cada crédito: ")
     val valorCredito = readLine()!!.toDouble()
 
+    var totalCreditos = 0
+    var totalAPagar = 0.0
+
     for (i in 1..cantidadCursos) {
         println("\n--- Registro del Curso $i ---")
         print("Nombre del curso: ")
@@ -18,8 +21,21 @@ fun main() {
         print("Cantidad de créditos: ")
         val creditosCurso = readLine()!!.toInt()
 
-        println("-> Registrado: $nombreCurso ($creditosCurso créditos)")
+        val costoCurso = creditosCurso * valorCredito
+        totalCreditos += creditosCurso
+        totalAPagar += costoCurso
     }
 
-    println("\n>>> Datos ingresados correctamente. <<<")
+    val cargaAcademica = if (totalCreditos <= 12) {
+        "Malla Regular"
+    } else if (totalCreditos <= 18) {
+        "Carga Completa"
+    } else {
+        "Requiere Autorizacion"
+    }
+
+    val cuotas = if (totalAPagar > 1500) 3 else 2
+    val montoCuota = totalAPagar / cuotas
+
+    println("\nCalculos realizados correctamente.")
 }
