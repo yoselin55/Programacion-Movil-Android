@@ -6,13 +6,16 @@ import com.flores.lab02carritokotlin.model.ProductoElectronico
 import com.flores.lab02carritokotlin.model.ProductoImportado
 import java.util.Locale
 
+private const val PALABRA_CANCELAR = "cancelar"
+private const val SUFIJO_CANCELAR = " (o '$PALABRA_CANCELAR' para volver al menu)"
+
 fun main() {
     println("=========================================")
     println("   CARRITO DE COMPRAS - TIENDA TECSUP   ")
     println("=========================================")
 
-    print("Ingrese el nombre del cliente: ")
-    val nombreCliente = readLine()?.trim().orEmpty().ifBlank { "Cliente sin nombre" }
+    val nombreCliente = leerTextoNoVacio("Ingrese el nombre del cliente", permitirCancelar = false)
+        ?: "Cliente sin nombre"
     println("Cliente: $nombreCliente\n")
 
     val carrito = Carrito()
@@ -31,11 +34,10 @@ fun main() {
             4 -> eliminarProductoInteractivo(carrito)
             5 -> mostrarTotales(carrito)
             6 -> {
-                println("\nGracias por usar el carrito, $nombreCliente. Hasta pronto!")
+                println("\nGracias por su visita, $nombreCliente. Hasta pronto!")
                 continuar = false
             }
-            null -> println("\nOpcion invalida: debe ingresar un numero.\n")
-            else -> println("\nOpcion invalida: elija un numero entre 1 y 6.\n")
+            else -> println("\nOpcion invalida: ingrese un numero del 1 al 6.\n")
         }
     }
 }
@@ -58,35 +60,25 @@ private fun leerOpcionMenu(): Int? {
 
 private fun agregarProducto(carrito: Carrito) {
     println("\n--- Agregar producto ---")
-    println("Tipo de producto:")
-    println("1) Electronico")
-    println("2) Accesorio")
-    println("3) Importado")
-    print("Seleccione un tipo (1-3): ")
-    val tipo = readLine()?.trim()?.toIntOrNull()
-    if (tipo == null || tipo !in 1..3) {
-        println("Tipo invalido. Operacion cancelada.\n")
+    println("Tipos disponibles: 1) Electronico   2) Accesorio   3) Importado")
+
+    val tipo = leerOpcionEnRango("Seleccione el tipo de producto", 1..3) ?: run {
+        println("Operacion cancelada: no se agrego ningun producto.\n")
         return
     }
 
-    print("Nombre del producto: ")
-    val nombre = readLine()?.trim().orEmpty()
-    if (nombre.isBlank()) {
-        println("El nombre no puede estar vacio. Operacion cancelada.\n")
+    val nombre = leerTextoNoVacio("Nombre del producto") ?: run {
+        println("Operacion cancelada: no se agrego ningun producto.\n")
         return
     }
 
-    print("Precio unitario: ")
-    val precio = readLine()?.trim()?.toDoubleOrNull()
-    if (precio == null) {
-        println("Precio invalido: debe ser un numero. Operacion cancelada.\n")
+    val precio = leerDoublePositivo("Precio unitario") ?: run {
+        println("Operacion cancelada: no se agrego ningun producto.\n")
         return
     }
 
-    print("Cantidad: ")
-    val cantidad = readLine()?.trim()?.toIntOrNull()
-    if (cantidad == null) {
-        println("Cantidad invalida: debe ser un numero entero. Operacion cancelada.\n")
+    val cantidad = leerEnteroPositivo("Cantidad") ?: run {
+        println("Operacion cancelada: no se agrego ningun producto.\n")
         return
     }
 
@@ -98,15 +90,20 @@ private fun agregarProducto(carrito: Carrito) {
 
     if (producto != null) {
         carrito.agregar(producto)
-        println("Producto agregado: ${producto.nombre}\n")
+        println("Producto agregado correctamente: ${producto.nombre}\n")
+    } else {
+        println("No se pudo agregar el producto: los datos no pasaron la validacion.\n")
     }
 }
 
 private fun buscarProductoInteractivo(carrito: Carrito) {
-    print("\nNombre del producto a buscar: ")
-    val nombre = readLine()?.trim().orEmpty()
-    if (nombre.isBlank()) {
-        println("Debe ingresar un nombre.\n")
+    if (carrito.estaVacio()) {
+        println("\nEl carrito esta vacio. No hay productos para buscar.\n")
+        return
+    }
+
+    val nombre = leerTextoNoVacio("\nNombre del producto a buscar") ?: run {
+        println("Busqueda cancelada.\n")
         return
     }
 
@@ -114,15 +111,18 @@ private fun buscarProductoInteractivo(carrito: Carrito) {
     if (encontrado != null) {
         println("Resultado: Encontrado -> ${encontrado.nombre} (S/ ${encontrado.precio}) x${encontrado.cantidad}\n")
     } else {
-        println("Resultado: El producto '$nombre' no existe.\n")
+        println("Resultado: no existe ningun producto llamado '$nombre' en el carrito.\n")
     }
 }
 
 private fun eliminarProductoInteractivo(carrito: Carrito) {
-    print("\nNombre del producto a eliminar: ")
-    val nombre = readLine()?.trim().orEmpty()
-    if (nombre.isBlank()) {
-        println("Debe ingresar un nombre.\n")
+    if (carrito.estaVacio()) {
+        println("\nEl carrito esta vacio. No hay productos para eliminar.\n")
+        return
+    }
+
+    val nombre = leerTextoNoVacio("\nNombre del producto a eliminar") ?: run {
+        println("Eliminacion cancelada.\n")
         return
     }
 
@@ -130,12 +130,12 @@ private fun eliminarProductoInteractivo(carrito: Carrito) {
     if (seElimino) {
         println("El producto '$nombre' fue eliminado con exito.\n")
     } else {
-        println("No se encontro el producto '$nombre' para eliminar.\n")
+        println("No se encontro ningun producto llamado '$nombre' para eliminar.\n")
     }
 }
 
 private fun mostrarTotales(carrito: Carrito) {
-    if (carrito.cantidadProductos == 0) {
+    if (carrito.estaVacio()) {
         println("\nEl carrito esta vacio. No hay totales que mostrar.\n")
         return
     }
@@ -159,4 +159,58 @@ private fun mostrarTotales(carrito: Carrito) {
         println("Descuento: No aplica")
     }
     println()
+}
+
+// --- Lectura de entrada con reintento y cancelacion opcional ---
+
+private fun esCancelacion(texto: String): Boolean = texto.equals(PALABRA_CANCELAR, ignoreCase = true)
+
+private fun leerTextoNoVacio(mensaje: String, permitirCancelar: Boolean = true): String? {
+    val sufijo = if (permitirCancelar) SUFIJO_CANCELAR else ""
+    while (true) {
+        print("$mensaje$sufijo: ")
+        val entrada = readLine()?.trim().orEmpty()
+        if (permitirCancelar && esCancelacion(entrada)) return null
+        if (entrada.isNotBlank()) return entrada
+        println("Entrada invalida: el texto no puede quedar vacio. Intente nuevamente.")
+    }
+}
+
+private fun leerOpcionEnRango(mensaje: String, rango: IntRange): Int? {
+    while (true) {
+        print("$mensaje$SUFIJO_CANCELAR: ")
+        val entrada = readLine()?.trim().orEmpty()
+        if (esCancelacion(entrada)) return null
+        val valor = entrada.toIntOrNull()
+        if (valor != null && valor in rango) return valor
+        println("Entrada invalida: ingrese un numero entre ${rango.first} y ${rango.last}. Intente nuevamente.")
+    }
+}
+
+private fun leerEnteroPositivo(mensaje: String): Int? {
+    while (true) {
+        print("$mensaje$SUFIJO_CANCELAR: ")
+        val entrada = readLine()?.trim().orEmpty()
+        if (esCancelacion(entrada)) return null
+        val valor = entrada.toIntOrNull()
+        when {
+            valor == null -> println("Entrada invalida: ingrese un numero entero. Intente nuevamente.")
+            valor <= 0 -> println("Entrada invalida: la cantidad debe ser mayor a cero. Intente nuevamente.")
+            else -> return valor
+        }
+    }
+}
+
+private fun leerDoublePositivo(mensaje: String): Double? {
+    while (true) {
+        print("$mensaje$SUFIJO_CANCELAR: ")
+        val entrada = readLine()?.trim().orEmpty()
+        if (esCancelacion(entrada)) return null
+        val valor = entrada.toDoubleOrNull()
+        when {
+            valor == null -> println("Entrada invalida: ingrese un numero valido (ej. 19.90). Intente nuevamente.")
+            valor <= 0.0 -> println("Entrada invalida: el precio debe ser mayor a cero. Intente nuevamente.")
+            else -> return valor
+        }
+    }
 }

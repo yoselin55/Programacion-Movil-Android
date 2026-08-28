@@ -7,6 +7,8 @@ class Carrito {
 
     val cantidadProductos: Int get() = productos.size
 
+    fun estaVacio(): Boolean = productos.isEmpty()
+
     fun agregar(producto: Producto) {
         productos.add(producto)
     }
@@ -41,11 +43,15 @@ class Carrito {
 
     fun mostrarDetalle() {
         println("--------- DETALLE DEL CARRITO ---------")
-        var i = 1
-        for (p in productos) {
-            val importe = p.calcularImporte()
-            println(String.format(Locale.getDefault(), "%d. %-20s x%d S/ %8.2f", i, p.nombre, p.cantidad, importe))
-            i++
+        if (estaVacio()) {
+            println("El carrito esta vacio. No hay productos para mostrar.")
+        } else {
+            var i = 1
+            for (p in productos) {
+                val importe = p.calcularImporte()
+                println(String.format(Locale.getDefault(), "%d. %-20s x%d S/ %8.2f", i, p.nombre, p.cantidad, importe))
+                i++
+            }
         }
         println("---------------------------------------")
     }
