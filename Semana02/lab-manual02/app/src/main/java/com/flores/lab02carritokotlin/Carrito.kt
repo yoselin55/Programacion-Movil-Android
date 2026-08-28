@@ -1,10 +1,34 @@
-package com.flores.myapplication
+package com.flores.lab02carritokotlin
 
-data class Producto(
-    val nombre: String,
-    val precio: Double,
-    var cantidad: Int
-)
+import java.util.Locale
+
+class Producto private constructor(
+    nombre: String,
+    precio: Double,
+    cantidad: Int
+) {
+    private val _nombre: String = nombre
+    private val _precio: Double = precio
+    private var _cantidad: Int = cantidad
+
+    val nombre: String get() = _nombre
+    val precio: Double get() = _precio
+    val cantidad: Int get() = _cantidad
+
+    companion object {
+        fun crear(nombre: String, precio: Double, cantidad: Int): Producto? {
+            if (precio <= 0.0) {
+                println("Error: no se pudo crear '$nombre'. El precio debe ser mayor a cero (recibido: $precio).")
+                return null
+            }
+            if (cantidad <= 0) {
+                println("Error: no se pudo crear '$nombre'. La cantidad debe ser mayor a cero (recibida: $cantidad).")
+                return null
+            }
+            return Producto(nombre, precio, cantidad)
+        }
+    }
+}
 
 fun calcularSubtotal(productos: List<Producto>): Double {
     var subtotal = 0.0
@@ -35,7 +59,7 @@ fun mostrarDetalle(productos: List<Producto>) {
     var i = 1
     for (p in productos) {
         val importe = p.precio * p.cantidad
-        println(String.format("%d. %-20s x%d S/ %8.2f", i, p.nombre, p.cantidad, importe))
+        println(String.format(Locale.getDefault(), "%d. %-20s x%d S/ %8.2f", i, p.nombre, p.cantidad, importe))
         i++
     }
     println("---------------------------------------")
@@ -55,10 +79,10 @@ fun main() {
 
     println("Cliente: $nombreCliente\n")
 
-    carrito.add(Producto("Laptop HP", 2500.0, 1))
-    carrito.add(Producto("Mouse Logitech", 45.5, 2))
-    carrito.add(Producto("Audifonos Sony", 120.0, 1))
-    carrito.add(Producto("USB Kingston 64GB", 25.0, 3))
+    Producto.crear("Laptop HP", 2500.0, 1)?.let { carrito.add(it) }
+    Producto.crear("Mouse Logitech", 45.5, 2)?.let { carrito.add(it) }
+    Producto.crear("Audifonos Sony", 120.0, 1)?.let { carrito.add(it) }
+    Producto.crear("USB Kingston 64GB", 25.0, 3)?.let { carrito.add(it) }
 
     for (producto in carrito) {
         println("Producto agregado: ${producto.nombre}")
@@ -73,15 +97,15 @@ fun main() {
     var igv = calcularIGV(subtotal)
     var total = calcularTotal(subtotal, igv)
 
-    println(String.format("Subtotal : S/ %8.2f", subtotal))
-    println(String.format("IGV (18%%): S/ %8.2f", igv))
-    println(String.format("TOTAL    : S/ %8.2f", total))
+    println(String.format(Locale.getDefault(), "Subtotal : S/ %8.2f", subtotal))
+    println(String.format(Locale.getDefault(), "IGV (18%%): S/ %8.2f", igv))
+    println(String.format(Locale.getDefault(), "TOTAL    : S/ %8.2f", total))
     println()
 
     val masCaro = carrito.maxByOrNull { it.precio }
     if (masCaro != null) {
         println("Producto mas caro: ${masCaro.nombre} " +
-                String.format("(S/ %.2f)", masCaro.precio))
+                String.format(Locale.getDefault(), "(S/ %.2f)", masCaro.precio))
     }
 
     var descuento = calcularDescuento(total)
@@ -89,8 +113,8 @@ fun main() {
 
     if (descuento > 0.0) {
         val porcentaje = if (total > 5000) "10%" else "5%"
-        println(String.format("Descuento (%s): S/ %8.2f", porcentaje, descuento))
-        println(String.format("TOTAL CON DESCUENTO: S/ %8.2f", totalConDescuento))
+        println(String.format(Locale.getDefault(), "Descuento (%s): S/ %8.2f", porcentaje, descuento))
+        println(String.format(Locale.getDefault(), "TOTAL CON DESCUENTO: S/ %8.2f", totalConDescuento))
     } else {
         println("Descuento: No aplica")
     }
@@ -128,14 +152,14 @@ fun main() {
     descuento = calcularDescuento(total)
     totalConDescuento = total - descuento
 
-    println(String.format("Subtotal Actualizado : S/ %8.2f", subtotal))
-    println(String.format("IGV (18%%) Actualizado : S/ %8.2f", igv))
-    println(String.format("TOTAL Actualizado    : S/ %8.2f", total))
+    println(String.format(Locale.getDefault(), "Subtotal Actualizado : S/ %8.2f", subtotal))
+    println(String.format(Locale.getDefault(), "IGV (18%%) Actualizado : S/ %8.2f", igv))
+    println(String.format(Locale.getDefault(), "TOTAL Actualizado    : S/ %8.2f", total))
 
     if (descuento > 0.0) {
         val porcentaje = if (total > 5000) "10%" else "5%"
-        println(String.format("Descuento (%s)        : S/ %8.2f", porcentaje, descuento))
-        println(String.format("TOTAL FINAL          : S/ %8.2f", totalConDescuento))
+        println(String.format(Locale.getDefault(), "Descuento (%s)        : S/ %8.2f", porcentaje, descuento))
+        println(String.format(Locale.getDefault(), "TOTAL FINAL          : S/ %8.2f", totalConDescuento))
     } else {
         println("Descuento            : No aplica (Total menor a S/ 3000.00)")
     }

@@ -1,50 +1,56 @@
-# Programacion-Movil-Android
-Repositorio de laboratorios y proyectos del curso de Desarrollo de Aplicaciones Móviles en Android.
+# Guía de Estructuración de Prompts para Programadores
+
+Esta guía define la estructura estándar para construir *prompts* efectivos dirigidos a modelos de Inteligencia Artificial en el ámbito del desarrollo de software.
 
 ---
 
-# SEMANA 02: Laboratorio - Carrito de Compras en Kotlin
+## 📌 Componentes Clave de un Prompt para Programadores
 
-**Estudiante:** Yoselin Flores  
-**Curso:** Programación Móvil Android - Tecsup  
-
----
-
-## 📝 Descripción del Programa
-
-Programa desarrollado en **Kotlin** para simular la gestión de un carrito de compras interactivo por consola. Utiliza un modelo de datos (`data class`) y un conjunto de funciones modulares para procesar los ítems, calcular subtotal, IGV (18%), descuentos por volumen de compra, imprimir el reporte en formato tabular alineado, además de implementar la búsqueda y eliminación dinámica de productos.
-
-### 🛠️ Funciones Implementadas:
-* `calcularSubtotal(productos: List<Producto>): Double`: Calcula la suma de multiplicaciones de `precio * cantidad` para cada ítem.
-* `calcularIGV(subtotal: Double): Double`: Calcula el 18% del subtotal.
-* `calcularTotal(subtotal: Double, igv: Double): Double`: Devuelve la suma del subtotal más el IGV.
-* `calcularDescuento(total: Double): Double`: Evalúa mediante la estructura `when` si aplica un 5% (si el total supera S/ 3000) o un 10% (si supera S/ 5000).
-* `mostrarDetalle(productos: List<Producto>)`: Muestra el detalle del carrito ordenado en formato de tabla alineada con `String.format`.
-* `buscarProducto(productos: List<Producto>, nombre: String): Producto?`: *(Reto Adicional)* Utiliza `.find` para localizar un producto por nombre y retornar el objeto o `null`.
-* `carrito.removeIf`: *(Reto Adicional)* Permite remover un ítem mutable del carrito y recalcular los totales actualizados.
+* **Rol / Persona:** Define el nivel de seniority y especialidad técnica del modelo (ej. *Senior Backend Developer en Python/FastAPI*).
+* **Contexto:** Explica el escenario del proyecto, versión del lenguaje, dependencias o datos de entrada.
+* **Tarea Principal:** La instrucción clara y directa de lo que debe generar o solucionar (ej. *Refactorizar, Crear test unitario, Detectar un bug*).
+* **Restricciones y Reglas:** Límites explícitos sobre lo que se debe y no se debe hacer (ej. *Sin dependencias externas, Complejidad temporal inferior a O(n²), Seguir guía de estilo PEP8*).
+* **Formato de Salida:** La forma exacta en que necesitas el resultado (ej. *Solo bloque de código sin texto, Código + 3 viñetas explicativas*).
 
 ---
 
-## ❓ Preguntas de Análisis - Parte 2
+## 🛠️ Plantilla Base (Meta-Prompt Reutilizable)
 
-### 1. ¿Por qué `nombre` y `precio` son `val` pero `cantidad` es `var`?
+```markdown
+[ROL] 
+Eres un desarrollador Senior especializado en [Lenguaje / Framework].
 
-* **`val` (Inmutable):** Define propiedades de solo lectura. El nombre de un producto y su precio unitario son datos fijos del catálogo que no deben ser modificados por error durante el proceso de compra.
-* **`var` (Mutable):** Define propiedades cuyo valor puede cambiar. La cantidad de artículos elegidos por el usuario es dinámica, ya que este puede agregar o quitar unidades del carrito en cualquier momento.
+[CONTEXTO] 
+Estoy trabajando en [descripción breve del módulo/sistema]. El stack actual usa [versión/tecnologías].
+
+[TAREA] 
+[Acción específica, ej. Escribe una función que reciba X y devuelva Y].
+
+[Insertar código base o interfaz si aplica]
+
+[RESTRICCIONES]
+- Cumplir con las buenas prácticas de [Estándar de código].
+- Manejar casos borde como [null, arrays vacíos, timeouts].
+- No utilizar librerías de terceros adicionales.
+
+[FORMATO DE SALIDA] 
+Devuelve únicamente el código en un bloque explicativo con comentarios Inline mínimos.
+```
 
 ---
 
-### 2. ¿Qué pasaría si intentas cambiar el precio después de crear el producto?
+## 🚀 Ejemplo Aplicado en Producción
 
-El compilador de Kotlin lanzará un error de compilación inmediato:
+```markdown
+Rol: Ingeniero Senior de Node.js y TypeScript.
 
-> `Val cannot be reassigned`
+Contexto: Tengo un microservicio Express que procesa archivos JSON grandes y bloquea el Event Loop.
 
-El programa no se ejecutará, lo cual garantiza la integridad de los datos al impedir que los precios se alteren de forma no autorizada o accidental en memoria.
+Tarea: Refactoriza la función adjunta para procesar los datos de forma asíncrona usando Streams o Worker Threads.
 
----
+Restricciones:
+- Mantener compatibilidad con TypeScript 5.x.
+- Incluir manejo explícito de errores con bloques try/catch.
+- Evitar el uso de la memoria heap por encima de 100 MB.
 
-## 📸 Captura de Consola
-
-<img width="527" height="875" alt="image" src="https://github.com/user-attachments/assets/c4632476-96e5-4c86-88d9-1b2ca7f21f0d" />
-<img width="547" height="452" alt="image" src="https://github.com/user-attachments/assets/cdb01b1f-a36a-4b27-add1-f78748ca790c" />
+Formato: Código refactorizado y una lista de 3 puntos explicando los cambios de rendimiento.
