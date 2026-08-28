@@ -1,5 +1,9 @@
 package com.flores.lab02carritokotlin
 
+import com.flores.lab02carritokotlin.model.Producto
+import com.flores.lab02carritokotlin.model.ProductoAccesorio
+import com.flores.lab02carritokotlin.model.ProductoElectronico
+import com.flores.lab02carritokotlin.model.ProductoImportado
 import java.util.Locale
 
 fun calcularSubtotal(productos: List<Producto>): Double {
@@ -51,10 +55,10 @@ fun main() {
 
     println("Cliente: $nombreCliente\n")
 
-    Producto.crear("Laptop HP", 2500.0, 1)?.let { carrito.add(it) }
-    Producto.crear("Mouse Logitech", 45.5, 2)?.let { carrito.add(it) }
-    Producto.crear("Audifonos Sony", 120.0, 1)?.let { carrito.add(it) }
-    Producto.crear("USB Kingston 64GB", 25.0, 3)?.let { carrito.add(it) }
+    ProductoElectronico.crear("Laptop HP", 2500.0, 1)?.let { carrito.add(it) }
+    ProductoAccesorio.crear("Mouse Logitech", 45.5, 2)?.let { carrito.add(it) }
+    ProductoImportado.crear("Audifonos Sony", 120.0, 1)?.let { carrito.add(it) }
+    ProductoAccesorio.crear("USB Kingston 64GB", 25.0, 3)?.let { carrito.add(it) }
 
     for (producto in carrito) {
         println("Producto agregado: ${producto.nombre}")
