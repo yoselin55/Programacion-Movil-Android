@@ -1,6 +1,6 @@
-package com.flores.lab02carritokotlin
+package com.flores.lab02carritokotlin.model
 
-class Producto private constructor(
+abstract class Producto protected constructor(
     nombre: String,
     precio: Double,
     cantidad: Int
@@ -14,16 +14,16 @@ class Producto private constructor(
     val cantidad: Int get() = _cantidad
 
     companion object {
-        fun crear(nombre: String, precio: Double, cantidad: Int): Producto? {
+        internal fun datosValidos(nombre: String, precio: Double, cantidad: Int): Boolean {
             if (precio <= 0.0) {
                 println("Error: no se pudo crear '$nombre'. El precio debe ser mayor a cero (recibido: $precio).")
-                return null
+                return false
             }
             if (cantidad <= 0) {
                 println("Error: no se pudo crear '$nombre'. La cantidad debe ser mayor a cero (recibida: $cantidad).")
-                return null
+                return false
             }
-            return Producto(nombre, precio, cantidad)
+            return true
         }
     }
 }
