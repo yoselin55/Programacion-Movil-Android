@@ -6,6 +6,11 @@ class ProductoElectronico private constructor(
     cantidad: Int
 ) : Producto(nombre, precio, cantidad) {
 
+    override fun calcularImporte(): Double {
+        // Recargo del 5% por garantia extendida incluida en electronicos
+        return precio * cantidad * 1.05
+    }
+
     companion object {
         fun crear(nombre: String, precio: Double, cantidad: Int): ProductoElectronico? {
             if (!Producto.datosValidos(nombre, precio, cantidad)) return null

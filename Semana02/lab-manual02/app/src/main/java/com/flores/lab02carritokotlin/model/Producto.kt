@@ -13,6 +13,8 @@ abstract class Producto protected constructor(
     val precio: Double get() = _precio
     val cantidad: Int get() = _cantidad
 
+    abstract fun calcularImporte(): Double
+
     companion object {
         internal fun datosValidos(nombre: String, precio: Double, cantidad: Int): Boolean {
             if (precio <= 0.0) {
