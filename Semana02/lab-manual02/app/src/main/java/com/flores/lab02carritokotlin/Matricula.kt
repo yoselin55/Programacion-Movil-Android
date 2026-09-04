@@ -4,14 +4,29 @@ fun main() {
     print("Ingrese el nombre del estudiante: ")
     val nombreEstudiante = readLine()!!
 
-    print("Ingrese la cantidad de cursos: ")
+    // AGREGADO: Selección de turno
+    println("\nSeleccione el turno:")
+    println("1. Mañana (+10%)")
+    println("2. Tarde (+15%)")
+    println("3. Noche (+20%)")
+    print("Opción: ")
+    val opcionTurno = readLine()!!.toInt()
+
+    val (turnoTexto, porcentajeTurno) = when (opcionTurno) {
+        1 -> Pair("Mañana", 0.10)
+        2 -> Pair("Tarde", 0.15)
+        3 -> Pair("Noche", 0.20)
+        else -> Pair("Mañana", 0.10)
+    }
+
+    print("\nIngrese la cantidad de cursos: ")
     val cantidadCursos = readLine()!!.toInt()
 
     print("Ingrese el valor de cada crédito: ")
     val valorCredito = readLine()!!.toDouble()
 
     var totalCreditos = 0
-    var totalAPagar = 0.0
+    var costoCursos = 0.0
     var detalleCursos = ""
 
     for (i in 1..cantidadCursos) {
@@ -24,10 +39,14 @@ fun main() {
 
         val costoCurso = creditosCurso * valorCredito
         totalCreditos += creditosCurso
-        totalAPagar += costoCurso
+        costoCursos += costoCurso
 
         detalleCursos += "$nombreCurso\t\t$creditosCurso\t\t$costoCurso\n"
     }
+
+    // AGREGADO: Recargo por turno
+    val recargoTurno = costoCursos * porcentajeTurno
+    val totalAPagar = costoCursos + recargoTurno
 
     val cargaAcademica = if (totalCreditos <= 12) {
         "M.R."
@@ -41,12 +60,14 @@ fun main() {
     val montoCuota = totalAPagar / cuotas
 
     println("\n--- RESULTADO FINAL ---")
-    println("Estudiante: $nombreEstudiante\n")
+    println("Estudiante: $nombreEstudiante")
+    println("Turno: $turnoTexto (Recargo ${(porcentajeTurno * 100).toInt()}%)\n")
     println("Curso\t\tCréditos\tCosto")
     print(detalleCursos)
     println("\nCursos Matr.: $cantidadCursos")
     println("TOTAL Crédito: $totalCreditos")
-    println("TOTAL A PAGAR: $totalAPagar")
+    println("Recargo Turno: S/ $recargoTurno")
+    println("TOTAL A PAGAR: S/ $totalAPagar")
     println("Carga Académica: $cargaAcademica")
-    println("Forma de Pago: $cuotas CUOTAS de $montoCuota")
+    println("Forma de Pago: $cuotas CUOTAS de S/ $montoCuota")
 }
