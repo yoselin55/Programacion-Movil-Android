@@ -4,7 +4,6 @@ fun main() {
     print("Ingrese el nombre del estudiante: ")
     val nombreEstudiante = readLine()!!
 
-    // AGREGADO: Selección de categoría
     println("\nSeleccione la categoría del estudiante:")
     println("1. Ordinario")
     println("2. Becado")
@@ -62,8 +61,11 @@ fun main() {
     }
 
     val recargoTurno = costoCursos * porcentajeTurno
-    // MODIFICADO: Incluye matrícula
-    val totalAPagar = costoCursos + recargoTurno + montoMatricula
+
+    // AGREGADO: Desglose de Subtotal, IGV y Total Final
+    val subtotal = costoCursos + recargoTurno + montoMatricula
+    val igv = subtotal * 0.18
+    val totalAPagar = subtotal + igv
 
     val cargaAcademica = if (totalCreditos <= 12) {
         "M.R."
@@ -84,8 +86,11 @@ fun main() {
     print(detalleCursos)
     println("\nCursos Matr.: $cantidadCursos")
     println("TOTAL Crédito: $totalCreditos")
+    println("Costo Cursos: S/ $costoCursos")
     println("Recargo Turno: S/ $recargoTurno")
     println("Matrícula: S/ $montoMatricula")
+    println("Subtotal: S/ $subtotal")
+    println("IGV (18%): S/ $igv")
     println("TOTAL A PAGAR: S/ $totalAPagar")
     println("Carga Académica: $cargaAcademica")
     println("Forma de Pago: $cuotas CUOTAS de S/ $montoCuota")
