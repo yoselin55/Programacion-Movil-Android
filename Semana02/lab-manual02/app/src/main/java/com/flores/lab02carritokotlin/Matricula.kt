@@ -89,7 +89,7 @@ fun main() {
     println("Costo Cursos: S/ $costoCursos")
     println("Recargo Turno: S/ $recargoTurno")
     println("Matrícula: S/ $montoMatricula")
-    println("Subtotal: S/ $subtotal")
+    kotlinc Main.kt -include-runtime -d App.jar println("Subtotal: S/ $subtotal")
     println("IGV (18%): S/ $igv")
     println("TOTAL A PAGAR: S/ $totalAPagar")
     println("Carga Académica: $cargaAcademica")
