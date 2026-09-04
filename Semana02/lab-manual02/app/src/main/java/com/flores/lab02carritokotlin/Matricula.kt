@@ -4,7 +4,24 @@ fun main() {
     print("Ingrese el nombre del estudiante: ")
     val nombreEstudiante = readLine()!!
 
-    // AGREGADO: Selección de turno
+    // AGREGADO: Selección de categoría
+    println("\nSeleccione la categoría del estudiante:")
+    println("1. Ordinario")
+    println("2. Becado")
+    print("Opción: ")
+    val opcionCategoria = readLine()!!.toInt()
+
+    var montoMatricula = 0.0
+    var categoriaTexto = "Becado"
+
+    if (opcionCategoria == 1) {
+        categoriaTexto = "Ordinario"
+        print("Ingrese el monto de la matrícula: ")
+        montoMatricula = readLine()!!.toDouble()
+    } else {
+        println("Categoría Becado seleccionada. Matrícula: S/ 0.00 (Automático)")
+    }
+
     println("\nSeleccione el turno:")
     println("1. Mañana (+10%)")
     println("2. Tarde (+15%)")
@@ -44,9 +61,9 @@ fun main() {
         detalleCursos += "$nombreCurso\t\t$creditosCurso\t\t$costoCurso\n"
     }
 
-    // AGREGADO: Recargo por turno
     val recargoTurno = costoCursos * porcentajeTurno
-    val totalAPagar = costoCursos + recargoTurno
+    // MODIFICADO: Incluye matrícula
+    val totalAPagar = costoCursos + recargoTurno + montoMatricula
 
     val cargaAcademica = if (totalCreditos <= 12) {
         "M.R."
@@ -61,12 +78,14 @@ fun main() {
 
     println("\n--- RESULTADO FINAL ---")
     println("Estudiante: $nombreEstudiante")
+    println("Categoría: $categoriaTexto")
     println("Turno: $turnoTexto (Recargo ${(porcentajeTurno * 100).toInt()}%)\n")
     println("Curso\t\tCréditos\tCosto")
     print(detalleCursos)
     println("\nCursos Matr.: $cantidadCursos")
     println("TOTAL Crédito: $totalCreditos")
     println("Recargo Turno: S/ $recargoTurno")
+    println("Matrícula: S/ $montoMatricula")
     println("TOTAL A PAGAR: S/ $totalAPagar")
     println("Carga Académica: $cargaAcademica")
     println("Forma de Pago: $cuotas CUOTAS de S/ $montoCuota")
