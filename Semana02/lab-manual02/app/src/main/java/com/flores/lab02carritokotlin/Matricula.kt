@@ -1,4 +1,7 @@
+
 package com.flores.lab02carritokotlin
+
+import java.util.Locale
 
 fun main() {
     println("=== Sistema de Matricula Universitaria ===")
@@ -22,10 +25,10 @@ fun main() {
         while (true) {
             print("Nombre del estudiante: ")
             nombreEstudiante = readln().trim()
-            if (nombreEstudiante.isNotEmpty() && !nombreEstudiante.any { it.isDigit() }) {
+            if (nombreEstudiante.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$"))) {
                 break
             }
-            println("Error: Ingrese un nombre valido.")
+            println("Error: Ingrese un nombre valido (solo letras).")
         }
 
         var turno = ""
@@ -65,11 +68,11 @@ fun main() {
                         print("Ingrese el costo de matricula (S/): ")
                         val inputMat = readln().trim()
                         val monto = inputMat.toDoubleOrNull()
-                        if (monto != null && monto >= 0) {
+                        if (monto != null && monto > 0) {
                             montoMatricula = monto
                             break
                         }
-                        println("Error: Ingrese un monto valido.")
+                        println("Error: Ingrese un monto valido mayor a 0.")
                     }
                     break
                 }
@@ -103,7 +106,7 @@ fun main() {
                 valorCredito = valCred
                 break
             }
-            println("Error: Ingrese un monto valido.")
+            println("Error: Ingrese un monto valido mayor a 0.")
         }
 
         var totalCreditos = 0
@@ -115,8 +118,10 @@ fun main() {
             while (true) {
                 print("\nNombre del curso $i: ")
                 nombreCurso = readln().trim()
-                if (nombreCurso.isNotEmpty()) break
-                println("Error: Ingrese un nombre valido.")
+                if (nombreCurso.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\\s]+$"))) {
+                    break
+                }
+                println("Error: Ingrese un nombre de curso valido (solo letras, numeros y espacios).")
             }
 
             var creditosCurso = 0
@@ -134,7 +139,7 @@ fun main() {
             val costoCurso = creditosCurso * valorCredito
             totalCreditos += creditosCurso
             costoCursos += costoCurso
-            detalleCursos += " - $nombreCurso: $creditosCurso creditos (S/ %.2f)\n".format(costoCurso)
+            detalleCursos += String.format(Locale.US, " - %s: %d creditos (S/ %.2f)\n", nombreCurso, creditosCurso, costoCurso)
         }
 
         val recargoTurno = costoCursos * porcentajeTurno
@@ -158,13 +163,41 @@ fun main() {
         println("Detalle de Cursos:")
         print(detalleCursos)
         println("Total Créditos: $totalCreditos")
-        println("Costo Cursos: S/ %.2f".format(costoCursos))
-        println("Recargo Turno: S/ %.2f".format(recargoTurno))
-        println("Matrícula: S/ %.2f".format(montoMatricula))
-        println("Subtotal: S/ %.2f".format(subtotal))
-        println("IGV (18%%): S/ %.2f".format(igv))
-        println("TOTAL A PAGAR: S/ %.2f".format(totalAPagar))
+        println(String.format(Locale.US, "Costo Cursos: S/ %.2f", costoCursos))
+        println(String.format(Locale.US, "Recargo Turno: S/ %.2f", recargoTurno))
+        println(String.format(Locale.US, "Matrícula: S/ %.2f", montoMatricula))
+        println(String.format(Locale.US, "Subtotal: S/ %.2f", subtotal))
+        println(String.format(Locale.US, "IGV (18%%): S/ %.2f", igv))
+        println(String.format(Locale.US, "TOTAL A PAGAR: S/ %.2f", totalAPagar))
         println("Carga Académica: $cargaAcademica")
-        println("Plan de Pago: $cuotas cuotas de S/ %.2f".format(montoCuota))
+
+        println("\n--- CALENDARIO DE PAGOS ($cuotas Cuotas) ---")
+        for (c in 1..cuotas) {
+            val etiquetaCuota = when (c) {
+                1 -> "Cuota 1 (Pago Inicial / Matricula)"
+                2 -> "Cuota 2 (Mes 1)"
+                3 -> "Cuota 3 (Mes 2)"
+                else -> "Cuota $c"
+            }
+            println(String.format(Locale.US, " * %s: S/ %.2f", etiquetaCuota, montoCuota))
+        }
+
+        if (alumno < aforo) {
+            var continuar = ""
+            while (true) {
+                print("\n¿Desea matricular a otro alumno? (Si/No): ")
+                continuar = readln().trim().lowercase()
+                if (continuar == "si" || continuar == "sí" || continuar == "no") {
+                    break
+                }
+                println("Error: Por favor, responda 'Si' o 'No'.")
+            }
+
+            if (continuar == "no") {
+                println("Finalizando las matriculas por decision del usuario...")
+                break
+            }
+        }
+        println("-------------------------------------------\n")
     }
 }
