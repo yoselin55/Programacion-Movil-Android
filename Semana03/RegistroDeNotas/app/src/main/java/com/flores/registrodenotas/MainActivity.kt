@@ -3,6 +3,7 @@ package com.flores.registrodenotas
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.util.Locale
 import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
@@ -114,7 +116,117 @@ fun RegistroNotasScreen() {
                 calculado = false
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Redondear promedio final", fontSize = 14.sp, color = Color.Black)
+                Switch(
+                    checked = redondear,
+                    onCheckedChange = {
+                        redondear = it
+                        if (calculado) {
+                            ejecutarCalculo(
+                                notaFundamentos, notaPoo, notaMoviles, notaBd, redondear,
+                                onResultado = { promPond, promFinTxt, obs, bgCol, txtCol ->
+                                    promedioPonderado = promPond
+                                    promedioFinalTexto = promFinTxt
+                                    observacion = obs
+                                    colorChipFondo = bgCol
+                                    colorChipTexto = txtCol
+                                }
+                            )
+                        }
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = colorMoradoPrincipal
+                    )
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Checkbox(
+                    checked = confirmado,
+                    onCheckedChange = {
+                        confirmado = it
+                        if (!it) calculado = false
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = colorMoradoPrincipal
+                    )
+                )
+                Text("Confirmo que las notas son correctas", fontSize = 14.sp, color = Color.Black)
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = {
+                        ejecutarCalculo(
+                            notaFundamentos, notaPoo, notaMoviles, notaBd, redondear,
+                            onResultado = { promPond, promFinTxt, obs, bgCol, txtCol ->
+                                promedioPonderado = promPond
+                                promedioFinalTexto = promFinTxt
+                                observacion = obs
+                                colorChipFondo = bgCol
+                                colorChipTexto = txtCol
+                                calculado = true
+                            }
+                        )
+                    },
+                    enabled = confirmado,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorMoradoPrincipal,
+                        disabledContainerColor = Color(0xFFCCC2DC)
+                    )
+                ) {
+                    Text("CALCULAR", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                }
+
+                OutlinedButton(
+                    onClick = {
+                        notaFundamentos = 0f
+                        notaPoo = 0f
+                        notaMoviles = 0f
+                        notaBd = 0f
+                        redondear = false
+                        confirmado = false
+                        calculado = false
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    border = BorderStroke(1.dp, colorMoradoPrincipal),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = colorMoradoPrincipal
+                    )
+                ) {
+                    Text("LIMPIAR", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                }
+            }
+
+            if (!calculado) {
+                Text(
+                    text = "Asigna las notas y confirma para calcular",
+                    color = Color.Gray,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
 
             Text(
                 text = "Desarrollado por: Yoselin Fabiola Flores",
@@ -123,7 +235,7 @@ fun RegistroNotasScreen() {
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 16.dp)
+                    .padding(top = 6.dp, bottom = 16.dp)
             )
         }
     }
@@ -148,7 +260,6 @@ fun CursoSliderItem(
                 Text(text = " ($peso)", color = Color(0xFF6750A4), fontSize = 12.sp)
             }
 
-            // Semáforo: fondo verde si es >= 13, rojo si es menor
             val colorFondoBadge = if (nota >= 13f) Color(0xFFD7E8DE) else Color(0xFFFFEBEE)
             val colorTextoBadge = if (nota >= 13f) Color(0xFF2E7D32) else Color(0xFFC62828)
 
@@ -183,4 +294,32 @@ fun CursoSliderItem(
             )
         )
     }
+}
+
+private fun ejecutarCalculo(
+    n1: Float, n2: Float, n3: Float, n4: Float,
+    redondear: Boolean,
+    onResultado: (Double, String, String, Color, Color) -> Unit
+) {
+    val ponderado = (n1 * 0.20) + (n2 * 0.25) + (n3 * 0.30) + (n4 * 0.25)
+    val promFinalNum: Double
+    val promFinalTxt: String
+
+    if (redondear) {
+        val redondeadoInt = ponderado.roundToInt()
+        promFinalNum = redondeadoInt.toDouble()
+        promFinalTxt = "$redondeadoInt"
+    } else {
+        promFinalNum = ponderado
+        promFinalTxt = String.format(Locale.US, "%.2f", ponderado)
+    }
+
+    val (obs, bgCol, txtCol) = when {
+        promFinalNum >= 17.0 -> Triple("EXCELENTE", Color(0xFF1B5E20), Color.White)
+        promFinalNum >= 13.0 -> Triple("APROBADO", Color(0xFFD7E8DE), Color(0xFF2E7D32))
+        promFinalNum >= 10.0 -> Triple("EN RECUPERACIÓN", Color(0xFFFFF3C4), Color(0xFFB78103))
+        else -> Triple("DESAPROBADO", Color(0xFFFFEBEE), Color(0xFFC62828))
+    }
+
+    onResultado(ponderado, promFinalTxt, obs, bgCol, txtCol)
 }
