@@ -58,38 +58,38 @@ fun RegistroNotasScreen() {
             Color(0xFFF6F2FA)
         )
     )
-
     val colorMoradoPrincipal = Color(0xFF5B419D)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(fondoDegradado)
-            .verticalScroll(rememberScrollState())
-    ) {
-        TopAppBar(
-            title = {
-                Text(
-                    text = "Registro de Notas",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Registro de Notas",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = colorMoradoPrincipal
                 )
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = colorMoradoPrincipal
             )
-        )
-
+        }
+    ) { paddingValores ->
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxSize()
+                .padding(paddingValores)
+                .background(fondoDegradado)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
                 text = "Notas del ciclo",
-                fontSize = 18.sp,
+                fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
@@ -116,14 +116,12 @@ fun RegistroNotasScreen() {
                 calculado = false
             }
 
-            Spacer(modifier = Modifier.height(2.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Redondear promedio final", fontSize = 14.sp, color = Color.Black)
+                Text("Redondear promedio final", fontSize = 13.sp, color = Color.Black)
                 Switch(
                     checked = redondear,
                     onCheckedChange = {
@@ -162,7 +160,7 @@ fun RegistroNotasScreen() {
                         checkedColor = colorMoradoPrincipal
                     )
                 )
-                Text("Confirmo que las notas son correctas", fontSize = 14.sp, color = Color.Black)
+                Text("Confirmo que las notas son correctas", fontSize = 13.sp, color = Color.Black)
             }
 
             Row(
@@ -186,8 +184,8 @@ fun RegistroNotasScreen() {
                     enabled = confirmado,
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(24.dp),
+                        .height(44.dp),
+                    shape = RoundedCornerShape(22.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colorMoradoPrincipal,
                         disabledContainerColor = Color(0xFFCCC2DC)
@@ -208,8 +206,8 @@ fun RegistroNotasScreen() {
                     },
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(24.dp),
+                        .height(44.dp),
+                    shape = RoundedCornerShape(22.dp),
                     border = BorderStroke(1.dp, colorMoradoPrincipal),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = colorMoradoPrincipal
@@ -223,19 +221,121 @@ fun RegistroNotasScreen() {
                 Text(
                     text = "Asigna las notas y confirma para calcular",
                     color = Color.Gray,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            } else {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, Color(0xFFE0D0F0)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "Aporte por curso:",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            color = Color.Black
+                        )
+                        Text(
+                            text = "• Fundamentos: ${notaFundamentos.toInt()} × 20% = ${String.format(Locale.US, "%.2f", notaFundamentos * 0.20f)}",
+                            fontSize = 11.sp,
+                            color = Color(0xFF49454F)
+                        )
+                        Text(
+                            text = "• POO: ${notaPoo.toInt()} × 25% = ${String.format(Locale.US, "%.2f", notaPoo * 0.25f)}",
+                            fontSize = 11.sp,
+                            color = Color(0xFF49454F)
+                        )
+                        Text(
+                            text = "• Móviles: ${notaMoviles.toInt()} × 30% = ${String.format(Locale.US, "%.2f", notaMoviles * 0.30f)}",
+                            fontSize = 11.sp,
+                            color = Color(0xFF49454F)
+                        )
+                        Text(
+                            text = "• Base de Datos: ${notaBd.toInt()} × 25% = ${String.format(Locale.US, "%.2f", notaBd * 0.25f)}",
+                            fontSize = 11.sp,
+                            color = Color(0xFF49454F)
+                        )
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp), color = Color(0xFFE0D0F0))
+
+                        Row {
+                            Text("Promedio ponderado:  ", color = Color(0xFF49454F), fontSize = 13.sp)
+                            Text(
+                                text = String.format(Locale.US, "%.2f", promedioPonderado),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp
+                            )
+                        }
+
+                        Column {
+                            Row {
+                                Text(
+                                    text = "Promedio final:  ",
+                                    fontWeight = FontWeight.Bold,
+                                    color = colorMoradoPrincipal,
+                                    fontSize = 16.sp
+                                )
+                                Text(
+                                    text = promedioFinalTexto,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colorMoradoPrincipal,
+                                    fontSize = 16.sp
+                                )
+                            }
+                            if (redondear) {
+                                Text(
+                                    text = "(redondeado)",
+                                    fontSize = 10.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(2.dp))
+
+                        Surface(
+                            color = colorChipFondo,
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text(
+                                text = observacion,
+                                color = colorChipTexto,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
+
+                Text(
+                    text = "✓ Promedio calculado correctamente",
+                    color = Color(0xFF2E7D32),
+                    fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
-                    modifier = Modifier.padding(top = 4.dp)
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
                 )
             }
 
             Text(
                 text = "Desarrollado por: Yoselin Fabiola Flores",
-                fontSize = 12.sp,
+                fontSize = 11.sp,
                 color = Color.Gray,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 6.dp, bottom = 16.dp)
+                    .padding(top = 8.dp)
             )
         }
     }
