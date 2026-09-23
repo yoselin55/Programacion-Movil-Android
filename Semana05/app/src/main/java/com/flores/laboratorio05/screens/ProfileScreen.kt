@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.flores.laboratorio05.navigation.Screen
@@ -26,6 +27,7 @@ fun ProfileScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Nombre del alumno
         Text(
             text = "Yoselin Fabiola Flores Quispe",
             style = MaterialTheme.typography.bodyLarge,
@@ -34,7 +36,7 @@ fun ProfileScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Botón con popUpTo para navegar a Home limpiando el back stack
+        // Botón con color morado personalizado mediante ButtonDefaults
         Button(
             onClick = {
                 navController.navigate(Screen.Home.route) {
@@ -42,7 +44,11 @@ fun ProfileScreen(navController: NavController) {
                     popUpTo(Screen.Home.route) { inclusive = true }
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF6750A4),//boton morado
+                contentColor = Color.White
+            )
         ) {
             Text("Ir al inicio")
         }
