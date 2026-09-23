@@ -12,6 +12,17 @@ Este repositorio contiene la implementación del **Portal Académico**, una apli
 - **Arquitectura:** Single-Activity Architecture con Vistas Modulares
 
 ---
+## 🖼️ Importación y Asignación de Imágenes de Perfil
+
+### Instrucciones para Agregar las Imágenes en Android Studio
+
+1. **Preparación de archivos:** Copia tus archivos de imagen desde tu computadora (`.png`, `.jpg` o `.webp`).
+   > **Importante:** Los nombres deben estar estrictamente en minúsculas, sin espacios ni caracteres especiales (ejemplo: `profile_user.png`, `student_1.png`, `student_2.png`, etc.).
+2. **Abrir el proyecto:** Abre el proyecto en Android Studio.
+3. **Ubicación del recurso:** En el explorador lateral izquierdo, navega hasta la carpeta:
+   `app/src/main/res/drawable`
+4. **Pegar imágenes:** Haz clic derecho sobre la carpeta `drawable` y selecciona **Paste** (o presiona `Ctrl + V` / `Cmd + V`).
+5. **Confirmación:** En la ventana emergente, confirma que el destino sea la carpeta `drawable` y presiona **OK**.
 
 ## 📝 Prompt Utilizado
 
