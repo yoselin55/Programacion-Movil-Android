@@ -39,12 +39,13 @@ fun HomeScreen(
             .fillMaxSize()
             .background(BackgroundWhite)
     ) {
-        // Cabecera con ícono ☰ para activar el NavigationDrawer
+        // Cabecera con statusBarsPadding() para empujar el contenido debajo de la barra de estado
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(HeaderPurple)
-                .padding(horizontal = 20.dp, vertical = 20.dp)
+                .statusBarsPadding() // <-- ESTO BAJA EL ENCABEZADO Y LIBERA EL BOTÓN ☰
+                .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             Column {
                 Row(
