@@ -6,12 +6,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.flores.laboratorio05.model.sampleStudents
-import com.flores.laboratorio05.ui.screens.DetailScreen
-import com.flores.laboratorio05.ui.screens.HomeScreen
-import com.flores.laboratorio05.ui.screens.ListScreen
-import com.flores.laboratorio05.ui.screens.LoginScreen
-import com.flores.laboratorio05.ui.screens.ProfileScreen
+import com.flores.laboratorio05.screens.DetailScreen
+import com.flores.laboratorio05.screens.HomeScreen
+import com.flores.laboratorio05.screens.ListScreen
+import com.flores.laboratorio05.screens.LoginScreen
+import com.flores.laboratorio05.screens.ProfileScreen
 
 // AppNavigation es el enrutador central: conecta las rutas con sus respectivas pantallas
 @Composable
@@ -50,10 +49,7 @@ fun AppNavigation() {
             // Extrae el identificador del alumno enviado desde ListScreen
             val studentId = backStackEntry.arguments?.getString("studentId") ?: ""
 
-            // Busca al alumno correspondiente dentro de la lista de datos de prueba
-            val student = sampleStudents.find { it.id == studentId } ?: sampleStudents.first()
-
-            DetailScreen(navController = navController, student = student)
+            DetailScreen(navController = navController, studentId = studentId)
         }
 
         // RUTA 5: Perfil del usuario

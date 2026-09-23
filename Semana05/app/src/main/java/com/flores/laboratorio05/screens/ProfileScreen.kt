@@ -1,4 +1,4 @@
-package com.flores.laboratorio05.ui.screens
+package com.flores.laboratorio05.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,7 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.School
@@ -62,65 +63,66 @@ import com.flores.laboratorio05.ui.theme.TextRed
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(navController: NavController) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Configuración de Perfil",
-                        color = TextDark,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = TextDark
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = ScreenBackground)
-            )
-        },
-        containerColor = ScreenBackground
-    ) { padding ->
+    Scaffold(containerColor = ScreenBackground) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(ScreenBackground)
-                .padding(padding)
+                .padding(bottom = padding.calculateBottomPadding())
         ) {
-            Box(
+            // Header con degradado: el TopAppBar transparente se dibuja encima
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(170.dp)
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(HeaderGradientStart, Color(0xFF6E4D85), HeaderGradientEnd)
                         )
-                    ),
-                contentAlignment = Alignment.Center
+                    )
+                    .padding(top = padding.calculateTopPadding(), bottom = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(
-                        painter = painterResource(id = R.drawable.profile_user),
-                        contentDescription = "Foto de perfil",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(90.dp)
-                            .clip(CircleShape)
-                            .border(width = 3.dp, color = Color.White, shape = CircleShape)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Yoselin Fabiola Flores Quispe",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "Configuración de Perfil",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Volver",
+                                tint = Color.White
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                    windowInsets = WindowInsets(0.dp)
+                )
+                Image(
+                    painter = painterResource(id = R.drawable.profile_user),
+                    contentDescription = "Foto de perfil",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(90.dp)
+                        .clip(CircleShape)
+                        .border(width = 3.dp, color = Color.White, shape = CircleShape)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Yoselin Fabiola Flores Quispe",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    text = "Ingeniería de Software",
+                    fontSize = 14.sp,
+                    color = Color.White.copy(alpha = 0.85f)
+                )
             }
 
             Column(
@@ -197,7 +199,7 @@ fun ProfileScreen(navController: NavController) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ExitToApp,
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                             contentDescription = "Cerrar Sesión",
                             tint = TextRed
                         )

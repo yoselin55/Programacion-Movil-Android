@@ -1,4 +1,4 @@
-package com.flores.laboratorio05.ui.screens
+package com.flores.laboratorio05.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -46,7 +46,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.flores.laboratorio05.model.Student
 import com.flores.laboratorio05.ui.theme.CardGray
 import com.flores.laboratorio05.ui.theme.IconDarkGray
 import com.flores.laboratorio05.ui.theme.PrimaryPurple
@@ -57,7 +56,10 @@ import com.flores.laboratorio05.ui.theme.TextMuted
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(navController: NavController, student: Student) {
+fun DetailScreen(navController: NavController, studentId: String) {
+    // Busca al alumno correspondiente al ID recibido desde ListScreen
+    val student = sampleStudents.find { it.id == studentId } ?: sampleStudents.first()
+
     Scaffold(
         topBar = {
             TopAppBar(

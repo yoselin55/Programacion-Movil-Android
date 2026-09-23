@@ -1,4 +1,4 @@
-package com.flores.laboratorio05.ui.screens
+package com.flores.laboratorio05.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -30,19 +30,80 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.flores.laboratorio05.model.sampleStudents
+import com.flores.laboratorio05.R
 import com.flores.laboratorio05.navigation.Screen
 import com.flores.laboratorio05.ui.theme.CardGray
 import com.flores.laboratorio05.ui.theme.IconDarkGray
 import com.flores.laboratorio05.ui.theme.PrimaryPurple
 import com.flores.laboratorio05.ui.theme.ScreenBackground
 import com.flores.laboratorio05.ui.theme.TextDark
+
+// Modelo de datos del alumno (declarado aquí por requerimiento del laboratorio)
+data class Student(
+    val id: String,
+    val name: String,
+    val career: String,
+    val email: String,
+    val faculty: String,
+    val bio: String,
+    val imageRes: Int
+)
+
+// Lista estática de alumnos de prueba
+val sampleStudents = listOf(
+    Student(
+        id = "2024-0091",
+        name = "Carlos Eduardo Mendoza",
+        career = "Ingeniería de Software",
+        email = "carlos.mendoza@tecsup.edu.pe",
+        faculty = "Tecnología de la Información",
+        bio = "Estudiante apasionado por el desarrollo móvil.",
+        imageRes = R.drawable.student_1
+    ),
+    Student(
+        id = "2024-0092",
+        name = "María Fernanda Torres",
+        career = "Diseño y Desarrollo de Software",
+        email = "maria.torres@tecsup.edu.pe",
+        faculty = "Tecnología de la Información",
+        bio = "Especialista en experiencia de usuario UI/UX.",
+        imageRes = R.drawable.student_2
+    ),
+    Student(
+        id = "2024-0093",
+        name = "Juan Pedro Gómez",
+        career = "Redes y Comunicaciones",
+        email = "juan.gomez@tecsup.edu.pe",
+        faculty = "Ingeniería",
+        bio = "Entusiasta de la ciberseguridad e infraestructura.",
+        imageRes = R.drawable.student_3
+    ),
+    Student(
+        id = "2024-0094",
+        name = "Ana Lucía Benítez",
+        career = "Big Data y Analítica",
+        email = "ana.benitez@tecsup.edu.pe",
+        faculty = "Tecnología de la Información",
+        bio = "Interesada en analítica de datos e IA.",
+        imageRes = R.drawable.student_4
+    ),
+    Student(
+        id = "2024-0095",
+        name = "Diego Alonso Ruiz",
+        career = "Ingeniería de Software",
+        email = "diego.ruiz@tecsup.edu.pe",
+        faculty = "Tecnología de la Información",
+        bio = "Desarrollador backend explorando soluciones nativas.",
+        imageRes = R.drawable.student_5
+    )
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +114,7 @@ fun ListScreen(navController: NavController) {
                 title = {
                     Text(
                         text = "Directorio de Alumnos",
-                        color = PrimaryPurple,
+                        color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -62,11 +123,11 @@ fun ListScreen(navController: NavController) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = PrimaryPurple
+                            tint = Color.White
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = ScreenBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = PrimaryPurple)
             )
         },
         containerColor = ScreenBackground

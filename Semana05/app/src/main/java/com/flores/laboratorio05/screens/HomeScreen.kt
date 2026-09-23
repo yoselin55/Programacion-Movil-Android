@@ -1,4 +1,4 @@
-package com.flores.laboratorio05.ui.screens
+package com.flores.laboratorio05.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
@@ -180,7 +180,7 @@ fun HomeScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.ExitToApp,
+                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                 contentDescription = "Cerrar Sesión Segura",
                 tint = TextRed
             )

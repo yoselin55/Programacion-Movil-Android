@@ -1,4 +1,4 @@
-package com.flores.laboratorio05.ui.screens
+package com.flores.laboratorio05.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
