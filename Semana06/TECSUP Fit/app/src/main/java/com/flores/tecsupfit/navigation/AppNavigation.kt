@@ -1,7 +1,7 @@
 package com.flores.tecsupfit.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -17,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -38,6 +37,9 @@ sealed class BottomItem(val route: String, val title: String, val icon: ImageVec
 private const val TOTAL_SLOTS = 12
 private const val INITIAL_SLOTS = 8
 
+// Clave para guardar los cupos de cada horario de una clase
+private fun slotKey(className: String, time: String) = "$className|$time"
+
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -51,7 +53,7 @@ fun AppNavigation() {
             ReservationItem("Yoga funcional", "Ayer, 7:00 am", "Completada")
         )
     }
-    // Cupos disponibles por clase (clave: nombre de la clase)
+    // Cupos disponibles por horario (clave: slotKey(clase, horario))
     val availableSlots = remember { mutableStateMapOf<String, Int>() }
 
     // Estado elevado: usuarios registrados en memoria (con un usuario de prueba)
@@ -114,12 +116,19 @@ fun AppNavigation() {
                     }
                 }
             }
-        }
+        },
+        // Sin insets aquí: cada pantalla tiene su propio Scaffold con topBar que maneja
+        // la barra de estado; así no se suma un espacio doble arriba
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         NavHost(
             navController = navController,
             startDestination = Screen.Login.route,
-            modifier = Modifier.padding(paddingValues)
+            // paddingValues solo trae la altura del bottomBar; al consumirlo, los Scaffold
+            // internos no vuelven a sumar el espacio de la barra de navegación del sistema
+            modifier = Modifier
+                .padding(paddingValues)
+                .consumeWindowInsets(paddingValues)
         ) {
             composable(Screen.Login.route) {
                 LoginScreen(
@@ -178,21 +187,34 @@ fun AppNavigation() {
                 val schedule = backStack.arguments?.getString("schedule") ?: ""
                 val room = backStack.arguments?.getString("room") ?: ""
 
-                val slots = availableSlots[name] ?: INITIAL_SLOTS
-                val alreadyReserved = reservations.any { it.name == name && it.status == "Confirmada" }
+                // Horarios de la clase (si no está en el catálogo, se usa el horario recibido)
+                val classSchedules = gymClasses.find { it.name == name }?.schedules
+                    ?: listOf(ClassSchedule(schedule, INITIAL_SLOTS))
+
+                // Cupos y estado de cada horario; los cupos se guardan por clase + horario
+                val scheduleOptions = classSchedules.map { s ->
+                    ScheduleOption(
+                        time = s.time,
+                        availableSlots = availableSlots[slotKey(name, s.time)] ?: s.initialSlots,
+                        // No se permite reservar dos veces la misma clase en el mismo horario
+                        alreadyReserved = reservations.any {
+                            it.name == name && it.date == "Hoy, ${s.time}" && it.status == "Confirmada"
+                        }
+                    )
+                }
 
                 DetailScreen(
                     className = name,
-                    schedule = schedule,
                     room = room,
-                    availableSlots = slots,
+                    schedules = scheduleOptions,
                     totalSlots = TOTAL_SLOTS,
-                    alreadyReserved = alreadyReserved,
                     onBackClick = { navController.popBackStack() },
-                    onReserveClick = {
-                        reservations.add(0, ReservationItem(name, "Hoy, $schedule", "Confirmada"))
-                        availableSlots[name] = slots - 1
-                        navController.navigate(Screen.Confirmation.createRoute(name, schedule, room))
+                    onReserveClick = { selectedTime ->
+                        val slots = scheduleOptions.first { it.time == selectedTime }.availableSlots
+                        reservations.add(0, ReservationItem(name, "Hoy, $selectedTime", "Confirmada"))
+                        availableSlots[slotKey(name, selectedTime)] = slots - 1
+                        // Se envía el horario elegido a la pantalla de confirmación
+                        navController.navigate(Screen.Confirmation.createRoute(name, selectedTime, room))
                     }
                 )
             }
@@ -222,11 +244,7 @@ fun AppNavigation() {
             }
 
             composable(Screen.Reservations.route) { ListScreen(reservations = reservations) }
-            composable(Screen.Routines.route) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Sección de Rutinas")
-                }
-            }
+            composable(Screen.Routines.route) { RoutinesScreen() }
             composable(Screen.Profile.route) {
                 val user = currentUser ?: return@composable
                 ProfileScreen(user = user)

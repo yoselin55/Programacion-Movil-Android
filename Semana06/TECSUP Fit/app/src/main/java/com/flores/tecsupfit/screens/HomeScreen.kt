@@ -18,34 +18,49 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-data class GymClass(val name: String, val schedule: String, val room: String)
+// Horario de una clase con sus cupos iniciales
+data class ClassSchedule(val time: String, val initialSlots: Int)
+
+// schedule = horario principal que se muestra en la lista del Home
+data class GymClass(
+    val name: String,
+    val schedule: String,
+    val room: String,
+    val schedules: List<ClassSchedule>
+)
+
+// Catálogo de clases compartido entre Home y Detalle
+val gymClasses = listOf(
+    GymClass(
+        "Yoga funcional", "7:00 am", "Sala 2",
+        listOf(ClassSchedule("7:00 am", 8), ClassSchedule("8:00 am", 3), ClassSchedule("9:00 am", 0))
+    ),
+    GymClass(
+        "Cross Training", "6:00 pm", "Sala 1",
+        listOf(ClassSchedule("5:00 pm", 6), ClassSchedule("6:00 pm", 8), ClassSchedule("7:00 pm", 2))
+    ),
+    GymClass(
+        "Spinning", "7:30 pm", "Sala 3",
+        listOf(ClassSchedule("6:30 pm", 0), ClassSchedule("7:30 pm", 8), ClassSchedule("8:30 pm", 5))
+    )
+)
 
 @Composable
 fun HomeScreen(userName: String, onClassClick: (GymClass) -> Unit) {
     var selectedFilter by remember { mutableStateOf("Hoy") }
     val filters = listOf("Hoy", "Esta semana")
 
-    val classList = listOf(
-        GymClass("Yoga funcional", "7:00 am", "Sala 2"),
-        GymClass("Cross Training", "6:00 pm", "Sala 1"),
-        GymClass("Spinning", "7:30 pm", "Sala 3")
-    )
+    val classList = gymClasses
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Top Header
-        Box(
+    Scaffold(
+        topBar = { TecsupTopBar(title = "TECSUP Fit", subtitle = "Hola, $userName") }
+    ) { padding ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFF0F6A52))
-                .padding(20.dp)
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
         ) {
-            Column {
-                Text("TECSUP Fit", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text("Hola, $userName", color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
-            }
-        }
-
-        Column(modifier = Modifier.padding(16.dp)) {
             // LazyRow de Filtros
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(filters) { filter ->
@@ -88,7 +103,11 @@ fun HomeScreen(userName: String, onClassClick: (GymClass) -> Unit) {
                             Spacer(modifier = Modifier.width(16.dp))
                             Column {
                                 Text(item.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                                Text("${item.schedule} · ${item.room}", color = Color.Gray, fontSize = 13.sp)
+                                Text(
+                                    "${item.room} · ${item.schedules.size} horarios",
+                                    color = Color.Gray,
+                                    fontSize = 13.sp
+                                )
                             }
                         }
                     }

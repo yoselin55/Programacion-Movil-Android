@@ -17,45 +17,46 @@ data class ReservationItem(val name: String, val date: String, val status: Strin
 
 @Composable
 fun ListScreen(reservations: List<ReservationItem>) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text("Mis reservas", fontSize = 22.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(reservations) { item ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
-                ) {
-                    Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-                        Box(
-                            modifier = Modifier
-                                .width(6.dp)
-                                .fillMaxHeight()
-                                .background(
-                                    if (item.status == "Confirmada") Color(0xFF0F6A52) else Color.Transparent
-                                )
-                        )
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(item.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                            Text(item.date, color = Color.Gray, fontSize = 13.sp)
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            val statusBg = if (item.status == "Confirmada") Color(0xFFD4F3E6) else Color(0xFFE5E5E5)
-                            val statusColor = if (item.status == "Confirmada") Color(0xFF0F6A52) else Color.Gray
-
+    Scaffold(
+        topBar = { TecsupTopBar(title = "Mis reservas") }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(reservations) { item ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+                    ) {
+                        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
                             Box(
                                 modifier = Modifier
-                                    .background(statusBg, shape = RoundedCornerShape(12.dp))
-                                    .padding(horizontal = 10.dp, vertical = 4.dp)
-                            ) {
-                                Text(item.status, color = statusColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                    .width(6.dp)
+                                    .fillMaxHeight()
+                                    .background(
+                                        if (item.status == "Confirmada") Color(0xFF0F6A52) else Color.Transparent
+                                    )
+                            )
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(item.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text(item.date, color = Color.Gray, fontSize = 13.sp)
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                val statusBg = if (item.status == "Confirmada") Color(0xFFD4F3E6) else Color(0xFFE5E5E5)
+                                val statusColor = if (item.status == "Confirmada") Color(0xFF0F6A52) else Color.Gray
+
+                                Box(
+                                    modifier = Modifier
+                                        .background(statusBg, shape = RoundedCornerShape(12.dp))
+                                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                                ) {
+                                    Text(item.status, color = statusColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                }
                             }
                         }
                     }
