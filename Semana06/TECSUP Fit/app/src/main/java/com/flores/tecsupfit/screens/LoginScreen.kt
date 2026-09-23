@@ -111,14 +111,9 @@ fun LoginScreen(
 
             Button(
                 onClick = {
-                    // Validación de campos vacíos (acepta correos de prueba sin formato real)
-                    emailError = if (email.isBlank()) "Ingresa tu correo" else null
-                    passwordError = if (password.isBlank()) "Ingresa tu contraseña" else null
-
-                    if (emailError == null && passwordError == null) {
-                        val success = onLoginClick(email.trim(), password)
-                        if (!success) loginError = "Correo o contraseña incorrectos"
-                    }
+                    // Modo prueba: se permite entrar con los campos llenos o vacíos
+                    val success = onLoginClick(email.trim(), password)
+                    if (!success) loginError = "Correo o contraseña incorrectos"
                 },
                 modifier = Modifier
                     .fillMaxWidth()

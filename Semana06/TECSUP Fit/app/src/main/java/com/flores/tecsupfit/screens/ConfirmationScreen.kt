@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun ConfirmationScreen(
     className: String,
-    schedule: String, // horario elegido en el detalle
+    schedule: String, // día y horario elegido en el detalle (ej. "Mañana, 8:00 am")
     room: String,
     onSeeReservationsClick: () -> Unit
 ) {
@@ -62,7 +62,7 @@ fun ConfirmationScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     SummaryRow("Clase", className)
-                    SummaryRow("Horario", "Hoy, $schedule")
+                    SummaryRow("Horario", schedule)
                     SummaryRow("Sala", room)
                 }
             }

@@ -34,6 +34,7 @@ data class ScheduleOption(
 fun DetailScreen(
     className: String,
     room: String,
+    day: String, // "Hoy", "Mañana" o día de la semana
     schedules: List<ScheduleOption>,
     totalSlots: Int,
     onBackClick: () -> Unit,
@@ -80,7 +81,7 @@ fun DetailScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(className, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                Text("$room · 45 min", color = Color.Gray, fontSize = 14.sp)
+                Text("$day · $room · 45 min", color = Color.Gray, fontSize = 14.sp)
 
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
@@ -144,7 +145,7 @@ fun DetailScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("Clase: $className")
-                    Text("Horario: Hoy, ${selectedOption.time}")
+                    Text("Horario: $day, ${selectedOption.time}")
                     Text("Sala: $room")
                 }
             },
