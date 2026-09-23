@@ -30,6 +30,29 @@ fun MyAppointmentsScreen(
 ) {
     val context = LocalContext.current
     var menuExpanded by remember { mutableStateOf(false) }
+    var showSupportDialog by remember { mutableStateOf(false) }
+
+    // Diálogo informativo de Soporte y Ayuda
+    if (showSupportDialog) {
+        AlertDialog(
+            onDismissRequest = { showSupportDialog = false },
+            title = { Text("Soporte y Ayuda") },
+            text = {
+                Text(
+                    "¿Necesitas ayuda con tus citas?\n\n" +
+                        "Llama al 0800-SALUD (0800-72583)\n" +
+                        "Correo: soporte@clinicasalud.com\n" +
+                        "Horario: Lunes a sábado, 8:00 AM - 8:00 PM"
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { showSupportDialog = false }) {
+                    Text("Entendido", color = PrimaryBlue)
+                }
+            },
+            containerColor = Color.White
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -80,14 +103,18 @@ fun MyAppointmentsScreen(
                                 text = { Text("Actualizar lista") },
                                 onClick = {
                                     menuExpanded = false
-                                    Toast.makeText(context, "Lista actualizada", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        context,
+                                        "Lista de citas actualizada",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             )
                             DropdownMenuItem(
                                 text = { Text("Soporte y Ayuda") },
                                 onClick = {
                                     menuExpanded = false
-                                    Toast.makeText(context, "Soporte: soporte@clinicasalud.com", Toast.LENGTH_LONG).show()
+                                    showSupportDialog = true
                                 }
                             )
                         }

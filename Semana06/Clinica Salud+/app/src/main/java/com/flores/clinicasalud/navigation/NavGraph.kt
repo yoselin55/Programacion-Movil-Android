@@ -55,7 +55,8 @@ fun MainAppNavigation() {
         )
     }
 
-    var selectedDrawerRoute by remember { mutableStateOf(Screen.Home.route) }
+    // La opción marcada en el Drawer se obtiene de la pantalla actual
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -117,14 +118,19 @@ fun MainAppNavigation() {
                     NavigationDrawerItem(
                         label = { Text(text = label, fontSize = 15.sp) },
                         icon = { Icon(imageVector = icon, contentDescription = null) },
-                        selected = selectedDrawerRoute == route,
+                        selected = currentRoute == route,
                         onClick = {
-                            selectedDrawerRoute = route
                             scope.launch { drawerState.close() }
-                            navController.navigate(route) {
-                                popUpTo(Screen.Home.route) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
+                            if (route == Screen.Home.route) {
+                                // Regresa a Inicio y limpia la pila de navegación
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Home.route) { inclusive = true }
+                                }
+                            } else {
+                                navController.navigate(route) {
+                                    popUpTo(Screen.Home.route) { inclusive = false }
+                                    launchSingleTop = true
+                                }
                             }
                         },
                         colors = NavigationDrawerItemDefaults.colors(
@@ -218,7 +224,6 @@ fun MainAppNavigation() {
                     date = date,
                     time = time,
                     onVerMisCitasClick = {
-                        selectedDrawerRoute = Screen.MyAppointments.route
                         navController.navigate(Screen.MyAppointments.route) {
                             popUpTo(Screen.Home.route)
                         }
@@ -244,7 +249,12 @@ fun MainAppNavigation() {
             // 7. Perfil
             composable(Screen.Profile.route) {
                 ProfileScreen(
-                    onOpenDrawer = { scope.launch { drawerState.open() } }
+                    onOpenDrawer = { scope.launch { drawerState.open() } },
+                    onGoHomeClick = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Home.route) { inclusive = true }
+                        }
+                    }
                 )
             }
         }

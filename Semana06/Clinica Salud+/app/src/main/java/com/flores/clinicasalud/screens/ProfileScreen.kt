@@ -2,7 +2,10 @@ package com.flores.clinicasalud.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
@@ -16,8 +19,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.flores.clinicasalud.ui.theme.*
 
+// REQUISITO CUMPLIDO: Perfil de la paciente
+
 @Composable
-fun ProfileScreen(onOpenDrawer: () -> Unit) {
+fun ProfileScreen(
+    onOpenDrawer: () -> Unit,
+    onGoHomeClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -54,30 +62,31 @@ fun ProfileScreen(onOpenDrawer: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Avatar circular con iniciales
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(96.dp)
                     .clip(CircleShape)
                     .background(LightBlueCard),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "JP",
+                    text = "YF",
                     fontWeight = FontWeight.Bold,
                     color = PrimaryBlue,
-                    fontSize = 24.sp
+                    fontSize = 34.sp
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Juan Pérez",
-                fontSize = 18.sp,
+                text = "Yoselin Flores Quispe",
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextDark
             )
@@ -85,10 +94,99 @@ fun ProfileScreen(onOpenDrawer: () -> Unit) {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "juan.perez@clinicasalud.com",
+                text = "yoselyn.flores@clinicasalud.com",
                 fontSize = 14.sp,
                 color = TextMuted
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Bloque de resumen con métricas
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                MetricBox(value = "3", label = "Citas Asistidas", modifier = Modifier.weight(1f))
+                MetricBox(value = "Activo", label = "Estado", modifier = Modifier.weight(1f))
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Información personal y clínica
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(
+                        text = "Datos personales",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextDark,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                    PersonalDataRow(label = "DNI", value = "74839201")
+                    HorizontalDivider(color = LightBlueCard)
+                    PersonalDataRow(label = "Edad", value = "26 años")
+                    HorizontalDivider(color = LightBlueCard)
+                    PersonalDataRow(label = "Tipo de sangre", value = "O+")
+                    HorizontalDivider(color = LightBlueCard)
+                    PersonalDataRow(label = "Teléfono", value = "+51 987 654 321")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Botón principal: regresar a la pantalla de Inicio
+            Button(
+                onClick = onGoHomeClick,
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+            ) {
+                Text(text = "Volver al Inicio", fontSize = 16.sp, color = Color.White)
+            }
         }
+    }
+}
+
+@Composable
+private fun MetricBox(value: String, label: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(LightBlueCard)
+            .padding(vertical = 18.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = value,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = PrimaryBlue
+        )
+        Text(text = label, fontSize = 13.sp, color = TextMuted)
+    }
+}
+
+@Composable
+private fun PersonalDataRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, fontSize = 14.sp, color = TextMuted)
+        Text(
+            text = value,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            color = TextDark
+        )
     }
 }
