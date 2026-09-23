@@ -1,4 +1,4 @@
-package com.example.semana05_navegacion.screens
+package com.flores.tecsupfit.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

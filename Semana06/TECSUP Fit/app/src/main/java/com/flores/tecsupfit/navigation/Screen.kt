@@ -1,6 +1,8 @@
-package com.example.semana05_navegacion.navigation
+package com.flores.tecsupfit.navigation
 
 sealed class Screen(val route: String) {
+    object Login : Screen("login")
+    object Register : Screen("register")
     object Home : Screen("home")
     object Detail : Screen("detail/{className}/{schedule}/{room}") {
         fun createRoute(className: String, schedule: String, room: String) =

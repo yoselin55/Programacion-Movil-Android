@@ -1,4 +1,4 @@
-package com.example.semana05_navegacion.screens
+package com.flores.tecsupfit.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,9 +12,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.flores.tecsupfit.model.User
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(user: User) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -33,11 +34,13 @@ fun ProfileScreen() {
                 .background(Color(0xFFD4F3E6), shape = CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Text("DR", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F6A52))
+            // Iniciales del usuario logueado
+            Text(user.initials, fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F6A52))
         }
 
         Spacer(modifier = Modifier.height(12.dp))
-        Text("Diego Ramos", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(user.fullName, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(user.email, color = Color.Gray, fontSize = 13.sp)
         Text("Plan Premium", color = Color.Gray, fontSize = 13.sp)
 
         Spacer(modifier = Modifier.height(30.dp))

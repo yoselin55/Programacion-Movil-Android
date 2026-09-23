@@ -1,4 +1,4 @@
-package com.example.semana05_navegacion.screens
+package com.flores.tecsupfit.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 data class GymClass(val name: String, val schedule: String, val room: String)
 
 @Composable
-fun HomeScreen(onClassClick: (GymClass) -> Unit) {
+fun HomeScreen(userName: String, onClassClick: (GymClass) -> Unit) {
     var selectedFilter by remember { mutableStateOf("Hoy") }
     val filters = listOf("Hoy", "Esta semana")
 
@@ -41,7 +41,7 @@ fun HomeScreen(onClassClick: (GymClass) -> Unit) {
         ) {
             Column {
                 Text("TECSUP Fit", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text("Hola, Diego", color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
+                Text("Hola, $userName", color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
             }
         }
 

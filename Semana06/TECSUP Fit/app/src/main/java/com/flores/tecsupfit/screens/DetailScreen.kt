@@ -1,4 +1,4 @@
-package com.example.semana05_navegacion.screens
+package com.flores.tecsupfit.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -21,6 +21,9 @@ fun DetailScreen(
     className: String,
     schedule: String,
     room: String,
+    availableSlots: Int,
+    totalSlots: Int,
+    alreadyReserved: Boolean,
     onBackClick: () -> Unit,
     onReserveClick: () -> Unit
 ) {
@@ -71,18 +74,26 @@ fun DetailScreen(
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
-                Text("8 de 12 cupos disponibles", color = Color.Gray, fontSize = 13.sp)
+                Text("$availableSlots de $totalSlots cupos disponibles", color = Color.Gray, fontSize = 13.sp)
+            }
+
+            val canReserve = availableSlots > 0 && !alreadyReserved
+            val buttonText = when {
+                alreadyReserved -> "Ya reservaste esta clase"
+                availableSlots <= 0 -> "Sin cupos disponibles"
+                else -> "Reservar cupo"
             }
 
             Button(
                 onClick = onReserveClick,
+                enabled = canReserve,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F6A52)),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Reservar cupo", fontSize = 16.sp, color = Color.White)
+                Text(buttonText, fontSize = 16.sp, color = Color.White)
             }
         }
     }

@@ -1,8 +1,9 @@
-package com.example.semana05_navegacion.screens
+package com.flores.tecsupfit.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -15,11 +16,7 @@ import androidx.compose.ui.unit.sp
 data class ReservationItem(val name: String, val date: String, val status: String)
 
 @Composable
-fun ListScreen() {
-    val reservations = listOf(
-        ReservationItem("Cross Training", "Hoy, 6:00 pm", "Confirmada"),
-        ReservationItem("Yoga funcional", "Ayer, 7:00 am", "Completada")
-    )
+fun ListScreen(reservations: List<ReservationItem>) {
 
     Column(
         modifier = Modifier
@@ -30,8 +27,7 @@ fun ListScreen() {
         Spacer(modifier = Modifier.height(16.dp))
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(reservations.size) { index ->
-                val item = reservations[index]
+            items(reservations) { item ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
