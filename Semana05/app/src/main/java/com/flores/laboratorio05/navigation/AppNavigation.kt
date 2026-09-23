@@ -6,10 +6,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.flores.laboratorio05.screens.DetailScreen
-import com.flores.laboratorio05.screens.HomeScreen
-import com.flores.laboratorio05.screens.ListScreen
-import com.flores.laboratorio05.screens.ProfileScreen
+import com.flores.laboratorio05.model.sampleStudents
+import com.flores.laboratorio05.ui.screens.DetailScreen
+import com.flores.laboratorio05.ui.screens.HomeScreen
+import com.flores.laboratorio05.ui.screens.ListScreen
+import com.flores.laboratorio05.ui.screens.LoginScreen
+import com.flores.laboratorio05.ui.screens.ProfileScreen
 
 // AppNavigation es el enrutador central: conecta las rutas con sus respectivas pantallas
 @Composable
@@ -18,36 +20,43 @@ fun AppNavigation() {
     val navController = rememberNavController()
 
     // 2. NavHost es el contenedor donde se van a intercambiar las pantallas.
-    // startDestination define con qué pantalla arranca la aplicación (HomeScreen).
+    // startDestination define con qué pantalla arranca la aplicación (LoginScreen).
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Login.route
     ) {
-        // RUTA 1: Si la ruta activa es "home", se invoca y muestra HomeScreen
+        // RUTA 1: Pantalla de inicio de sesión
+        composable(route = Screen.Login.route) {
+            LoginScreen(navController = navController)
+        }
+
+        // RUTA 2: Pantalla de bienvenida / menú principal
         composable(route = Screen.Home.route) {
             HomeScreen(navController = navController)
         }
 
-        // RUTA 2: Si la ruta activa es "list", se invoca y muestra ListScreen
+        // RUTA 3: Directorio de alumnos
         composable(route = Screen.List.route) {
             ListScreen(navController = navController)
         }
 
-        // RUTA 3: Si la ruta activa es "detail/{itemId}", se configura el argumento
+        // RUTA 4: Expediente académico del alumno seleccionado
         composable(
             route = Screen.Detail.route,
             arguments = listOf(
-                navArgument("itemId") { type = NavType.IntType } // Define que el argumento debe ser un Entero
+                navArgument("studentId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            // Extrae el valor de "itemId" enviado desde ListScreen
-            val itemId = backStackEntry.arguments?.getInt("itemId") ?: 0
+            // Extrae el identificador del alumno enviado desde ListScreen
+            val studentId = backStackEntry.arguments?.getString("studentId") ?: ""
 
-            // Invoca DetailScreen pasándole el ID capturado
-            DetailScreen(navController = navController, itemId = itemId)
+            // Busca al alumno correspondiente dentro de la lista de datos de prueba
+            val student = sampleStudents.find { it.id == studentId } ?: sampleStudents.first()
+
+            DetailScreen(navController = navController, student = student)
         }
 
-        // RUTA 4: Si la ruta activa es "profile", se invoca y muestra ProfileScreen
+        // RUTA 5: Perfil del usuario
         composable(route = Screen.Profile.route) {
             ProfileScreen(navController = navController)
         }
