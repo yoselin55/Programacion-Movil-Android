@@ -1,4 +1,4 @@
-# Portal Académico - Android Jetpack Compose
+# Portal Académico - Android Jetpack Compose (SEMANA05-Laboratorio-IA)
 
 Este repositorio contiene la implementación del **Portal Académico**, una aplicación móvil desarrollada completamente con **Jetpack Compose**, **Material Design 3** y **Kotlin** (100% libre de archivos XML de diseño).
 
