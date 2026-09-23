@@ -69,13 +69,13 @@ fun DoctorDetailScreen(
                 .size(100.dp)
                 .align(Alignment.CenterHorizontally)
                 .clip(CircleShape)
-                .background(PrimaryPurple.copy(alpha = 0.15f)),
+                .background(PrimaryBlue.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = null,
-                tint = PrimaryPurple,
+                tint = PrimaryBlue,
                 modifier = Modifier.size(60.dp)
             )
         }
@@ -135,7 +135,7 @@ fun DoctorDetailScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryPurple),
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(text = "Agendar cita", fontSize = 16.sp, color = Color.White)

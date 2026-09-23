@@ -24,7 +24,7 @@ fun MedicalHistoryScreen(onOpenDrawer: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(HeaderPurple)
+                .background(HeaderBlue)
                 .padding(horizontal = 20.dp, vertical = 20.dp)
         ) {
             Row(

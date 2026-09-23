@@ -2,12 +2,14 @@ package com.flores.clinicasalud.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val PrimaryPurple = Color(0xFF5B2E91)
-val HeaderPurple = Color(0xFF59278E)
-val LightPurpleCard = Color(0xFFF3EDF7)
-val ChipUnselected = Color(0xFFEFECEF)
-val TextDark = Color(0xFF1C1B1F)
-val TextMuted = Color(0xFF67626D)
+// Paleta Celeste Médico
+val PrimaryBlue = Color(0xFF0284C7)
+val HeaderBlue = Color(0xFF0284C7)
+val AccentBlue = Color(0xFF0284C7)
+val LightBlueCard = Color(0xFFE0F2FE)
+val ChipUnselected = Color(0xFFF0F9FF)
+val TextDark = Color(0xFF0F172A)
+val TextMuted = Color(0xFF64748B)
 val SuccessGreen = Color(0xFF34A853)
 val SuccessGreenBg = Color(0xFFE6F4EA)
 val CompletedGrayBg = Color(0xFFEEEEEE)

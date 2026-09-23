@@ -34,6 +34,15 @@ fun HomeScreen(
     var selectedSpecialty by remember { mutableStateOf("Cardiología") }
     val specialties = listOf("Cardiología", "Pediatría")
 
+    // Relaciona cada chip con la especialidad del médico
+    val specialtyFilter = mapOf(
+        "Cardiología" to "Cardióloga",
+        "Pediatría" to "Pediatra"
+    )
+    val filteredDoctors = sampleDoctors.filter { doctor ->
+        doctor.specialty == specialtyFilter[selectedSpecialty]
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -43,7 +52,7 @@ fun HomeScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(HeaderPurple)
+                .background(HeaderBlue)
                 .statusBarsPadding() // <-- ESTO BAJA EL ENCABEZADO Y LIBERA EL BOTÓN ☰
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
@@ -69,7 +78,7 @@ fun HomeScreen(
                     }
                 }
                 Text(
-                    text = "Hola, Juan",
+                    text = "Hola, Yoselin",
                     color = Color.White.copy(alpha = 0.8f),
                     fontSize = 13.sp
                 )
@@ -90,7 +99,7 @@ fun HomeScreen(
                     onClick = { selectedSpecialty = specialty },
                     label = { Text(specialty) },
                     colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = PrimaryPurple,
+                        selectedContainerColor = PrimaryBlue,
                         selectedLabelColor = Color.White,
                         containerColor = ChipUnselected,
                         labelColor = TextDark
@@ -117,7 +126,7 @@ fun HomeScreen(
             contentPadding = PaddingValues(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            items(sampleDoctors) { doctor ->
+            items(filteredDoctors, key = { it.id }) { doctor ->
                 DoctorCard(doctor = doctor, onClick = { onDoctorClick(doctor.id) })
             }
         }
@@ -130,7 +139,7 @@ fun DoctorCard(doctor: Doctor, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = LightPurpleCard),
+        colors = CardDefaults.cardColors(containerColor = LightBlueCard),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
@@ -141,13 +150,13 @@ fun DoctorCard(doctor: Doctor, onClick: () -> Unit) {
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(PrimaryPurple.copy(alpha = 0.15f)),
+                    .background(PrimaryBlue.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = null,
-                    tint = PrimaryPurple,
+                    tint = PrimaryBlue,
                     modifier = Modifier.size(28.dp)
                 )
             }

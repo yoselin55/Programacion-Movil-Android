@@ -26,7 +26,7 @@ fun ProfileScreen(onOpenDrawer: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(HeaderPurple)
+                .background(HeaderBlue)
                 .padding(horizontal = 20.dp, vertical = 20.dp)
         ) {
             Row(
@@ -61,13 +61,13 @@ fun ProfileScreen(onOpenDrawer: () -> Unit) {
                 modifier = Modifier
                     .size(80.dp)
                     .clip(CircleShape)
-                    .background(LightPurpleCard),
+                    .background(LightBlueCard),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "JP",
                     fontWeight = FontWeight.Bold,
-                    color = PrimaryPurple,
+                    color = PrimaryBlue,
                     fontSize = 24.sp
                 )
             }

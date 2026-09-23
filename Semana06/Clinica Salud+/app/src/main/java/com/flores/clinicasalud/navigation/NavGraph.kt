@@ -1,13 +1,13 @@
 package com.flores.clinicasalud.navigation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.outlined.Circle
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -64,86 +64,78 @@ fun MainAppNavigation() {
                 drawerContainerColor = Color.White,
                 modifier = Modifier.width(300.dp)
             ) {
-                // Cabecera del Drawer (Idéntica a la Figura 2)
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(LightPurpleCard),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "JP",
-                                fontWeight = FontWeight.Bold,
-                                color = PrimaryPurple,
-                                fontSize = 18.sp
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column {
-                            Text(
-                                text = "Juan Pérez",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                color = TextDark
-                            )
-                            Text(
-                                text = "Paciente",
-                                fontSize = 13.sp,
-                                color = TextMuted
-                            )
-                        }
+                // Cabecera del Drawer con los datos del paciente
+                Row(
+                    modifier = Modifier.padding(24.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(LightBlueCard),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "YF",
+                            fontWeight = FontWeight.Bold,
+                            color = PrimaryBlue,
+                            fontSize = 18.sp
+                        )
                     }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = "Yoselin Flores Quispe",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = TextDark
+                        )
+                        Text(
+                            text = "Paciente",
+                            fontSize = 13.sp,
+                            color = TextMuted
+                        )
+                    }
+                }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-                    HorizontalDivider(color = Color(0xFFEEEEEE))
-                    Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider(
+                    color = Color(0xFFEEEEEE),
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    // Ítems del Drawer (Figura 2)
-                    val menuItems = listOf(
-                        "Inicio" to Screen.Home.route,
-                        "Mis citas" to Screen.MyAppointments.route,
-                        "Historial médico" to Screen.MedicalHistory.route,
-                        "Perfil" to Screen.Profile.route
+                // Ítems del Drawer con NavigationDrawerItem (Material 3)
+                val menuItems = listOf(
+                    Triple("Inicio", Screen.Home.route, Icons.Filled.Home),
+                    Triple("Mis citas", Screen.MyAppointments.route, Icons.Filled.CalendarMonth),
+                    Triple("Historial médico", Screen.MedicalHistory.route, Icons.Filled.Description),
+                    Triple("Perfil", Screen.Profile.route, Icons.Filled.Person)
+                )
+
+                menuItems.forEach { (label, route, icon) ->
+                    NavigationDrawerItem(
+                        label = { Text(text = label, fontSize = 15.sp) },
+                        icon = { Icon(imageVector = icon, contentDescription = null) },
+                        selected = selectedDrawerRoute == route,
+                        onClick = {
+                            selectedDrawerRoute = route
+                            scope.launch { drawerState.close() }
+                            navController.navigate(route) {
+                                popUpTo(Screen.Home.route) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = LightBlueCard,
+                            selectedIconColor = AccentBlue,
+                            selectedTextColor = AccentBlue,
+                            unselectedIconColor = TextDark,
+                            unselectedTextColor = TextDark
+                        ),
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
-
-                    menuItems.forEach { (label, route) ->
-                        val isSelected = selectedDrawerRoute == route
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) LightPurpleCard else Color.Transparent)
-                                .clickable {
-                                    selectedDrawerRoute = route
-                                    scope.launch { drawerState.close() }
-                                    navController.navigate(route) {
-                                        popUpTo(Screen.Home.route) { saveState = true }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                }
-                                .padding(horizontal = 16.dp, vertical = 14.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = if (isSelected) Icons.Filled.CheckCircle else Icons.Outlined.Circle,
-                                contentDescription = null,
-                                tint = if (isSelected) PrimaryPurple else TextMuted,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text(
-                                text = label,
-                                fontSize = 15.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isSelected) PrimaryPurple else TextDark
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
                 }
             }
         }

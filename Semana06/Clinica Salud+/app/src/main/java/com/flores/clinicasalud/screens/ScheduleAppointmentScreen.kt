@@ -75,7 +75,7 @@ fun ScheduleAppointmentScreen(
                 Button(
                     onClick = { selectedDate = date }, // Selección única
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isSelected) PrimaryPurple else ChipUnselected,
+                        containerColor = if (isSelected) PrimaryBlue else ChipUnselected,
                         contentColor = if (isSelected) Color.White else TextDark
                     ),
                     shape = RoundedCornerShape(12.dp),
@@ -112,7 +112,7 @@ fun ScheduleAppointmentScreen(
                 Button(
                     onClick = { selectedTime = time }, // Selección única
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isSelected) PrimaryPurple else ChipUnselected,
+                        containerColor = if (isSelected) PrimaryBlue else ChipUnselected,
                         contentColor = if (isSelected) Color.White else TextDark
                     ),
                     shape = RoundedCornerShape(12.dp),
@@ -131,7 +131,7 @@ fun ScheduleAppointmentScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryPurple),
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(text = "Confirmar cita", fontSize = 16.sp, color = Color.White)

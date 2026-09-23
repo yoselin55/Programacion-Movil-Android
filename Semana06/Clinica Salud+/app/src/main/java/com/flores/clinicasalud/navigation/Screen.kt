@@ -58,10 +58,10 @@ val sampleDoctors = listOf(
     Doctor(
         id = "3",
         name = "Dra. Rosa Díaz",
-        specialty = "Dermatóloga",
+        specialty = "Cardióloga",
         rating = 4.8,
         reviewsCount = 110,
         expYears = 10,
-        bio = "Especialista en dermatología clínica y estética dermatológica."
+        bio = "Especialista en cardiología preventiva y rehabilitación cardiovascular."
     )
 )

@@ -34,7 +34,7 @@ fun MyAppointmentsScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(HeaderPurple)
+                .background(HeaderBlue)
                 .padding(horizontal = 20.dp, vertical = 20.dp)
         ) {
             Row(
@@ -78,7 +78,7 @@ fun AppointmentCard(appointment: AppointmentItem) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = LightPurpleCard),
+        colors = CardDefaults.cardColors(containerColor = LightBlueCard),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
