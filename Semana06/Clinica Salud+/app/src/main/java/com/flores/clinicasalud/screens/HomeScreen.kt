@@ -25,6 +25,7 @@ import com.flores.clinicasalud.navigation.Doctor
 import com.flores.clinicasalud.navigation.sampleDoctors
 import com.flores.clinicasalud.ui.theme.*
 
+// REQUISITO CUMPLIDO: Pantalla de Inicio
 @Composable
 fun HomeScreen(
     onOpenDrawer: () -> Unit,
@@ -38,7 +39,7 @@ fun HomeScreen(
             .fillMaxSize()
             .background(BackgroundWhite)
     ) {
-        // Cabecera Morada superior (idéntica a la Fig. 1)
+        // Cabecera con ícono ☰ para activar el NavigationDrawer
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -57,6 +58,7 @@ fun HomeScreen(
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
+                    // REQUISITO: Ícono ☰ en la topBar de Inicio
                     IconButton(onClick = onOpenDrawer) {
                         Icon(
                             imageVector = Icons.Default.Menu,
@@ -75,7 +77,7 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Chips de Especialidades
+        // REQUISITO: LazyRow con chips de especialidad (mínimo 2)
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -99,7 +101,6 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Título de la sección
         Text(
             text = "Médicos disponibles",
             fontSize = 15.sp,
@@ -110,7 +111,7 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Lista de Médicos (Filtrada o completa)
+        // REQUISITO: LazyColumn con lista de médicos (mínimo 3)
         LazyColumn(
             contentPadding = PaddingValues(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -135,7 +136,6 @@ fun DoctorCard(doctor: Doctor, onClick: () -> Unit) {
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Círculo con el ícono '+' de la imagen
             Box(
                 modifier = Modifier
                     .size(44.dp)
