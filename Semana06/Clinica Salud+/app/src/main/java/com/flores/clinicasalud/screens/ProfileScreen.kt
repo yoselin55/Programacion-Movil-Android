@@ -27,6 +27,7 @@ fun ProfileScreen(onOpenDrawer: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(HeaderBlue)
+                .statusBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 20.dp)
         ) {
             Row(

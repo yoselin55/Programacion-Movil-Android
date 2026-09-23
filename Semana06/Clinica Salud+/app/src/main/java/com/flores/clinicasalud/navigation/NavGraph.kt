@@ -39,7 +39,7 @@ fun MainAppNavigation() {
             AppointmentItem(
                 id = "1",
                 doctorName = "Dra. Ana Torres",
-                specialty = "Viernes 27, 10:30 am",
+                specialty = "Viernes 27, 10:30 AM",
                 date = "",
                 time = "",
                 status = "Confirmada"
@@ -47,7 +47,7 @@ fun MainAppNavigation() {
             AppointmentItem(
                 id = "2",
                 doctorName = "Dr. Luis Vega",
-                specialty = "Miércoles 15, 3:00 pm",
+                specialty = "Miércoles 15, 3:00 PM",
                 date = "",
                 time = "",
                 status = "Completada"
@@ -186,7 +186,7 @@ fun MainAppNavigation() {
                                 AppointmentItem(
                                     id = System.currentTimeMillis().toString(),
                                     doctorName = it.name,
-                                    specialty = "$date, $time am",
+                                    specialty = "$date, $time",
                                     date = date,
                                     time = time,
                                     status = "Confirmada"

@@ -25,15 +25,17 @@ fun ScheduleAppointmentScreen(
 ) {
     // ESTADO LOCAL DE SELECCIÓN ÚNICA (Requisito)
     var selectedDate by remember { mutableStateOf("Vie 27") }
-    var selectedTime by remember { mutableStateOf("10:30") }
+    var selectedTime by remember { mutableStateOf("") } // Sin hora por defecto
+    var showTimeError by remember { mutableStateOf(false) }
 
     val dates = listOf("Jue 26", "Vie 27", "Sáb 28")
-    val times = listOf("9:00", "10:30", "3:00")
+    val times = listOf("9:00 AM", "10:30 AM", "3:00 PM")
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundWhite)
+            .statusBarsPadding()
             .padding(16.dp)
     ) {
         // TopBar / Botón de retorno
@@ -46,7 +48,7 @@ fun ScheduleAppointmentScreen(
                 )
             }
             Text(
-                text = "← Agendar cita",
+                text = "Agendar cita",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextDark
@@ -110,12 +112,16 @@ fun ScheduleAppointmentScreen(
             times.forEach { time ->
                 val isSelected = time == selectedTime
                 Button(
-                    onClick = { selectedTime = time }, // Selección única
+                    onClick = {
+                        selectedTime = time // Selección única
+                        showTimeError = false // Limpia la advertencia
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isSelected) PrimaryBlue else ChipUnselected,
                         contentColor = if (isSelected) Color.White else TextDark
                     ),
                     shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 12.dp),
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(text = time, fontSize = 14.sp, fontWeight = FontWeight.Bold)
@@ -123,11 +129,28 @@ fun ScheduleAppointmentScreen(
             }
         }
 
+        // VALIDACIÓN: advertencia si no se eligió horario
+        if (showTimeError) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "⚠️ Debes seleccionar un horario",
+                color = Color(0xFFD32F2F),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
         Spacer(modifier = Modifier.weight(1f))
 
         // Botón Confirmar
         Button(
-            onClick = { onConfirmClick(selectedDate, selectedTime) },
+            onClick = {
+                if (selectedTime.isBlank()) {
+                    showTimeError = true // Impide avanzar sin horario
+                } else {
+                    onConfirmClick(selectedDate, selectedTime)
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),

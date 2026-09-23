@@ -39,6 +39,7 @@ fun DoctorDetailScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundWhite)
+            .statusBarsPadding()
             .padding(16.dp)
     ) {
         // Barra superior de navegación hacia atrás

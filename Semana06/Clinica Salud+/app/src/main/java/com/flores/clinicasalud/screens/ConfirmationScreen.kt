@@ -31,6 +31,7 @@ fun ConfirmationScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundWhite)
+            .statusBarsPadding()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -72,7 +73,7 @@ fun ConfirmationScreen(
 
         val fullDateStr = if (date.contains("27")) "Viernes 27" else date
         Text(
-            text = "$fullDateStr, $time am",
+            text = "$fullDateStr, $time",
             fontSize = 14.sp,
             color = TextMuted
         )
