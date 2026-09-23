@@ -55,4 +55,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
         // Iconos extendidos de Material Design (para FitnessCenter, ArrowBack, etc.)
     implementation("androidx.compose.material:material-icons-extended")
+    // Navegación para Jetpack Compose
+    implementation("androidx.navigation:navigation-compose:2.8.0")
 }
