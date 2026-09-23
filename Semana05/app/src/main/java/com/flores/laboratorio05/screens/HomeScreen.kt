@@ -28,7 +28,7 @@ fun HomeScreen(navController: NavController) {
     ) {
         // Título de la pantalla
         Text(
-            text = "Pantalla de Inicio (Home)",
+            text = "Pantalla Tecsup",
             style = MaterialTheme.typography.headlineMedium
         )
 

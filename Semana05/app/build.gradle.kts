@@ -5,11 +5,7 @@ plugins {
 
 android {
     namespace = "com.flores.laboratorio05"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.flores.laboratorio05"
