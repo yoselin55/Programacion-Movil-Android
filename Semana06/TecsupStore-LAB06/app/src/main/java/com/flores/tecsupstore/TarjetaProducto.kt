@@ -1,4 +1,3 @@
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -6,10 +5,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,7 +56,7 @@ fun TarjetaProducto(nombre: String, precio: String) {
                 }
 
                 // ====================================================
-                // AGREGADO PARA EL HITO 2: DropdownMenu básico
+                // MODIFICADO PARA EL HITO 3: Personalización con Íconos y Divisores
                 // ====================================================
                 DropdownMenu(
                     expanded = expanded,
@@ -61,14 +64,25 @@ fun TarjetaProducto(nombre: String, precio: String) {
                 ) {
                     DropdownMenuItem(
                         text = { Text("Favoritos") },
+                        leadingIcon = {
+                            Icon(Icons.Default.FavoriteBorder, contentDescription = "Favoritos")
+                        },
                         onClick = { expanded = false }
                     )
+                    HorizontalDivider()
                     DropdownMenuItem(
                         text = { Text("Compartir") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Share, contentDescription = "Compartir")
+                        },
                         onClick = { expanded = false }
                     )
+                    HorizontalDivider()
                     DropdownMenuItem(
                         text = { Text("Reportar") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Warning, contentDescription = "Reportar")
+                        },
                         onClick = { expanded = false }
                     )
                 }
