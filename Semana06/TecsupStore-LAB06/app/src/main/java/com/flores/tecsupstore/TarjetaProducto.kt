@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ShoppingBag
@@ -23,14 +24,15 @@ import androidx.compose.ui.unit.sp
 fun TarjetaProducto(
     nombre: String,
     precio: String,
+    // =========================================================
+    // === FASE 2: PARÁMETROS AGREGADOS PARA ESTADO FAVORITO ===
+    // =========================================================
+    esFavorito: Boolean,
+    onToggleFavorito: () -> Unit,
+    // =========================================================
     abiertoPorDefecto: Boolean = false,
     tieneBorde: Boolean = false
 ) {
-    // ====================================================
-    // HITO 1 - Commit 49577ba:
-    // "agrega icono de 3 puntos y estado expanded en TarjetaProducto"
-    // Estado que controla si el menú está abierto o cerrado
-    // ====================================================
     var expanded by remember { mutableStateOf(abiertoPorDefecto) }
 
     val colorMoradoPrincipal = Color(0xFF5B1DA3)
@@ -51,7 +53,6 @@ fun TarjetaProducto(
                 .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Ícono de Bolsa
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -68,7 +69,6 @@ fun TarjetaProducto(
 
             Spacer(modifier = Modifier.width(14.dp))
 
-            // Textos
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = nombre,
@@ -84,11 +84,6 @@ fun TarjetaProducto(
                 )
             }
 
-            // ====================================================
-            // HITO 1 - Commit 49577ba:
-            // "agrega icono de 3 puntos y estado expanded en TarjetaProducto"
-            // Botón con ícono MoreVert (3 puntos) que abre el menú
-            // ====================================================
             Box {
                 IconButton(onClick = { expanded = !expanded }) {
                     Icon(
@@ -98,39 +93,46 @@ fun TarjetaProducto(
                     )
                 }
 
-                // ====================================================
-                // HITO 2 - Commit 4ca9a2f:
-                // "implementa DropdownMenu contextual basico en tarjeta de producto"
-                // DropdownMenu con las opciones Favoritos, Compartir y Reportar
-                //
-                // HITO 3 - Commit c319c83:
-                // "personaliza DropdownMenu con iconos y divisores"
-                // Se agregan leadingIcon a cada opción y HorizontalDivider entre ellas
-                // ====================================================
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                     modifier = Modifier.background(Color.White)
                 ) {
+                    // =========================================================
+                    // === FASE 2: OPCIÓN FAVORITOS DINÁMICA (CAMBIA TEXTO E ÍCONO) ===
+                    // =========================================================
                     DropdownMenuItem(
-                        text = { Text("Favoritos", color = Color(0xFF1D1B20)) },
-                        leadingIcon = { // Hito 3: ícono
-                            Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFF1D1B20))
+                        text = {
+                            Text(
+                                text = if (esFavorito) "Eliminar de Favoritos" else "Favoritos",
+                                color = if (esFavorito) Color.Red else Color(0xFF1D1B20)
+                            )
                         },
-                        onClick = { expanded = false }
+                        leadingIcon = {
+                            Icon(
+                                imageVector = if (esFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = null,
+                                tint = if (esFavorito) Color.Red else Color(0xFF1D1B20)
+                            )
+                        },
+                        onClick = {
+                            onToggleFavorito() // Ejecuta la acción para agregar o quitar de favoritos
+                            expanded = false
+                        }
                     )
-                    HorizontalDivider(color = Color(0xFFE7E0EC)) // Hito 3: divisor
+                    // =========================================================
+                    HorizontalDivider(color = Color(0xFFE7E0EC))
                     DropdownMenuItem(
                         text = { Text("Compartir", color = Color(0xFF1D1B20)) },
-                        leadingIcon = { // Hito 3: ícono
+                        leadingIcon = {
                             Icon(Icons.Default.Share, contentDescription = null, tint = Color(0xFF1D1B20))
                         },
                         onClick = { expanded = false }
                     )
-                    HorizontalDivider(color = Color(0xFFE7E0EC)) // Hito 3: divisor
+                    HorizontalDivider(color = Color(0xFFE7E0EC))
                     DropdownMenuItem(
                         text = { Text("Reportar", color = Color(0xFF1D1B20)) },
-                        leadingIcon = { // Hito 3: ícono
+                        leadingIcon = {
                             Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFF1D1B20))
                         },
                         onClick = { expanded = false }
