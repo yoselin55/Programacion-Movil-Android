@@ -16,7 +16,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun EncabezadoDrawer() {
+fun EncabezadoDrawer(
+    nombreUsuario: String = "Yoselin Fabiola Flores Quispe",
+    emailUsuario: String = "yoselin.flores@tecsup.edu.pe"
+) {
+    val iniciales = nombreUsuario
+        .split(" ")
+        .mapNotNull { it.firstOrNull()?.toString() }
+        .take(2)
+        .joinToString("")
+        .uppercase()
+        .ifEmpty { "YF" }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -31,7 +42,7 @@ fun EncabezadoDrawer() {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "MR",
+                text = iniciales,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF5B1DA3),
                 fontSize = 18.sp
@@ -40,14 +51,15 @@ fun EncabezadoDrawer() {
         Spacer(modifier = Modifier.width(16.dp))
         Column {
             Text(
-                text = "María Rojas",
+                text = nombreUsuario,
                 fontWeight = FontWeight.Bold,
-                fontSize = 17.sp,
+                fontSize = 16.sp,
                 color = Color(0xFF1D1B20)
             )
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "maria@tecsup.edu.pe",
-                fontSize = 13.sp,
+                text = emailUsuario,
+                fontSize = 12.sp,
                 color = Color(0xFF79747E)
             )
         }
@@ -57,17 +69,18 @@ fun EncabezadoDrawer() {
 @Composable
 fun ContenidoDrawer(
     opcionSeleccionada: String,
-    // =========================================================
-    // === FASE 2: PARÁMETRO PARA LA CANTIDAD DE FAVORITOS ===
-    // =========================================================
     cantidadFavoritos: Int,
-    // =========================================================
+    nombreUsuario: String = "Yoselin Fabiola Flores Quispe",
+    emailUsuario: String = "yoselin.flores@tecsup.edu.pe",
     onOpcionSeleccionada: (String) -> Unit
 ) {
     ModalDrawerSheet(
         drawerContainerColor = Color.White
     ) {
-        EncabezadoDrawer()
+        EncabezadoDrawer(
+            nombreUsuario = nombreUsuario,
+            emailUsuario = emailUsuario
+        )
         HorizontalDivider(color = Color(0xFFE7E0EC))
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -98,9 +111,6 @@ fun ContenidoDrawer(
                         tint = if (esSeleccionado) Color(0xFF5B1DA3) else Color(0xFF49454F)
                     )
                 },
-                // =========================================================
-                // === FASE 2: AGREGADO BADGE CON CONTADOR EN FAVORITOS ===
-                // =========================================================
                 badge = {
                     if (titulo == "Favoritos" && cantidadFavoritos > 0) {
                         Badge(
@@ -115,7 +125,6 @@ fun ContenidoDrawer(
                         }
                     }
                 },
-                // =========================================================
                 colors = NavigationDrawerItemDefaults.colors(
                     selectedContainerColor = Color(0xFFF3EDF7),
                     selectedIconColor = Color(0xFF5B1DA3),

@@ -24,7 +24,7 @@ fun AppNavegacion() {
     var pantallaActual by remember { mutableStateOf("Mis pedidos") }
 
     // =========================================================
-    // === FASE 2: ESTADO GLOBAL DE PRODUCTOS FAVORITOS ===
+    // === FASE 2: ESTADO GLOBAL DE FAVORITOS ===
     // =========================================================
     var favoritosSet by remember { mutableStateOf(setOf<String>()) }
     // =========================================================
@@ -42,10 +42,12 @@ fun AppNavegacion() {
         drawerContent = {
             ContenidoDrawer(
                 opcionSeleccionada = pantallaActual,
-                // =========================================================
-                // === FASE 2: PASO DE CANTIDAD DE FAVORITOS AL DRAWER ===
-                // =========================================================
                 cantidadFavoritos = favoritosSet.size,
+                // =========================================================
+                // === ENVÍO DE DATOS PERSONALES DE YOSELIN FLORES ===
+                // =========================================================
+                nombreUsuario = "Yoselin Fabiola Flores Quispe",
+                emailUsuario = "yoselin.flores@tecsup.edu.pe",
                 // =========================================================
                 onOpcionSeleccionada = { nuevaPantalla ->
                     pantallaActual = nuevaPantalla
@@ -107,9 +109,6 @@ fun AppNavegacion() {
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     itemsIndexed(productos) { index, (nombre, precio) ->
-                        // =========================================================
-                        // === FASE 2: CONEXIÓN DE ESTADO CON CADA TARJETA ===
-                        // =========================================================
                         val esFavorito = favoritosSet.contains(nombre)
                         TarjetaProducto(
                             nombre = nombre,
@@ -125,7 +124,6 @@ fun AppNavegacion() {
                             abiertoPorDefecto = (index == 0),
                             tieneBorde = (index == 0)
                         )
-                        // =========================================================
                     }
                 }
             }
