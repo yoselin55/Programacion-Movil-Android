@@ -16,20 +16,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
-// ====================================================
-// HITO 5 - Commit 86b5cad:
-// "integra NavigationDrawer con Scaffold y navegacion entre pantallas"
-// ModalNavigationDrawer + Scaffold con barra superior y botón de menú
-// ====================================================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavegacion() {
-    // Hito 5: estado del drawer, scope para abrir/cerrar y pantalla actual
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var pantallaActual by remember { mutableStateOf("Mis pedidos") }
 
-    // Hito 6 (Commit e293a85): lista de productos de ejemplo
+    // =========================================================
+    // === FASE 2: ESTADO GLOBAL DE PRODUCTOS FAVORITOS ===
+    // =========================================================
+    var favoritosSet by remember { mutableStateOf(setOf<String>()) }
+    // =========================================================
+
     val productos = listOf(
         "Audífonos" to "89.00",
         "Smartwatch" to "199.00",
@@ -41,10 +40,13 @@ fun AppNavegacion() {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            // Hito 6 (Commit e293a85): drawer con opciones; al elegir una
-            // se cambia la pantalla y se cierra el menú
             ContenidoDrawer(
                 opcionSeleccionada = pantallaActual,
+                // =========================================================
+                // === FASE 2: PASO DE CANTIDAD DE FAVORITOS AL DRAWER ===
+                // =========================================================
+                cantidadFavoritos = favoritosSet.size,
+                // =========================================================
                 onOpcionSeleccionada = { nuevaPantalla ->
                     pantallaActual = nuevaPantalla
                     scope.launch { drawerState.close() }
@@ -52,7 +54,6 @@ fun AppNavegacion() {
             )
         }
     ) {
-        // Hito 5 (Commit 86b5cad): Scaffold con barra superior; el ícono Menu abre el drawer
         Scaffold(
             topBar = {
                 Surface(
@@ -100,19 +101,31 @@ fun AppNavegacion() {
                     .padding(paddingValues)
                     .background(Color.White)
             ) {
-                // Hito 6 (Commit e293a85): lista de TarjetaProducto (Hitos 1-3)
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     itemsIndexed(productos) { index, (nombre, precio) ->
+                        // =========================================================
+                        // === FASE 2: CONEXIÓN DE ESTADO CON CADA TARJETA ===
+                        // =========================================================
+                        val esFavorito = favoritosSet.contains(nombre)
                         TarjetaProducto(
                             nombre = nombre,
                             precio = precio,
-                            abiertoPorDefecto = (index == 0), // Abre el menú de Audífonos por defecto
-                            tieneBorde = (index == 0)        // Aplica el borde morado al primer producto
+                            esFavorito = esFavorito,
+                            onToggleFavorito = {
+                                favoritosSet = if (esFavorito) {
+                                    favoritosSet - nombre
+                                } else {
+                                    favoritosSet + nombre
+                                }
+                            },
+                            abiertoPorDefecto = (index == 0),
+                            tieneBorde = (index == 0)
                         )
+                        // =========================================================
                     }
                 }
             }
