@@ -23,11 +23,7 @@ fun AppNavegacion() {
     val scope = rememberCoroutineScope()
     var pantallaActual by remember { mutableStateOf("Mis pedidos") }
 
-    // =========================================================
-    // === FASE 2: ESTADO GLOBAL DE FAVORITOS ===
-    // =========================================================
     var favoritosSet by remember { mutableStateOf(setOf<String>()) }
-    // =========================================================
 
     val productos = listOf(
         "Audífonos" to "89.00",
@@ -43,12 +39,8 @@ fun AppNavegacion() {
             ContenidoDrawer(
                 opcionSeleccionada = pantallaActual,
                 cantidadFavoritos = favoritosSet.size,
-                // =========================================================
-                // === ENVÍO DE DATOS PERSONALES DE YOSELIN FLORES ===
-                // =========================================================
                 nombreUsuario = "Yoselin Fabiola Flores Quispe",
                 emailUsuario = "yoselin.flores@tecsup.edu.pe",
-                // =========================================================
                 onOpcionSeleccionada = { nuevaPantalla ->
                     pantallaActual = nuevaPantalla
                     scope.launch { drawerState.close() }
@@ -121,6 +113,7 @@ fun AppNavegacion() {
                                     favoritosSet + nombre
                                 }
                             },
+                            // El primer producto ("Audífonos") se muestra abierto con borde morado exactamente como en la foto
                             abiertoPorDefecto = (index == 0),
                             tieneBorde = (index == 0)
                         )
