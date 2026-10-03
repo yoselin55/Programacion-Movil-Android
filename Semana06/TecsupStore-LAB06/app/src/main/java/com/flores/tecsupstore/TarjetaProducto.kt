@@ -29,7 +29,7 @@ fun TarjetaProducto(
     abiertoPorDefecto: Boolean = false,
     tieneBorde: Boolean = false
 ) {
-    // Estado para controlar la apertura/cierre del menú de 3 puntos
+    // Estado para controlar la apertura del DropdownMenu
     var menuExpandido by remember { mutableStateOf(abiertoPorDefecto) }
 
     val colorMorado = Color(0xFF5B1DA3)
@@ -49,7 +49,7 @@ fun TarjetaProducto(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Ícono de bolsa morada dentro de contenedor redondeado
+            // Ícono de bolsa morada
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -82,9 +82,9 @@ fun TarjetaProducto(
                 )
             }
 
-            // BOTÓN DE 3 PUNTOS (⋮) Y DROPDOWNMENU CONTEXTUAL
+            // CONTENEDOR DEL BOTÓN Y DROPDOWNMENU
             Box {
-                IconButton(onClick = { menuExpandido = !menuExpandido }) {
+                IconButton(onClick = { menuExpandido = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = "Opciones",
@@ -92,13 +92,13 @@ fun TarjetaProducto(
                     )
                 }
 
-                // Menú desplegable con diseño calcado a la imagen de la guía
+                // Menú desplegable flotante
                 DropdownMenu(
                     expanded = menuExpandido,
                     onDismissRequest = { menuExpandido = false },
                     modifier = Modifier.background(Color.White)
                 ) {
-                    // 1. Opcion Favoritos
+                    // Opción 1: Favoritos
                     DropdownMenuItem(
                         text = { Text("Favoritos", fontSize = 14.sp, fontWeight = FontWeight.Medium) },
                         leadingIcon = {
@@ -116,7 +116,7 @@ fun TarjetaProducto(
 
                     HorizontalDivider(color = Color(0xFFE7E0EC))
 
-                    // 2. Opción Compartir
+                    // Opción 2: Compartir
                     DropdownMenuItem(
                         text = { Text("Compartir", fontSize = 14.sp, fontWeight = FontWeight.Medium) },
                         leadingIcon = {
@@ -131,7 +131,7 @@ fun TarjetaProducto(
 
                     HorizontalDivider(color = Color(0xFFE7E0EC))
 
-                    // 3. Opción Reportar
+                    // Opción 3: Reportar
                     DropdownMenuItem(
                         text = { Text("Reportar", fontSize = 14.sp, fontWeight = FontWeight.Medium) },
                         leadingIcon = {

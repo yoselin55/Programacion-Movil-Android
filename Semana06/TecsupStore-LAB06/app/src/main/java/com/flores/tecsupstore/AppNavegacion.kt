@@ -113,8 +113,9 @@ fun AppNavegacion() {
                                     favoritosSet + nombre
                                 }
                             },
-                            // El primer producto ("Audífonos") se muestra abierto con borde morado exactamente como en la foto
-                            abiertoPorDefecto = (index == 0),
+                            // El primer producto ("Audífonos") se muestra con borde morado.
+                            // El menú NO se abre por defecto: abrir un DropdownMenu al iniciar
+                            // la app crea un popup invisible que bloquea el primer toque.
                             tieneBorde = (index == 0)
                         )
                     }
