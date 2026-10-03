@@ -15,11 +15,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// ====================================================
-// HITO 4 - Commit b566a96:
-// "crea estructura inicial de NavigationDrawer con encabezado de usuario"
-// Encabezado del menú lateral: avatar con iniciales, nombre y correo
-// ====================================================
 @Composable
 fun EncabezadoDrawer() {
     Row(
@@ -59,15 +54,14 @@ fun EncabezadoDrawer() {
     }
 }
 
-// ====================================================
-// HITO 6 - Commit e293a85:
-// "finaliza personalizacion del NavigationDrawer e item activo resaltado"
-// Contenido del drawer: encabezado + opciones del menú.
-// La opción activa se resalta con color morado y texto en negrita
-// ====================================================
 @Composable
 fun ContenidoDrawer(
     opcionSeleccionada: String,
+    // =========================================================
+    // === FASE 2: PARÁMETRO PARA LA CANTIDAD DE FAVORITOS ===
+    // =========================================================
+    cantidadFavoritos: Int,
+    // =========================================================
     onOpcionSeleccionada: (String) -> Unit
 ) {
     ModalDrawerSheet(
@@ -86,7 +80,7 @@ fun ContenidoDrawer(
         )
 
         opciones.forEach { titulo ->
-            val esSeleccionado = (opcionSeleccionada == titulo) // Hito 6: detecta el ítem activo
+            val esSeleccionado = (opcionSeleccionada == titulo)
             NavigationDrawerItem(
                 label = {
                     Text(
@@ -104,7 +98,24 @@ fun ContenidoDrawer(
                         tint = if (esSeleccionado) Color(0xFF5B1DA3) else Color(0xFF49454F)
                     )
                 },
-                // Hito 6: colores del ítem activo resaltado
+                // =========================================================
+                // === FASE 2: AGREGADO BADGE CON CONTADOR EN FAVORITOS ===
+                // =========================================================
+                badge = {
+                    if (titulo == "Favoritos" && cantidadFavoritos > 0) {
+                        Badge(
+                            containerColor = Color(0xFF5B1DA3),
+                            contentColor = Color.White
+                        ) {
+                            Text(
+                                text = cantidadFavoritos.toString(),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                },
+                // =========================================================
                 colors = NavigationDrawerItemDefaults.colors(
                     selectedContainerColor = Color(0xFFF3EDF7),
                     selectedIconColor = Color(0xFF5B1DA3),
