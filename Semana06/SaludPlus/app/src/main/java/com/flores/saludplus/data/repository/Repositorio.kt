@@ -80,24 +80,27 @@ object Repositorio {
     }
 
     // ---- Especialidades ----
-    // TODO: filter + contains (ignoreCase) sobre el nombre
-    fun buscarEspecialidades(texto: String): List<Especialidad> = emptyList()
+    // Filtra con filter + contains (sin importar mayúsculas) por nombre; con texto vacío devuelve todas
+    fun buscarEspecialidades(texto: String): List<Especialidad> =
+        especialidades.filter { it.nombre.contains(texto.trim(), ignoreCase = true) }
 
-    // TODO: take de las primeras 3 especialidades
-    fun especialidadesDestacadas(): List<Especialidad> = emptyList()
+    // Toma con take las 3 primeras especialidades para el LazyRow de Inicio
+    fun especialidadesDestacadas(): List<Especialidad> = especialidades.take(3)
 
-    // TODO: find por id
-    fun obtenerEspecialidad(id: Int): Especialidad? = null
+    // Busca con find la especialidad por id (null si no existe)
+    fun obtenerEspecialidad(id: Int): Especialidad? = especialidades.find { it.id == id }
 
     // ---- Médicos ----
-    // TODO: find por id
-    fun obtenerMedico(id: Int): Medico? = null
+    // Busca con find el médico por id (null si no existe)
+    fun obtenerMedico(id: Int): Medico? = medicos.find { it.id == id }
 
-    // TODO: filter por especialidadId + sortedByDescending por calificación
-    fun medicosPorEspecialidad(especialidadId: Int): List<Medico> = emptyList()
+    // Médicos de una especialidad (filter), del mejor al peor calificado (sortedByDescending)
+    fun medicosPorEspecialidad(especialidadId: Int): List<Medico> =
+        medicos.filter { it.especialidadId == especialidadId }.sortedByDescending { it.calificacion }
 
-    // TODO: filter por especialidad y texto en el nombre + sortedByDescending
-    fun buscarMedicos(especialidadId: Int, texto: String): List<Medico> = emptyList()
+    // Igual que medicosPorEspecialidad pero también filtra por texto en el nombre del médico
+    fun buscarMedicos(especialidadId: Int, texto: String): List<Medico> =
+        medicosPorEspecialidad(especialidadId).filter { it.nombre.contains(texto.trim(), ignoreCase = true) }
 
     // ---- Citas ----
     // TODO: horariosBase.filter quitando las horas ya reservadas (citas.filter + map)
