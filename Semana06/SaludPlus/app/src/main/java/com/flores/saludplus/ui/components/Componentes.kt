@@ -2,11 +2,13 @@ package com.flores.saludplus.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -131,6 +133,31 @@ fun LogoClinica(tamano: Int = 96) {
             tint = AzulPrimario,
             modifier = Modifier.size((tamano * 0.6).dp)
         )
+    }
+}
+
+// Commit 7: botón seleccionable para días y horas; se pinta de azul al elegirlo
+@Composable
+fun ChipSeleccion(
+    texto: String,
+    seleccionado: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    subtitulo: String? = null
+) {
+    val colorTexto = if (seleccionado) Color.White else MaterialTheme.colorScheme.onSurface
+    Column(
+        modifier = modifier
+            .height(56.dp)
+            .background(if (seleccionado) AzulPrimario else AzulClaro, RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(texto, color = colorTexto, style = MaterialTheme.typography.labelMedium)
+        if (subtitulo != null) {
+            Text(subtitulo, color = colorTexto, fontWeight = FontWeight.Bold)
+        }
     }
 }
 

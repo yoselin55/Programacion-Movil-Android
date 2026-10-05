@@ -103,8 +103,11 @@ object Repositorio {
         medicosPorEspecialidad(especialidadId).filter { it.nombre.contains(texto.trim(), ignoreCase = true) }
 
     // ---- Citas ----
-    // TODO: horariosBase.filter quitando las horas ya reservadas (citas.filter + map)
-    fun horariosDisponibles(medicoId: Int, fecha: String): List<String> = emptyList()
+    // Horas ya reservadas del médico ese día (filter + map); se quitan de los horarios base
+    fun horariosDisponibles(medicoId: Int, fecha: String): List<String> {
+        val reservadas = citas.filter { it.medicoId == medicoId && it.fecha == fecha }.map { it.hora }
+        return horariosBase.filter { it !in reservadas }
+    }
 
     // TODO: any para validar que el horario siga libre; crear la Cita y add
     fun agendarCita(medicoId: Int, fecha: String, hora: String, motivo: String): Cita? = null
