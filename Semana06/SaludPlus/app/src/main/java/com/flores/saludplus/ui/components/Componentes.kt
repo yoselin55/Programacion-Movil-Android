@@ -1,20 +1,112 @@
 package com.flores.saludplus.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.flores.saludplus.ui.theme.AzulClaro
+import com.flores.saludplus.ui.theme.AzulPrimario
 
 // Relaciones:
-// - Lo usan todas las pantallas de ui/screens (por ahora PantallaEnConstruccion)
-// - Aquí se irán creando los componentes reutilizables (botones, tarjetas, barras)
+// - Los usan las pantallas de ui/screens (Splash, Registro y Login por ahora)
+// Botón azul de ancho completo (Comenzar, Registrarme, Ingresar...)
+@Composable
+fun BotonPrincipal(texto: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier.fillMaxWidth().height(52.dp)
+    ) {
+        Text(texto, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+// Campo de texto con ícono, etiqueta y mensaje de error (nombre, teléfono, correo, contraseña)
+@Composable
+fun CampoTexto(
+    valor: String,
+    onCambio: (String) -> Unit,
+    etiqueta: String,
+    icono: ImageVector,
+    modifier: Modifier = Modifier,
+    error: String? = null,
+    teclado: KeyboardType = KeyboardType.Text,
+    esContrasena: Boolean = false
+) {
+    OutlinedTextField(
+        value = valor,
+        onValueChange = onCambio,
+        label = { Text(etiqueta) },
+        leadingIcon = { Icon(icono, contentDescription = null, tint = AzulPrimario) },
+        isError = error != null,
+        supportingText = error?.let { mensaje -> { Text(mensaje) } },
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp),
+        keyboardOptions = KeyboardOptions(keyboardType = teclado),
+        visualTransformation = if (esContrasena) PasswordVisualTransformation() else VisualTransformation.None,
+        modifier = modifier.fillMaxWidth()
+    )
+}
+
+// Barra superior con título centrado y flecha para volver (pantallas internas)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BarraSuperior(titulo: String, onBack: () -> Unit) {
+    CenterAlignedTopAppBar(
+        title = { Text(titulo, fontWeight = FontWeight.SemiBold) },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+            }
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+    )
+}
+
+// Logo de la clínica: ícono médico sobre un cuadro azul claro
+@Composable
+fun LogoClinica(tamano: Int = 96) {
+    Box(
+        modifier = Modifier.size(tamano.dp).background(AzulClaro, RoundedCornerShape(24.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            Icons.Filled.MedicalServices,
+            contentDescription = "Logo SaludPlus",
+            tint = AzulPrimario,
+            modifier = Modifier.size((tamano * 0.6).dp)
+        )
+    }
+}
 
 // Contenido temporal de cada pantalla pendiente, con botones para seguir el flujo.
 // TODO: quitar su uso en cada pantalla al terminarla
