@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
@@ -53,6 +54,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.flores.saludplus.data.model.Cita
 import com.flores.saludplus.data.model.Especialidad
 import com.flores.saludplus.data.model.Medico
 import com.flores.saludplus.navigation.Rutas
@@ -133,6 +135,27 @@ fun LogoClinica(tamano: Int = 96) {
             tint = AzulPrimario,
             modifier = Modifier.size((tamano * 0.6).dp)
         )
+    }
+}
+
+// Commit 9: tarjeta de una cita (médico, especialidad, fecha y hora)
+@Composable
+fun TarjetaCita(cita: Cita, medico: String, especialidad: String, onClick: () -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(medico, fontWeight = FontWeight.Bold)
+            Text(especialidad, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.Event, contentDescription = null, tint = AzulPrimario, modifier = Modifier.size(18.dp))
+                Text(cita.fecha, style = MaterialTheme.typography.bodyMedium)
+                Icon(Icons.Filled.Schedule, contentDescription = null, tint = AzulPrimario, modifier = Modifier.size(18.dp))
+                Text(cita.hora, style = MaterialTheme.typography.bodyMedium)
+            }
+        }
     }
 }
 

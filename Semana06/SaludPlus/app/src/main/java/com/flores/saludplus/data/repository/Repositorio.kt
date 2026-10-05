@@ -118,8 +118,10 @@ object Repositorio {
         return nueva
     }
 
-    // TODO: filter por usuario actual + sortedWith por fecha y hora
-    fun citasDelUsuario(): List<Cita> = emptyList()
+    // Citas del usuario en sesión (filter), de la más próxima a la más lejana (sortedWith)
+    fun citasDelUsuario(): List<Cita> =
+        citas.filter { it.usuarioId == usuarioActual?.id }
+            .sortedWith(compareBy({ it.fecha }, { it.hora }))
 
     // Busca con find la cita por id (null si no existe)
     fun obtenerCita(id: Int): Cita? = citas.find { it.id == id }
