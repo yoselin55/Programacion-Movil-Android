@@ -5,20 +5,27 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -44,9 +51,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.flores.saludplus.data.model.Especialidad
+import com.flores.saludplus.data.model.Medico
 import com.flores.saludplus.navigation.Rutas
 import com.flores.saludplus.ui.theme.AzulClaro
+import com.flores.saludplus.ui.theme.Estrella
 import com.flores.saludplus.ui.theme.AzulPrimario
+import com.flores.saludplus.ui.theme.VerdeClaro
+import com.flores.saludplus.ui.theme.VerdeDisponible
 
 // Relaciones:
 // - Los usan las pantallas de ui/screens (Splash, Registro, Login, Home y las 3 de la barra inferior)
@@ -93,7 +105,7 @@ fun CampoTexto(
 // Barra superior con título centrado y flecha para volver (pantallas internas)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BarraSuperior(titulo: String, onBack: () -> Unit) {
+fun BarraSuperior(titulo: String, onBack: () -> Unit, acciones: @Composable RowScope.() -> Unit = {}) {
     CenterAlignedTopAppBar(
         title = { Text(titulo, fontWeight = FontWeight.SemiBold) },
         navigationIcon = {
@@ -101,6 +113,7 @@ fun BarraSuperior(titulo: String, onBack: () -> Unit) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
             }
         },
+        actions = acciones,
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.background)
     )
 }
@@ -118,6 +131,86 @@ fun LogoClinica(tamano: Int = 96) {
             tint = AzulPrimario,
             modifier = Modifier.size((tamano * 0.6).dp)
         )
+    }
+}
+
+// Commit 6: campo de búsqueda en tiempo real (Especialidades y Médicos)
+@Composable
+fun CampoBusqueda(valor: String, onCambio: (String) -> Unit, placeholder: String, modifier: Modifier = Modifier) {
+    OutlinedTextField(
+        value = valor,
+        onValueChange = onCambio,
+        placeholder = { Text(placeholder) },
+        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier.fillMaxWidth()
+    )
+}
+
+// Commit 6: fila de una especialidad (ícono, nombre, descripción y flecha)
+@Composable
+fun ItemEspecialidad(especialidad: Especialidad, onClick: () -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier.size(44.dp).background(AzulClaro, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(especialidad.icono, contentDescription = null, tint = AzulPrimario)
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(especialidad.nombre, fontWeight = FontWeight.SemiBold)
+                Text(
+                    especialidad.descripcion,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+        }
+    }
+}
+
+// Commit 6: tarjeta de un médico (nombre, especialidad, calificación y disponibilidad)
+@Composable
+fun TarjetaMedico(medico: Medico, especialidad: String, onClick: () -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier.size(60.dp).background(AzulClaro, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Filled.Person, contentDescription = null, tint = AzulPrimario, modifier = Modifier.size(34.dp))
+            }
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(medico.nombre, fontWeight = FontWeight.Bold)
+                Text(especialidad, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.Star, contentDescription = null, tint = Estrella, modifier = Modifier.size(16.dp))
+                    Text(" ${medico.calificacion} (${medico.resenas})", style = MaterialTheme.typography.bodySmall)
+                }
+                Box(modifier = Modifier.background(VerdeClaro, RoundedCornerShape(8.dp)).padding(horizontal = 8.dp, vertical = 2.dp)) {
+                    Text(medico.disponibilidad, style = MaterialTheme.typography.labelSmall, color = VerdeDisponible)
+                }
+            }
+        }
     }
 }
 
