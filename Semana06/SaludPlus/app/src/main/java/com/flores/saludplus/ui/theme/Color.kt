@@ -15,3 +15,9 @@ val TextoSecundario = Color(0xFF6B7585)
 val VerdeDisponible = Color(0xFF2E9E5B)
 val VerdeClaro = Color(0xFFDDF5E7)
 val Estrella = Color(0xFFF5A623)
+
+// Commit 4: colores de las tarjetas de acción de Inicio
+val MoradoClaro = Color(0xFFEDE4FB)
+val Morado = Color(0xFF7B4FD6)
+val NaranjaClaro = Color(0xFFFDEBD3)
+val Naranja = Color(0xFFF28C1E)

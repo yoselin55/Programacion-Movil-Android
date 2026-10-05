@@ -2,6 +2,7 @@ package com.flores.saludplus.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -31,12 +34,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.flores.saludplus.ui.theme.AzulClaro
 import com.flores.saludplus.ui.theme.AzulPrimario
 
 // Relaciones:
-// - Los usan las pantallas de ui/screens (Splash, Registro y Login por ahora)
+// - Los usan las pantallas de ui/screens (Splash, Registro, Login y Home por ahora)
 // Botón azul de ancho completo (Comenzar, Registrarme, Ingresar...)
 @Composable
 fun BotonPrincipal(texto: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
@@ -105,6 +110,32 @@ fun LogoClinica(tamano: Int = 96) {
             tint = AzulPrimario,
             modifier = Modifier.size((tamano * 0.6).dp)
         )
+    }
+}
+
+// Commit 4: tarjeta cuadrada de color con ícono y texto (accesos de Inicio)
+@Composable
+fun TarjetaAccion(
+    texto: String,
+    icono: ImageVector,
+    colorFondo: Color,
+    colorIcono: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = colorFondo),
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.height(110.dp).clickable(onClick = onClick)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(icono, contentDescription = null, tint = colorIcono, modifier = Modifier.size(36.dp))
+            Text(texto, color = colorIcono, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
+        }
     }
 }
 
