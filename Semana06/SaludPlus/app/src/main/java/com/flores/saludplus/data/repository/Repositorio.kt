@@ -109,14 +109,20 @@ object Repositorio {
         return horariosBase.filter { it !in reservadas }
     }
 
-    // TODO: any para validar que el horario siga libre; crear la Cita y add
-    fun agendarCita(medicoId: Int, fecha: String, hora: String, motivo: String): Cita? = null
+    // Crea la cita si hay sesión y el horario sigue libre (any); si no, devuelve null
+    fun agendarCita(medicoId: Int, fecha: String, hora: String, motivo: String): Cita? {
+        val usuario = usuarioActual ?: return null
+        if (citas.any { it.medicoId == medicoId && it.fecha == fecha && it.hora == hora }) return null
+        val nueva = Cita((citas.maxOfOrNull { it.id } ?: 0) + 1, usuario.id, medicoId, fecha, hora, motivo)
+        citas.add(nueva)
+        return nueva
+    }
 
     // TODO: filter por usuario actual + sortedWith por fecha y hora
     fun citasDelUsuario(): List<Cita> = emptyList()
 
-    // TODO: find por id
-    fun obtenerCita(id: Int): Cita? = null
+    // Busca con find la cita por id (null si no existe)
+    fun obtenerCita(id: Int): Cita? = citas.find { it.id == id }
 
     // TODO: removeIf por id y devolver si se eliminó
     fun cancelarCita(id: Int): Boolean = false

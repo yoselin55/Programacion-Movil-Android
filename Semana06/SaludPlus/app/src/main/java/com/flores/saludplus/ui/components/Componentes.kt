@@ -136,6 +136,27 @@ fun LogoClinica(tamano: Int = 96) {
     }
 }
 
+// Commit 8: fila con ícono, título y valor (datos de la cita)
+@Composable
+fun FilaDetalle(icono: ImageVector, titulo: String, valor: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Box(
+            modifier = Modifier.size(40.dp).background(AzulClaro, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icono, contentDescription = null, tint = AzulPrimario)
+        }
+        Column {
+            Text(titulo, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(valor, fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
 // Commit 7: botón seleccionable para días y horas; se pinta de azul al elegirlo
 @Composable
 fun ChipSeleccion(

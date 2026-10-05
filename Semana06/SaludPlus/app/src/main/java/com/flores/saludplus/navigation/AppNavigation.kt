@@ -115,7 +115,7 @@ fun AppNavigation() {
                 fecha = entrada.arguments!!.getString("fecha")!!,
                 hora = entrada.arguments!!.getString("hora")!!,
                 onCitaAgendada = { citaId ->
-                    // Borra el flujo de agendamiento del historial hasta Inicio
+                    // Commit 8: popUpTo(HOME) borra el flujo de agendamiento del historial
                     nav.navigate(Rutas.citaExitosa(citaId)) { popUpTo(Rutas.HOME) }
                 },
                 onBack = { nav.popBackStack() }
