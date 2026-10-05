@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.flores.saludplus.data.model.Especialidad
 import com.flores.saludplus.data.repository.Repositorio
 import com.flores.saludplus.navigation.Rutas
+import com.flores.saludplus.ui.components.BarraInferior
 import com.flores.saludplus.ui.components.TarjetaAccion
 import com.flores.saludplus.ui.theme.AzulClaro
 import com.flores.saludplus.ui.theme.AzulPrimario
@@ -52,7 +53,7 @@ import com.flores.saludplus.ui.theme.VerdeDisponible
 
 // Relaciones:
 // - La llama AppNavigation en Rutas.HOME
-// - Usa TarjetaAccion (Componentes.kt) y Repositorio (usuarioActual, especialidadesDestacadas)
+// - Usa TarjetaAccion y BarraInferior (Componentes.kt) y Repositorio (usuarioActual, especialidadesDestacadas)
 // - Navega a Especialidades, Médicos, Notificaciones y a Mis citas, Perfil y Resultados
 
 // Commit 4: pantalla de Inicio con saludo, tarjetas y especialidades destacadas
@@ -66,7 +67,11 @@ fun HomeScreen(
     // Primer nombre del usuario con sesión iniciada
     val nombre = Repositorio.usuarioActual?.nombre?.substringBefore(" ") ?: ""
 
-    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        // Commit 5: barra inferior de navegación
+        bottomBar = { BarraInferior(Rutas.HOME, onNavegar) }
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

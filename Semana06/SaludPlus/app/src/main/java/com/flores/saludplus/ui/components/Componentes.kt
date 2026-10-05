@@ -14,7 +14,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -23,6 +27,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -37,11 +44,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.flores.saludplus.navigation.Rutas
 import com.flores.saludplus.ui.theme.AzulClaro
 import com.flores.saludplus.ui.theme.AzulPrimario
 
 // Relaciones:
-// - Los usan las pantallas de ui/screens (Splash, Registro, Login y Home por ahora)
+// - Los usan las pantallas de ui/screens (Splash, Registro, Login, Home y las 3 de la barra inferior)
 // Botón azul de ancho completo (Comenzar, Registrarme, Ingresar...)
 @Composable
 fun BotonPrincipal(texto: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
@@ -110,6 +118,32 @@ fun LogoClinica(tamano: Int = 96) {
             tint = AzulPrimario,
             modifier = Modifier.size((tamano * 0.6).dp)
         )
+    }
+}
+
+// Commit 5: barra inferior con los 4 destinos principales; resalta la ruta actual
+@Composable
+fun BarraInferior(rutaActual: String, onNavegar: (String) -> Unit) {
+    val destinos = listOf(
+        Triple("Inicio", Icons.Filled.Home, Rutas.HOME),
+        Triple("Citas", Icons.Filled.Event, Rutas.MIS_CITAS),
+        Triple("Resultados", Icons.Filled.Description, Rutas.RESULTADOS),
+        Triple("Perfil", Icons.Filled.Person, Rutas.PERFIL)
+    )
+    NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+        destinos.forEach { (etiqueta, icono, ruta) ->
+            NavigationBarItem(
+                selected = ruta == rutaActual,
+                onClick = { if (ruta != rutaActual) onNavegar(ruta) },
+                icon = { Icon(icono, contentDescription = etiqueta) },
+                label = { Text(etiqueta) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = AzulPrimario,
+                    selectedTextColor = AzulPrimario,
+                    indicatorColor = AzulClaro
+                )
+            )
+        }
     }
 }
 
