@@ -40,7 +40,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
-    // Agregado: íconos extendidos de Material (Person, ChildCare, Favorite, etc.) para las listas y la barra inferior
+    // Agregado: íconos extendidos de Material
     implementation(libs.androidx.compose.material.icons.extended)
     // Agregado: Navigation Compose (NavHost, rutas con parámetros y popUpTo) usado en AppNavigation.kt
     implementation(libs.androidx.navigation.compose)

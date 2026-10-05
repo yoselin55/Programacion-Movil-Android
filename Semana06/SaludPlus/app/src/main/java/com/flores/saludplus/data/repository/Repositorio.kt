@@ -58,14 +58,26 @@ object Repositorio {
     )
 
     // ---- Usuarios ----
-    // TODO: any para validar teléfono repetido + add del nuevo Usuario; devolver si se pudo
-    fun registrarUsuario(nombre: String, telefono: String, correo: String, contrasena: String): Boolean = false
+    // Registra al usuario; devuelve false si el teléfono ya existe (any) y si no lo agrega (add)
+    fun registrarUsuario(nombre: String, telefono: String, correo: String, contrasena: String): Boolean {
+        if (usuarios.any { it.telefono == telefono }) return false
+        val nuevo = Usuario(usuarios.size + 1, nombre, telefono, correo, contrasena)
+        usuarios.add(nuevo)
+        usuarioActual = nuevo // queda con la sesión iniciada
+        return true
+    }
 
-    // TODO: find por teléfono y contraseña; guardar el resultado en usuarioActual
-    fun iniciarSesion(telefono: String, contrasena: String): Boolean = false
+    // Busca con find el usuario que coincida; si existe lo deja como usuarioActual
+    fun iniciarSesion(telefono: String, contrasena: String): Boolean {
+        val encontrado = usuarios.find { it.telefono == telefono && it.contrasena == contrasena }
+        usuarioActual = encontrado
+        return encontrado != null
+    }
 
-    // TODO: dejar usuarioActual en null
-    fun cerrarSesion() {}
+    // Cierra la sesión actual
+    fun cerrarSesion() {
+        usuarioActual = null
+    }
 
     // ---- Especialidades ----
     // TODO: filter + contains (ignoreCase) sobre el nombre
