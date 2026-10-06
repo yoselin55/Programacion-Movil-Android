@@ -2,9 +2,11 @@ package com.flores.saludplus.util
 
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.format.DateTimeParseException
 
 // Relaciones:
 // - Lo usará FechaHoraScreen (ui/screens/agendamiento) para armar el calendario dinámico
+// - Lo usan ConfirmarCitaScreen, CitaExitosaScreen y TarjetaCita para mostrar fechas ISO en español
 // - Lo prueba FechasTest (app/src/test)
 // - Depende solo de java.time.LocalDate (requiere minSdk 26)
 
@@ -76,4 +78,20 @@ object Fechas {
     // Fase 2: devuelve la fecha abreviada, por ejemplo "Mié 16 set 2026".
     fun textoCorto(fecha: LocalDate): String =
         "${diaCorto(fecha)} ${fecha.dayOfMonth} ${mesesCortos[fecha.monthValue - 1]} ${fecha.year}"
+
+    // Fase 2: convierte una fecha ISO ("2026-10-06") a texto largo ("Martes 6 de octubre 2026").
+    // Si el texto no es una fecha válida, devuelve el mismo texto sin lanzar excepción.
+    fun textoLargoDesdeIso(iso: String): String = desdeIso(iso, ::textoLargo)
+
+    // Fase 2: convierte una fecha ISO ("2026-10-06") a texto corto ("Mar 6 oct 2026").
+    // Si el texto no es una fecha válida, devuelve el mismo texto sin lanzar excepción.
+    fun textoCortoDesdeIso(iso: String): String = desdeIso(iso, ::textoCorto)
+
+    // Fase 2: aplica el formato a la fecha ISO; devuelve el texto original si no se puede convertir
+    private fun desdeIso(iso: String, formato: (LocalDate) -> String): String =
+        try {
+            formato(LocalDate.parse(iso))
+        } catch (e: DateTimeParseException) {
+            iso
+        }
 }

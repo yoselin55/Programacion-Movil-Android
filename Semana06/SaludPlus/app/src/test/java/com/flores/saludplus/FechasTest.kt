@@ -62,4 +62,28 @@ class FechasTest {
         assertEquals("Mié 16 set 2026", Fechas.textoCorto(fecha))
         assertEquals("Setiembre 2026", Fechas.mesYAnio(fecha))
     }
+
+    // Fase 2: verifica el texto largo de una fecha ISO de martes (sin "de" antes del año)
+    @Test
+    fun textoLargoDesdeIso_martes6Octubre() {
+        assertEquals("Martes 6 de octubre 2026", Fechas.textoLargoDesdeIso("2026-10-06"))
+    }
+
+    // Fase 2: verifica el texto largo de una fecha ISO con tilde y "setiembre"
+    @Test
+    fun textoLargoDesdeIso_miercoles16Setiembre() {
+        assertEquals("Miércoles 16 de setiembre 2026", Fechas.textoLargoDesdeIso("2026-09-16"))
+    }
+
+    // Fase 2: verifica el texto corto de una fecha ISO
+    @Test
+    fun textoCortoDesdeIso_martes6Octubre() {
+        assertEquals("Mar 6 oct 2026", Fechas.textoCortoDesdeIso("2026-10-06"))
+    }
+
+    // Fase 2: verifica que un texto inválido se devuelve igual, sin lanzar excepción
+    @Test
+    fun textoLargoDesdeIso_textoInvalido_devuelveMismoTexto() {
+        assertEquals("fecha-invalida", Fechas.textoLargoDesdeIso("fecha-invalida"))
+    }
 }

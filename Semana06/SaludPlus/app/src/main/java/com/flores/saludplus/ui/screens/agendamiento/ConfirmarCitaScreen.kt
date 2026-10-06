@@ -42,11 +42,13 @@ import com.flores.saludplus.ui.components.BotonPrincipal
 import com.flores.saludplus.ui.components.FilaDetalle
 import com.flores.saludplus.ui.theme.AzulClaro
 import com.flores.saludplus.ui.theme.AzulPrimario
+import com.flores.saludplus.util.Fechas
 
 // Relaciones:
 // - La llama AppNavigation en Rutas.CONFIRMAR y recibe medicoId, fecha y hora de la ruta
 // - Usa BarraSuperior, BotonPrincipal y FilaDetalle (Componentes.kt)
-// - Llama a Repositorio.obtenerMedico y agendarCita
+// - Llama a Repositorio.obtenerMedico y agendarCita (la fecha se guarda en ISO)
+// - Usa util/Fechas.kt (Fase 2) para mostrar la fecha en español
 // - Al agendar envía el id de la cita a Cita agendada (onCitaAgendada)
 
 // Commit 8: resumen de la cita con motivo opcional; al confirmar se guarda en el Repositorio
@@ -107,7 +109,8 @@ fun ConfirmarCitaScreen(
             }
 
             // Datos de la cita
-            FilaDetalle(Icons.Filled.CalendarMonth, "Fecha", fecha)
+            // Fase 2: la fecha llega en ISO y se muestra como "Martes 6 de octubre 2026"
+            FilaDetalle(Icons.Filled.CalendarMonth, "Fecha", Fechas.textoLargoDesdeIso(fecha))
             FilaDetalle(Icons.Filled.AccessTime, "Hora", rangoHora)
             FilaDetalle(Icons.Filled.Info, "Tipo de atención", "Consulta presencial")
             FilaDetalle(Icons.Filled.LocationOn, "Dirección", "Av. Los Olivos 123, Lima")

@@ -30,11 +30,13 @@ import com.flores.saludplus.data.repository.Repositorio
 import com.flores.saludplus.ui.components.BotonPrincipal
 import com.flores.saludplus.ui.components.FilaDetalle
 import com.flores.saludplus.ui.theme.VerdeDisponible
+import com.flores.saludplus.util.Fechas
 
 // Relaciones:
 // - La llama AppNavigation en Rutas.CITA_EXITOSA y recibe citaId de la ruta
 // - Usa BotonPrincipal y FilaDetalle (Componentes.kt)
 // - Llama a Repositorio.obtenerCita y obtenerMedico
+// - Usa util/Fechas.kt (Fase 2) para mostrar la fecha en español
 // - Sus botones llevan a Mis citas (onVerMisCitas) y a Inicio (onIrInicio)
 
 // Commit 8: confirmación con el resumen de la cita agendada
@@ -72,7 +74,7 @@ fun CitaExitosaScreen(citaId: Int, onVerMisCitas: () -> Unit, onIrInicio: () -> 
                 ) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         FilaDetalle(Icons.Filled.Person, especialidad, medico.nombre)
-                        FilaDetalle(Icons.Filled.CalendarMonth, "Fecha", cita.fecha)
+                        FilaDetalle(Icons.Filled.CalendarMonth, "Fecha", Fechas.textoLargoDesdeIso(cita.fecha)) // Fase 2: fecha en español
                         FilaDetalle(Icons.Filled.AccessTime, "Hora", cita.hora)
                     }
                 }

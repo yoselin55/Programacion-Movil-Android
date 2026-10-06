@@ -63,9 +63,11 @@ import com.flores.saludplus.ui.theme.Estrella
 import com.flores.saludplus.ui.theme.AzulPrimario
 import com.flores.saludplus.ui.theme.VerdeClaro
 import com.flores.saludplus.ui.theme.VerdeDisponible
+import com.flores.saludplus.util.Fechas
 
 // Relaciones:
 // - Los usan las pantallas de ui/screens (Splash, Registro, Login, Home y las 3 de la barra inferior)
+// - TarjetaCita usa util/Fechas.kt (Fase 2) para mostrar la fecha en español
 // Botón azul de ancho completo (Comenzar, Registrarme, Ingresar...)
 @Composable
 fun BotonPrincipal(texto: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
@@ -151,7 +153,8 @@ fun TarjetaCita(cita: Cita, medico: String, especialidad: String, onClick: () ->
             Text(especialidad, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.Event, contentDescription = null, tint = AzulPrimario, modifier = Modifier.size(18.dp))
-                Text(cita.fecha, style = MaterialTheme.typography.bodyMedium)
+                // Fase 2: fecha corta en español, por ejemplo "Mar 6 oct 2026"
+                Text(Fechas.textoCortoDesdeIso(cita.fecha), style = MaterialTheme.typography.bodyMedium)
                 Icon(Icons.Filled.Schedule, contentDescription = null, tint = AzulPrimario, modifier = Modifier.size(18.dp))
                 Text(cita.hora, style = MaterialTheme.typography.bodyMedium)
             }
