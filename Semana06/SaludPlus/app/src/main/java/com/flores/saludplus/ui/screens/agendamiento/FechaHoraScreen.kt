@@ -27,7 +27,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,31 +43,42 @@ import com.flores.saludplus.ui.components.BotonPrincipal
 import com.flores.saludplus.ui.components.ChipSeleccion
 import com.flores.saludplus.ui.theme.AzulClaro
 import com.flores.saludplus.ui.theme.AzulPrimario
+import com.flores.saludplus.util.Fechas
+import java.time.LocalDate
 
 // Relaciones:
 // - La llama AppNavigation en Rutas.FECHA_HORA y recibe medicoId de la ruta
 // - Usa BarraSuperior, ChipSeleccion y BotonPrincipal (Componentes.kt)
 // - Llama a Repositorio.obtenerMedico y horariosDisponibles
-// - Al continuar envía fecha y hora a Confirmar cita (onContinuar)
-
-// Días fijos de la semana (Fase 1): etiqueta, número y fecha en formato ISO
-private val diasSemana = listOf(
-    Triple("Lun", "15", "2026-09-15"),
-    Triple("Mar", "16", "2026-09-16"),
-    Triple("Mié", "17", "2026-09-17"),
-    Triple("Jue", "18", "2026-09-18"),
-    Triple("Vie", "19", "2026-09-19")
-)
+// - Usa util/Fechas.kt (Fase 2) para generar los días hábiles, el mes y el año con LocalDate
+// - Al continuar envía fecha (ISO "yyyy-MM-dd") y hora a Confirmar cita (onContinuar)
 
 // Commit 7: elección de día y hora; los horarios salen de horariosDisponibles
+// Fase 2: los días se generan con LocalDate en lugar de una lista fija
 @Composable
 fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack: () -> Unit) {
-    var fechaSeleccionada by rememberSaveable { mutableStateOf<String?>(null) }
+    // Fase 2: fecha de hoy, se calcula una sola vez al abrir la pantalla
+    val hoy = remember { LocalDate.now() }
+    // Fase 2: semanas avanzadas desde la actual (0 = semana actual, nunca negativo)
+    var desplazamientoSemana by rememberSaveable { mutableIntStateOf(0) }
+    // Fase 2: 5 días hábiles de la semana mostrada (sin fines de semana ni días pasados)
+    val dias = Fechas.semana(hoy, desplazamientoSemana)
+    // Fase 2: día elegido como String ISO; empieza en el primer día hábil de la semana
+    var fechaSeleccionada by rememberSaveable { mutableStateOf<String?>(dias.first().toString()) }
+    // Hora elegida; null mientras no se toque ningún horario
     var horaSeleccionada by rememberSaveable { mutableStateOf<String?>(null) }
+
+    // Fase 2: cambia de semana, selecciona su primer día y reinicia la hora
+    fun cambiarSemana(nuevoDesplazamiento: Int) {
+        desplazamientoSemana = nuevoDesplazamiento
+        fechaSeleccionada = Fechas.semana(hoy, nuevoDesplazamiento).first().toString()
+        horaSeleccionada = null
+    }
 
     val medico = Repositorio.obtenerMedico(medicoId)
     val especialidad = medico?.let { Repositorio.obtenerEspecialidad(it.especialidadId)?.nombre } ?: ""
-    // Horarios del día elegido (los ya reservados no aparecen)
+    // Horarios del día elegido; se recalculan en cada recomposición con horariosDisponibles,
+    // así las horas ya reservadas nunca aparecen aunque se cambie de día o semana y se vuelva
     val horarios = fechaSeleccionada?.let { Repositorio.horariosDisponibles(medicoId, it) } ?: emptyList()
 
     Scaffold(
@@ -100,30 +113,35 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
                 }
             }
 
-            // Mes (las flechas se activan en la Fase 2 con el calendario dinámico)
+            // Fase 2: mes y año de la semana mostrada; "<" retrocede y ">" avanza una semana
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = {}, enabled = false) {
+                // Fase 2: "<" deshabilitada en la semana actual (no se puede ir al pasado)
+                IconButton(
+                    onClick = { cambiarSemana(desplazamientoSemana - 1) },
+                    enabled = desplazamientoSemana > 0
+                ) {
                     Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Semana anterior")
                 }
                 Text(
-                    "Setiembre 2026",
+                    Fechas.mesYAnio(dias.first()),
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold
                 )
-                IconButton(onClick = {}, enabled = false) {
+                // Fase 2: ">" siempre habilitada, avanza una semana
+                IconButton(onClick = { cambiarSemana(desplazamientoSemana + 1) }) {
                     Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Semana siguiente")
                 }
             }
 
-            // Días de la semana; al cambiar de día se reinicia la hora
+            // Fase 2: días hábiles generados con LocalDate; al cambiar de día se reinicia la hora
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                diasSemana.forEach { (etiqueta, numero, fecha) ->
+                dias.forEach { fecha ->
                     ChipSeleccion(
-                        texto = etiqueta,
-                        subtitulo = numero,
-                        seleccionado = fecha == fechaSeleccionada,
-                        onClick = { fechaSeleccionada = fecha; horaSeleccionada = null },
+                        texto = Fechas.diaCorto(fecha),
+                        subtitulo = fecha.dayOfMonth.toString(),
+                        seleccionado = fecha.toString() == fechaSeleccionada,
+                        onClick = { fechaSeleccionada = fecha.toString(); horaSeleccionada = null },
                         modifier = Modifier.weight(1f)
                     )
                 }
