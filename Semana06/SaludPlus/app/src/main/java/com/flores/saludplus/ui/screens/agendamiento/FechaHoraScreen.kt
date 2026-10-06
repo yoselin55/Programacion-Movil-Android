@@ -3,6 +3,7 @@ package com.flores.saludplus.ui.screens.agendamiento
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,10 +38,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.flores.saludplus.data.repository.Repositorio
 import com.flores.saludplus.ui.components.BarraSuperior
 import com.flores.saludplus.ui.components.BotonPrincipal
 import com.flores.saludplus.ui.components.ChipSeleccion
+import com.flores.saludplus.ui.components.FotoMedico
 import com.flores.saludplus.ui.theme.AzulClaro
 import com.flores.saludplus.ui.theme.AzulPrimario
 import com.flores.saludplus.util.Fechas
@@ -49,6 +52,7 @@ import java.time.LocalDate
 // Relaciones:
 // - La llama AppNavigation en Rutas.FECHA_HORA y recibe medicoId de la ruta
 // - Usa BarraSuperior, ChipSeleccion y BotonPrincipal (Componentes.kt)
+// - Fase 2: usa FotoMedico (ImagenPorNombre.kt) para la foto del médico
 // - Llama a Repositorio.obtenerMedico y horariosDisponibles
 // - Usa util/Fechas.kt (Fase 2) para generar los días hábiles, el mes y el año con LocalDate
 // - Al continuar envía fecha (ISO "yyyy-MM-dd") y hora a Confirmar cita (onContinuar)
@@ -95,19 +99,16 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
+                // Fase 2: tarjeta un poco más alta (padding vertical 18dp y foto de 68dp)
                 Row(
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 18.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    Box(
-                        modifier = Modifier.size(56.dp).background(MaterialTheme.colorScheme.surface, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Filled.Person, contentDescription = null, tint = AzulPrimario)
-                    }
+                    // Fase 2: foto del médico por nombre (dra_ana_torres...) o silueta de respaldo
+                    FotoMedico(medico?.nombre ?: "", 68.dp)
                     Column {
-                        Text(medico?.nombre ?: "", fontWeight = FontWeight.Bold)
+                        Text(medico?.nombre ?: "", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Text(especialidad, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
@@ -142,7 +143,9 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
                         subtitulo = fecha.dayOfMonth.toString(),
                         seleccionado = fecha.toString() == fechaSeleccionada,
                         onClick = { fechaSeleccionada = fecha.toString(); horaSeleccionada = null },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        // Fase 2: los días más altos (100dp) que los botones de hora
+                        alto = 100.dp
                     )
                 }
             }
@@ -153,18 +156,28 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
             } else if (horarios.isEmpty()) {
                 Text("No hay horarios disponibles este día", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.weight(1f)
-            ) {
-                items(horarios, key = { it }) { hora ->
-                    ChipSeleccion(
-                        texto = hora,
-                        seleccionado = hora == horaSeleccionada,
-                        onClick = { horaSeleccionada = hora }
-                    )
+            // Fase 2: la cuadrícula ocupa TODO el espacio libre hasta el botón "Continuar" (solo
+            // quedan los 16dp de separación). El alto de cada botón se reparte entre las filas de
+            // horariosBase (3 de 3), mínimo 52dp; no cambia aunque haya horas reservadas
+            BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                val filas = (Repositorio.horariosBase.size + 2) / 3
+                val altoHora = ((maxHeight - 8.dp * (filas - 1)) / filas).coerceAtLeast(52.dp)
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    // Fase 2: separación horizontal de 6dp para que cada botón sea un poco más ancho
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(horarios, key = { it }) { hora ->
+                        ChipSeleccion(
+                            texto = hora,
+                            seleccionado = hora == horaSeleccionada,
+                            onClick = { horaSeleccionada = hora },
+                            alto = altoHora,
+                            tamanoTexto = 20.sp
+                        )
+                    }
                 }
             }
 

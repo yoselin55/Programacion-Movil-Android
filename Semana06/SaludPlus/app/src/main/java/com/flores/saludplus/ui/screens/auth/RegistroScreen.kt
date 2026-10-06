@@ -1,11 +1,15 @@
 package com.flores.saludplus.ui.screens.auth
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,10 +18,8 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,21 +27,30 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.flores.saludplus.data.repository.Repositorio
 import com.flores.saludplus.ui.components.BotonPrincipal
 import com.flores.saludplus.ui.components.CampoTexto
+import com.flores.saludplus.ui.theme.AzulOscuro
+import com.flores.saludplus.ui.theme.AzulPrimario
+import com.flores.saludplus.ui.theme.GrisMarcado
+import com.flores.saludplus.ui.theme.TextoPrincipal
+import com.flores.saludplus.ui.theme.TextoSecundario
 
 // Relaciones:
 // - La llama AppNavigation en el destino Rutas.REGISTRO
-// - Llama a BotonPrincipal y CampoTexto (ui/components/Componentes.kt)
+// - Llama a BotonPrincipal y CampoTexto (Componentes.kt; Fase 2: CampoTexto dibuja una CampoFila de 80dp:
+//   recuadro de ícono de 78dp + etiqueta y caja blanca de 54dp)
 // - Llama a Repositorio.registrarUsuario; si se registra va a Inicio (onRegistrado)
 // - Sus enlaces llevan a Términos (onTerminos) y a Login (onIrLogin)
 
 // Formulario de registro con validaciones de cada campo
+// Fase 2: medidas tomadas del diseño de referencia (pantalla de 411 x 913 dp)
 @Composable
 fun RegistroScreen(
     onRegistrado: () -> Unit,
@@ -66,66 +77,101 @@ fun RegistroScreen(
     ) "Correo no válido" else null
     val errorContrasena = if (intentoRegistrar && contrasena.length < 6) "Mínimo 6 caracteres" else null
 
-    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
+    Scaffold(
+        // Fase 2: fondo blanco
+        containerColor = Color.White,
+        // Fase 2: "¿Ya tienes cuenta? Iniciar sesión" anclado abajo con 40dp de margen inferior
+        bottomBar = {
+            Row(
+                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(top = 8.dp, bottom = 40.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("¿Ya tienes cuenta? ", fontSize = 20.sp, color = TextoPrincipal)
+                Text(
+                    "Iniciar sesión",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = AzulPrimario,
+                    modifier = Modifier.clickable(onClick = onIrLogin)
+                )
+            }
+        }
+    ) { padding ->
+        // Fase 2: contenido desplazable con 20dp de margen lateral; imePadding deja sitio al teclado
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(24.dp))
-            Text("Crear cuenta", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            // Fase 2: 64dp bajo la barra de estado
+            Spacer(Modifier.height(64.dp))
+
+            // Fase 2: título 38sp y subtítulo 20sp, centrados
+            Text("Crear cuenta", fontSize = 38.sp, fontWeight = FontWeight.Bold, color = AzulOscuro)
             Text(
                 "Regístrate para agendar tus citas",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 20.sp,
+                color = TextoSecundario,
                 textAlign = TextAlign.Center
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(36.dp))
 
-            CampoTexto(nombre, { nombre = it }, "Nombre completo", Icons.Filled.Person, error = errorNombre)
-            CampoTexto(
-                telefono,
-                { if (it.length <= 9 && it.all(Char::isDigit)) { telefono = it; telefonoRepetido = false } },
-                "Teléfono", Icons.Filled.Phone, error = errorTelefono, teclado = KeyboardType.Phone
-            )
-            CampoTexto(
-                correo, { correo = it }, "Correo (opcional)", Icons.Filled.Email,
-                error = errorCorreo, teclado = KeyboardType.Email
-            )
-            CampoTexto(
-                contrasena, { contrasena = it }, "Contraseña", Icons.Filled.Lock,
-                error = errorContrasena, teclado = KeyboardType.Password, esContrasena = true
-            )
+            // Fase 2: cuatro filas de campo de 80dp con 26dp de separación
+            Column(verticalArrangement = Arrangement.spacedBy(26.dp)) {
+                CampoTexto(nombre, { nombre = it }, "Nombre completo", Icons.Filled.Person, error = errorNombre)
+                CampoTexto(
+                    telefono,
+                    { if (it.length <= 9 && it.all(Char::isDigit)) { telefono = it; telefonoRepetido = false } },
+                    "Teléfono", Icons.Filled.Phone, error = errorTelefono, teclado = KeyboardType.Phone
+                )
+                CampoTexto(
+                    correo, { correo = it }, "Correo (opcional)", Icons.Filled.Email,
+                    error = errorCorreo, teclado = KeyboardType.Email
+                )
+                CampoTexto(
+                    contrasena, { contrasena = it }, "Contraseña", Icons.Filled.Lock,
+                    error = errorContrasena, teclado = KeyboardType.Password, esContrasena = true
+                )
+            }
 
-            Spacer(Modifier.height(8.dp))
-            BotonPrincipal("Registrarme", onClick = {
-                intentoRegistrar = true
-                val datosValidos = nombre.isNotBlank() && telefono.length == 9 &&
-                    (correo.isBlank() || android.util.Patterns.EMAIL_ADDRESS.matcher(correo).matches()) &&
-                    contrasena.length >= 6
-                if (datosValidos) {
-                    if (Repositorio.registrarUsuario(nombre.trim(), telefono, correo.trim(), contrasena)) {
-                        onRegistrado()
-                    } else {
-                        telefonoRepetido = true
+            // Fase 2: botón de 72dp, esquinas 18dp y texto 24sp
+            Spacer(Modifier.height(34.dp))
+            BotonPrincipal(
+                "Registrarme",
+                alto = 72.dp,
+                radio = 18.dp,
+                tamanoTexto = 24.sp,
+                onClick = {
+                    intentoRegistrar = true
+                    val datosValidos = nombre.isNotBlank() && telefono.length == 9 &&
+                        (correo.isBlank() || android.util.Patterns.EMAIL_ADDRESS.matcher(correo).matches()) &&
+                        contrasena.length >= 6
+                    if (datosValidos) {
+                        if (Repositorio.registrarUsuario(nombre.trim(), telefono, correo.trim(), contrasena)) {
+                            onRegistrado()
+                        } else {
+                            telefonoRepetido = true
+                        }
                     }
                 }
-            })
-
-            Text(
-                "Al registrarte aceptas nuestros",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            TextButton(onClick = onTerminos) { Text("Términos y Condiciones") }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("¿Ya tienes cuenta?", style = MaterialTheme.typography.bodyMedium)
-                TextButton(onClick = onIrLogin) { Text("Iniciar sesión") }
-            }
+
+            // Fase 2: aviso de términos (18sp gris marcado) y enlace (20sp SemiBold azul)
+            Spacer(Modifier.height(28.dp))
+            Text("Al registrarte aceptas nuestros", fontSize = 18.sp, color = GrisMarcado, textAlign = TextAlign.Center)
+            Text(
+                "Términos y Condiciones",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = AzulPrimario,
+                modifier = Modifier.clickable(onClick = onTerminos).padding(vertical = 4.dp)
+            )
+            Spacer(Modifier.height(16.dp))
         }
     }
 }

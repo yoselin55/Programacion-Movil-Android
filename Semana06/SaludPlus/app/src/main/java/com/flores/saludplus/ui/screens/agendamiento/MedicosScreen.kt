@@ -1,6 +1,10 @@
 package com.flores.saludplus.ui.screens.agendamiento
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -29,6 +33,7 @@ import com.flores.saludplus.ui.components.TarjetaMedico
 // Relaciones:
 // - La llama AppNavigation en Rutas.MEDICOS y recibe especialidadId de la ruta
 // - Usa BarraSuperior, CampoBusqueda y TarjetaMedico (Componentes.kt)
+// - Fase 2: muestra 4 tarjetas por pantalla (alto calculado con BoxWithConstraints) y el resto con scroll
 // - Llama a Repositorio.obtenerEspecialidad y buscarMedicos; al elegir uno pasa medicoId a Fecha y hora
 
 // Commit 6: médicos de la especialidad recibida por parámetro, con búsqueda
@@ -65,9 +70,22 @@ fun MedicosScreen(especialidadId: Int, onMedico: (Int) -> Unit, onBack: () -> Un
             if (lista.isEmpty()) {
                 Text("No se encontraron médicos", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(lista, key = { it.id }) { medico ->
-                    TarjetaMedico(medico, nombreEspecialidad, onClick = { onMedico(medico.id) })
+            // Fase 2: la lista ocupa todo el alto libre; cada tarjeta mide 1/4 de ese alto
+            // (4 médicos visibles a la vez, mínimo 110dp). Si hay más de 4, se ven con scroll vertical
+            BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                val altoTarjeta = ((maxHeight - 12.dp * 3 - 16.dp) / 4).coerceAtLeast(110.dp)
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(lista, key = { it.id }) { medico ->
+                        TarjetaMedico(
+                            medico, nombreEspecialidad,
+                            onClick = { onMedico(medico.id) },
+                            modifier = Modifier.height(altoTarjeta)
+                        )
+                    }
                 }
             }
         }

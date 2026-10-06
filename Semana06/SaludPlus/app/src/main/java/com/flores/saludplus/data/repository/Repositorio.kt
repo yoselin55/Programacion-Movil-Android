@@ -30,7 +30,7 @@ object Repositorio {
         Especialidad(1, "Medicina General", "Atención integral", Icons.Filled.Person),
         Especialidad(2, "Pediatría", "Niños y adolescentes", Icons.Filled.ChildCare),
         Especialidad(3, "Ginecología", "Salud de la mujer", Icons.Filled.Female),
-        Especialidad(4, "Cardiología", "Corazón y vasos sanguíneos", Icons.Filled.Favorite),
+        Especialidad(4, "Cardiología", "Corazón y presión sanguínea", Icons.Filled.Favorite),
         Especialidad(5, "Dermatología", "Piel, cabello y uñas", Icons.Filled.WbSunny),
         Especialidad(6, "Traumatología", "Huesos y articulaciones", Icons.Filled.Healing),
         Especialidad(7, "Oftalmología", "Salud visual", Icons.Filled.Visibility)
