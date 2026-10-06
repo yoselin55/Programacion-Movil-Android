@@ -12,7 +12,8 @@ android {
 
     defaultConfig {
         applicationId = "com.flores.saludplus"
-        minSdk = 24
+        // Fase 2: subido de 24 a 26 porque java.time.LocalDate (util/Fechas.kt) requiere API 26
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
