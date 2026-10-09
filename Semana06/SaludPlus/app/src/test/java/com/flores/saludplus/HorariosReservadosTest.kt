@@ -26,28 +26,28 @@ class HorariosReservadosTest {
     // Verifica que una hora agendada ya no aparece para ese médico en esa fecha
     @Test
     fun horaAgendada_noApareceEnHorariosDisponibles() {
-        assertNotNull(Repositorio.agendarCita(medicoId = 1, fecha = "2026-10-06", hora = "09:30", motivo = ""))
-        assertFalse("09:30" in Repositorio.horariosDisponibles(1, "2026-10-06"))
+        assertNotNull(Repositorio.agendarCita(medicoId = 1, fecha = "2026-10-06", hora = "09:30", motivo = "", ahora = AHORA_PRUEBA))
+        assertFalse("09:30" in Repositorio.horariosDisponibles(1, "2026-10-06", AHORA_PRUEBA))
     }
 
-    // Verifica que la misma hora sigue libre para otro médico (2) en la misma fecha
+    // Verifica que la misma hora sigue libre para otro médico (7) en la misma fecha
     @Test
     fun horaAgendada_sigueDisponibleParaOtroMedico() {
-        Repositorio.agendarCita(medicoId = 1, fecha = "2026-10-06", hora = "09:30", motivo = "")
-        assertTrue("09:30" in Repositorio.horariosDisponibles(2, "2026-10-06"))
+        Repositorio.agendarCita(medicoId = 1, fecha = "2026-10-06", hora = "09:30", motivo = "", ahora = AHORA_PRUEBA)
+        assertTrue("09:30" in Repositorio.horariosDisponibles(7, "2026-10-06", AHORA_PRUEBA))
     }
 
     // Verifica que la misma hora sigue libre para el mismo médico en otra fecha
     @Test
     fun horaAgendada_sigueDisponibleEnOtraFecha() {
-        Repositorio.agendarCita(medicoId = 1, fecha = "2026-10-06", hora = "09:30", motivo = "")
-        assertTrue("09:30" in Repositorio.horariosDisponibles(1, "2026-10-07"))
+        Repositorio.agendarCita(medicoId = 1, fecha = "2026-10-06", hora = "09:30", motivo = "", ahora = AHORA_PRUEBA)
+        assertTrue("09:30" in Repositorio.horariosDisponibles(1, "2026-10-07", AHORA_PRUEBA))
     }
 
     // Verifica que agendar de nuevo el mismo médico, fecha y hora devuelve null
     @Test
     fun agendarDosVeces_mismoHorario_devuelveNull() {
-        Repositorio.agendarCita(medicoId = 1, fecha = "2026-10-06", hora = "09:30", motivo = "")
-        assertNull(Repositorio.agendarCita(medicoId = 1, fecha = "2026-10-06", hora = "09:30", motivo = ""))
+        Repositorio.agendarCita(medicoId = 1, fecha = "2026-10-06", hora = "09:30", motivo = "", ahora = AHORA_PRUEBA)
+        assertNull(Repositorio.agendarCita(medicoId = 1, fecha = "2026-10-06", hora = "09:30", motivo = "", ahora = AHORA_PRUEBA))
     }
 }

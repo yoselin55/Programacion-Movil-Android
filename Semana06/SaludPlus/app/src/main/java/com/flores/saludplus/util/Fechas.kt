@@ -66,9 +66,23 @@ object Fechas {
         diasHabiles(hoy.plusWeeks(desplazamiento.toLong()))
 
     // Fase 2: devuelve el nombre corto del día, por ejemplo "Mié".
-    fun diaCorto(fecha: LocalDate): String =
-        // dayOfWeek.value va de 1 (lunes) a 7 (domingo)
-        diasCortos[fecha.dayOfWeek.value - 1]
+    fun diaCorto(fecha: LocalDate): String = nombreCorto(fecha.dayOfWeek)
+
+    // Fase 3: devuelve el nombre corto de un día de la semana, por ejemplo "Lun".
+    fun nombreCorto(dia: DayOfWeek): String =
+        // value va de 1 (lunes) a 7 (domingo)
+        diasCortos[dia.value - 1]
+
+    // Fase 3: devuelve el día en plural y minúscula para los avisos, por ejemplo "martes".
+    fun nombreDiaPlural(dia: DayOfWeek): String {
+        val nombre = diasLargos[dia.value - 1].lowercase()
+        // lunes a viernes ya terminan en "s"; sábado y domingo llevan "s" al final
+        return if (nombre.endsWith("s")) nombre else nombre + "s"
+    }
+
+    // Fase 3: devuelve el día y el mes abreviados sin año, por ejemplo "Lun 12 oct".
+    fun textoDiaMes(fecha: LocalDate): String =
+        "${diaCorto(fecha)} ${fecha.dayOfMonth} ${mesesCortos[fecha.monthValue - 1]}"
 
     // Fase 2: devuelve el mes con mayúscula inicial y el año, por ejemplo "Octubre 2026".
     fun mesYAnio(fecha: LocalDate): String =

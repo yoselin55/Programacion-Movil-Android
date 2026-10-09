@@ -69,6 +69,11 @@ internal fun mensajeCruce(cita: Cita): String {
         "con $medico. Elige otro horario."
 }
 
+// Fase 3: primer día de la lista con horarios libres para el médico (ISO); si ninguno tiene, el primero
+private fun primerDiaConHorarios(medicoId: Int, dias: List<LocalDate>): String =
+    (dias.firstOrNull { Repositorio.horariosDisponibles(medicoId, it.toString()).isNotEmpty() } ?: dias.first())
+        .toString()
+
 // Commit 7: elección de día y hora; los horarios salen de horariosDisponibles
 // Fase 2: los días se generan con LocalDate en lugar de una lista fija
 @Composable
@@ -79,8 +84,9 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
     var desplazamientoSemana by rememberSaveable { mutableIntStateOf(0) }
     // Fase 2: 5 días hábiles de la semana mostrada (sin fines de semana ni días pasados)
     val dias = Fechas.semana(hoy, desplazamientoSemana)
-    // Fase 2: día elegido como String ISO; empieza en el primer día hábil de la semana
-    var fechaSeleccionada by rememberSaveable { mutableStateOf<String?>(dias.first().toString()) }
+    // Fase 3: día elegido como String ISO; empieza en el primer día de la semana con horarios libres
+    // (si ninguno tiene, queda en el primero)
+    var fechaSeleccionada by rememberSaveable { mutableStateOf<String?>(primerDiaConHorarios(medicoId, dias)) }
     // Hora elegida; null mientras no se toque ningún horario
     var horaSeleccionada by rememberSaveable { mutableStateOf<String?>(null) }
     // Fase 2: aviso de cruce al tocar una hora en la que el paciente ya tiene otra cita (null = sin aviso)
@@ -89,13 +95,14 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
     // Fase 2: cambia de semana, selecciona su primer día y reinicia la hora y el aviso
     fun cambiarSemana(nuevoDesplazamiento: Int) {
         desplazamientoSemana = nuevoDesplazamiento
-        fechaSeleccionada = Fechas.semana(hoy, nuevoDesplazamiento).first().toString()
+        fechaSeleccionada = primerDiaConHorarios(medicoId, Fechas.semana(hoy, nuevoDesplazamiento))
         horaSeleccionada = null
         avisoCruce = null
     }
 
     val medico = Repositorio.obtenerMedico(medicoId)
     val especialidad = medico?.let { Repositorio.obtenerEspecialidad(it.especialidadId)?.nombre } ?: ""
+    val sede = medico?.let { Repositorio.obtenerSede(it.sedeId)?.nombre } ?: ""
     // Horarios del día elegido; se recalculan en cada recomposición con horariosDisponibles,
     // así las horas ya reservadas nunca aparecen aunque se cambie de día o semana y se vuelva
     val horarios = fechaSeleccionada?.let { Repositorio.horariosDisponibles(medicoId, it) } ?: emptyList()
@@ -122,9 +129,17 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
                 ) {
                     // Fase 2: foto del médico por nombre (dra_ana_torres...) o silueta de respaldo
                     FotoMedico(medico?.nombre ?: "", 68.dp)
-                    Column {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(medico?.nombre ?: "", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                        Text(especialidad, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(especialidad, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        // Fase 3: sede y días y horas en que atiende el médico
+                        Text("Sede $sede", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            medico?.let { Repositorio.resumenHorario(it) } ?: "",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = AzulPrimario
+                        )
                     }
                 }
             }
@@ -153,14 +168,26 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
             // Fase 2: días hábiles generados con LocalDate; al cambiar de día se reinicia la hora
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 dias.forEach { fecha ->
+                    // Fase 3: un día sin horarios libres (el médico no atiende o ya no quedan) va atenuado
+                    val sinHorarios = Repositorio.horariosDisponibles(medicoId, fecha.toString()).isEmpty()
                     ChipSeleccion(
                         texto = Fechas.diaCorto(fecha),
                         subtitulo = fecha.dayOfMonth.toString(),
                         seleccionado = fecha.toString() == fechaSeleccionada,
-                        onClick = { fechaSeleccionada = fecha.toString(); horaSeleccionada = null; avisoCruce = null },
+                        onClick = {
+                            if (sinHorarios) {
+                                // Fase 3: no se puede elegir; explica por qué
+                                val atiende = medico?.atiende(fecha.dayOfWeek) == true
+                                avisoCruce = if (atiende) "Ya no quedan horarios libres el ${Fechas.textoLargo(fecha)}."
+                                else "${medico?.nombre ?: "El médico"} no atiende los ${Fechas.nombreDiaPlural(fecha.dayOfWeek)}. Elige un día disponible."
+                            } else {
+                                fechaSeleccionada = fecha.toString(); horaSeleccionada = null; avisoCruce = null
+                            }
+                        },
                         modifier = Modifier.weight(1f),
                         // Fase 2: los días más altos (100dp) que los botones de hora
-                        alto = 100.dp
+                        alto = 100.dp,
+                        atenuado = sinHorarios
                     )
                 }
             }
@@ -169,13 +196,14 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
             if (fechaSeleccionada == null) {
                 Text("Elige un día para ver los horarios", color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else if (horarios.isEmpty()) {
-                Text("No hay horarios disponibles este día", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Este día no hay horarios disponibles", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             // Fase 2: la cuadrícula ocupa TODO el espacio libre hasta el botón "Continuar" (solo
             // quedan los 16dp de separación). El alto de cada botón se reparte entre las filas de
-            // horariosBase (3 de 3), mínimo 52dp; no cambia aunque haya horas reservadas
+            // horas máximas que atiende el médico en un día (3 de 3), mínimo 52dp; no cambia aunque haya
+            // horas reservadas
             BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                val filas = (Repositorio.horariosBase.size + 2) / 3
+                val filas = ((medico?.horasMaximasPorDia ?: 0) + 2).div(3).coerceAtLeast(1)
                 val altoHora = ((maxHeight - 8.dp * (filas - 1)) / filas).coerceAtLeast(52.dp)
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),

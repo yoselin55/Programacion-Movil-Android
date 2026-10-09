@@ -78,6 +78,8 @@ fun ConfirmarCitaScreen(
 
     val medico = Repositorio.obtenerMedico(medicoId)
     val especialidad = medico?.let { Repositorio.obtenerEspecialidad(it.especialidadId)?.nombre } ?: ""
+    // Fase 3: sede donde atiende el médico (su nombre y dirección reemplazan a la dirección fija)
+    val sede = medico?.let { Repositorio.obtenerSede(it.sedeId) }
 
     // Rango de la consulta: la hora elegida hasta 30 minutos después
     // Fase 2: se calcula con Fechas.rangoHora (igual que en Cita agendada y Detalle de cita)
@@ -122,22 +124,22 @@ fun ConfirmarCitaScreen(
                             FotoMedico(medico?.nombre ?: "", 84.dp)
                             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                 Text(medico?.nombre ?: "", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                                // Fase 2: especialidad 18sp y CMP 16sp
+                                // Fase 2: especialidad 18sp y código 16sp
                                 Text(especialidad, fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("CMP: ${medico?.cmp ?: ""}", fontSize = 16.sp)
+                                Text("Código: ${medico?.codigo ?: ""}", fontSize = 16.sp)
                             }
                         }
                     }
 
                     // Datos de la cita
                     // Fase 2: la fecha llega en ISO y se muestra como "Martes 6 de octubre 2026"
-                    // Fase 2: las 4 filas (Fecha a Dirección) se reparten el alto libre de la pantalla;
+                    // Fase 2: las 4 filas (Fecha a Tipo de atención) se reparten el alto libre de la pantalla;
                     // cada una ocupa la misma altura y después de cada dato hay una línea separadora
                     val datos = listOf(
                         Triple(Icons.Filled.CalendarMonth, "Fecha", Fechas.textoLargoDesdeIso(fecha)),
                         Triple(Icons.Filled.AccessTime, "Hora", rangoHora),
                         Triple(Icons.Filled.Info, "Tipo de atención", "Consulta presencial"),
-                        Triple(Icons.Filled.LocationOn, "Dirección", "Av. Los Olivos 123, Lima")
+                        Triple(Icons.Filled.LocationOn, "Sede", sede?.let { "${it.nombre} - ${it.direccion}" } ?: "")
                     )
                     Column(modifier = Modifier.weight(1f).heightIn(min = 280.dp)) {
                         datos.forEach { (icono, titulo, valor) ->
@@ -148,7 +150,7 @@ fun ConfirmarCitaScreen(
                                 // Fase 2: título 18sp y valor 22sp
                                 FilaDetalle(icono, titulo, valor, tamanoTitulo = 18.sp, tamanoValor = 22.sp)
                             }
-                            // Fase 2: línea de 1.5dp después de cada dato (Fecha, Hora, Tipo y Dirección)
+                            // Fase 2: línea de 1.5dp después de cada dato (Fecha, Hora, Sede y Tipo)
                             HorizontalDivider(thickness = 1.5.dp, color = LineaSeparadora)
                         }
                     }

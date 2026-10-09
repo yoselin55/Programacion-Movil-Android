@@ -36,6 +36,7 @@ import com.flores.saludplus.data.repository.Repositorio
 import com.flores.saludplus.ui.components.BarraSuperior
 import com.flores.saludplus.ui.components.BotonPrincipal
 import com.flores.saludplus.ui.components.CampoTexto
+import com.flores.saludplus.ui.components.DialogoConfirmacion
 import com.flores.saludplus.ui.theme.AzulOscuro
 import com.flores.saludplus.ui.theme.AzulPrimario
 import com.flores.saludplus.ui.theme.TextoPrincipal
@@ -57,6 +58,8 @@ fun LoginScreen(onLoginExitoso: () -> Unit, onIrRegistro: () -> Unit, onBack: ()
     var contrasena by rememberSaveable { mutableStateOf("") }
     var intentoIngresar by rememberSaveable { mutableStateOf(false) }
     var credencialesIncorrectas by rememberSaveable { mutableStateOf(false) }
+    // Fase 3: muestra el mensaje de confirmación una vez iniciada la sesión
+    var sesionIniciada by rememberSaveable { mutableStateOf(false) }
 
     // Fase 2: valida el teléfono con util/Validaciones.kt (9 dígitos que empiezan con 9)
     val reglaTelefono = Validaciones.errorTelefono(telefono)
@@ -66,6 +69,15 @@ fun LoginScreen(onLoginExitoso: () -> Unit, onIrRegistro: () -> Unit, onBack: ()
     // Fase 2: el error del teléfono sale al escribir o al pulsar "Ingresar"; el de la contraseña al pulsar
     val errorTelefono = reglaTelefono.takeIf { intentoIngresar || telefono.isNotEmpty() }
     val errorContrasena = reglaContrasena.takeIf { intentoIngresar }
+
+    // Fase 3: confirmación con el logo; al continuar entra a Inicio
+    if (sesionIniciada) {
+        DialogoConfirmacion(
+            titulo = "¡Bienvenido!",
+            mensaje = "Iniciaste sesión correctamente, ${Repositorio.usuarioActual?.nombre?.substringBefore(" ") ?: ""}.",
+            onContinuar = onLoginExitoso
+        )
+    }
 
     Scaffold(
         // Fase 2: fondo blanco; BarraSuperior trae fondo blanco, flecha y título de 26sp negrita azul marino
@@ -142,7 +154,7 @@ fun LoginScreen(onLoginExitoso: () -> Unit, onIrRegistro: () -> Unit, onBack: ()
                     // Fase 2: solo consulta el Repositorio si los datos son válidos;
                     // si no coinciden con ningún usuario muestra "Teléfono o contraseña incorrectos"
                     if (reglaTelefono == null && reglaContrasena == null) {
-                        if (Repositorio.iniciarSesion(telefono, contrasena)) onLoginExitoso()
+                        if (Repositorio.iniciarSesion(telefono, contrasena)) sesionIniciada = true
                         else credencialesIncorrectas = true
                     }
                 }

@@ -25,28 +25,28 @@ class CrucesDeCitasTest {
     // Verifica que no se puede agendar con otro médico (10) a la misma fecha y hora que una cita existente (médico 9)
     @Test
     fun mismaFechaYHora_otroMedico_devuelveNull() {
-        assertNotNull(Repositorio.agendarCita(medicoId = 9, fecha = "2026-10-09", hora = "08:30", motivo = ""))
-        assertNull(Repositorio.agendarCita(medicoId = 10, fecha = "2026-10-09", hora = "08:30", motivo = ""))
+        assertNotNull(Repositorio.agendarCita(medicoId = 9, fecha = "2026-10-09", hora = "15:30", motivo = "", ahora = AHORA_PRUEBA))
+        assertNull(Repositorio.agendarCita(medicoId = 10, fecha = "2026-10-09", hora = "15:30", motivo = "", ahora = AHORA_PRUEBA))
     }
 
     // Verifica que citaDelUsuarioEn devuelve la primera cita del paciente en esa fecha y hora
     @Test
     fun citaDelUsuarioEn_devuelveLaCitaExistente() {
-        val primera = Repositorio.agendarCita(medicoId = 9, fecha = "2026-10-09", hora = "08:30", motivo = "")
-        Repositorio.agendarCita(medicoId = 10, fecha = "2026-10-09", hora = "08:30", motivo = "")
-        assertEquals(primera, Repositorio.citaDelUsuarioEn("2026-10-09", "08:30"))
+        val primera = Repositorio.agendarCita(medicoId = 9, fecha = "2026-10-09", hora = "15:30", motivo = "", ahora = AHORA_PRUEBA)
+        Repositorio.agendarCita(medicoId = 10, fecha = "2026-10-09", hora = "15:30", motivo = "", ahora = AHORA_PRUEBA)
+        assertEquals(primera, Repositorio.citaDelUsuarioEn("2026-10-09", "15:30"))
     }
 
-    // Verifica que a otra hora del mismo día (09:00) sí se puede agendar con otro médico
+    // Verifica que a otra hora del mismo día (16:00) sí se puede agendar con otro médico
     @Test
     fun mismaFechaOtraHora_siSePuedeAgendar() {
-        Repositorio.agendarCita(medicoId = 9, fecha = "2026-10-09", hora = "08:30", motivo = "")
-        assertNotNull(Repositorio.agendarCita(medicoId = 10, fecha = "2026-10-09", hora = "09:00", motivo = ""))
+        Repositorio.agendarCita(medicoId = 9, fecha = "2026-10-09", hora = "15:30", motivo = "", ahora = AHORA_PRUEBA)
+        assertNotNull(Repositorio.agendarCita(medicoId = 10, fecha = "2026-10-09", hora = "16:00", motivo = "", ahora = AHORA_PRUEBA))
     }
 
     // Verifica que citaDelUsuarioEn devuelve null cuando no hay cita a esa fecha y hora
     @Test
     fun citaDelUsuarioEn_sinCita_devuelveNull() {
-        assertNull(Repositorio.citaDelUsuarioEn("2026-10-09", "08:30"))
+        assertNull(Repositorio.citaDelUsuarioEn("2026-10-09", "15:30"))
     }
 }

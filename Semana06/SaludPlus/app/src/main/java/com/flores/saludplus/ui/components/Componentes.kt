@@ -21,6 +21,9 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -28,6 +31,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Home
@@ -74,6 +78,7 @@ import androidx.compose.ui.unit.sp
 import com.flores.saludplus.data.model.Cita
 import com.flores.saludplus.data.model.Especialidad
 import com.flores.saludplus.data.model.Medico
+import com.flores.saludplus.data.repository.Repositorio
 import com.flores.saludplus.navigation.Rutas
 import com.flores.saludplus.ui.theme.AzulClaro
 import com.flores.saludplus.ui.theme.AzulOscuro
@@ -484,9 +489,11 @@ fun ItemEspecialidad(especialidad: Especialidad, onClick: () -> Unit) {
 }
 
 // Commit 6: tarjeta de un médico (nombre, especialidad, calificación y disponibilidad)
+// Fase 3: muestra también la sede y la etiqueta de disponibilidad sale de los horarios reales del médico
 @Composable
 // Fase 2: modifier opcional (con valor por defecto) para que la lista le asigne el alto
 fun TarjetaMedico(medico: Medico, especialidad: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val sede = Repositorio.obtenerSede(medico.sedeId)?.nombre ?: ""
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
@@ -504,6 +511,8 @@ fun TarjetaMedico(medico: Medico, especialidad: String, onClick: () -> Unit, mod
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(medico.nombre, fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 Text(especialidad, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                // Fase 3: sede donde atiende
+                Text("Sede $sede", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.Star, contentDescription = null, tint = Estrella, modifier = Modifier.size(20.dp))
                     Text(" ${medico.calificacion} (${medico.resenas})", fontSize = 16.sp)
@@ -516,7 +525,10 @@ fun TarjetaMedico(medico: Medico, especialidad: String, onClick: () -> Unit, mod
                     .background(VerdeClaro, RoundedCornerShape(8.dp))
                     .padding(horizontal = 8.dp, vertical = 2.dp)
             ) {
-                Text(medico.disponibilidad, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = VerdeDisponible)
+                Text(
+                    Repositorio.etiquetaDisponibilidad(medico.id),
+                    fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = VerdeDisponible
+                )
             }
         }
     }
@@ -616,6 +628,47 @@ fun PantallaEnConstruccion(
         Text(text = "Pantalla en construcción", style = MaterialTheme.typography.bodyMedium)
         acciones.forEach { (texto, accion) ->
             Button(onClick = accion) { Text(texto) }
+        }
+    }
+}
+
+// Fase 3: mensaje de confirmación con el logo (registro e inicio de sesión exitosos).
+// No se cierra tocando fuera ni con Atrás: solo con el botón "Continuar"
+@Composable
+fun DialogoConfirmacion(titulo: String, mensaje: String, onContinuar: () -> Unit) {
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+    ) {
+        Card(
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            shape = RoundedCornerShape(24.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Logo de la clínica (res/drawable/logo_saludplus) o el respaldo dibujado
+                ImagenPorNombre(
+                    nombre = "logo_saludplus",
+                    descripcion = "Logo SaludPlus",
+                    modifier = Modifier.width(96.dp),
+                    contentScale = ContentScale.Fit,
+                    respaldo = { LogoClinica(96) }
+                )
+                Icon(
+                    Icons.Filled.CheckCircle,
+                    contentDescription = null,
+                    tint = VerdeDisponible,
+                    modifier = Modifier.size(48.dp)
+                )
+                Text(titulo, fontSize = 26.sp, fontWeight = FontWeight.Bold, color = AzulOscuro, textAlign = TextAlign.Center)
+                Text(mensaje, fontSize = 18.sp, color = TextoSecundario, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(4.dp))
+                BotonPrincipal("Continuar", onClick = onContinuar)
+            }
         }
     }
 }

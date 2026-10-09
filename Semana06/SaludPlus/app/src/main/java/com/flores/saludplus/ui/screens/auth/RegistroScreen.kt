@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.flores.saludplus.data.repository.Repositorio
 import com.flores.saludplus.ui.components.BotonPrincipal
 import com.flores.saludplus.ui.components.CampoTexto
+import com.flores.saludplus.ui.components.DialogoConfirmacion
 import com.flores.saludplus.ui.theme.AzulOscuro
 import com.flores.saludplus.ui.theme.AzulPrimario
 import com.flores.saludplus.ui.theme.GrisMarcado
@@ -66,6 +67,8 @@ fun RegistroScreen(
     var contrasena by rememberSaveable { mutableStateOf("") }
     var intentoRegistrar by rememberSaveable { mutableStateOf(false) } // los errores salen al pulsar el botón
     var telefonoRepetido by rememberSaveable { mutableStateOf(false) }
+    // Fase 3: muestra el mensaje de confirmación una vez creada la cuenta
+    var registroExitoso by rememberSaveable { mutableStateOf(false) }
 
     // Fase 2: nombre y correo sin espacios sobrantes (inicio, final y espacios repetidos)
     val nombreLimpio = nombre.trim().replace(Regex("\\s+"), " ")
@@ -86,6 +89,15 @@ fun RegistroScreen(
     }
     val errorCorreo = reglaCorreo.takeIf { intentoRegistrar || correo.isNotEmpty() }
     val errorContrasena = reglaContrasena.takeIf { intentoRegistrar || contrasena.isNotEmpty() }
+
+    // Fase 3: confirmación con el logo; al continuar entra a Inicio
+    if (registroExitoso) {
+        DialogoConfirmacion(
+            titulo = "¡Registro exitoso!",
+            mensaje = "Tu cuenta fue creada, ${nombreLimpio.substringBefore(" ")}. Ya puedes agendar tus citas.",
+            onContinuar = onRegistrado
+        )
+    }
 
     Scaffold(
         // Fase 2: fondo blanco
@@ -169,7 +181,7 @@ fun RegistroScreen(
                     if (datosValidos) {
                         // Fase 2: guarda el nombre y el correo sin espacios sobrantes
                         if (Repositorio.registrarUsuario(nombreLimpio, telefono, correoLimpio, contrasena)) {
-                            onRegistrado()
+                            registroExitoso = true
                         } else {
                             telefonoRepetido = true
                         }
