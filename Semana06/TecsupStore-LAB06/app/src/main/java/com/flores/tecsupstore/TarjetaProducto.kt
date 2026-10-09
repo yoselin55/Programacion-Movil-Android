@@ -1,5 +1,7 @@
 package com.flores.tecsupstore
 
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +35,7 @@ fun TarjetaProducto(
     // Estado para controlar la apertura del DropdownMenu
     var menuExpandido by remember { mutableStateOf(abiertoPorDefecto) }
 
+    val context = LocalContext.current
     val colorMorado = Color(0xFF5B1DA3)
     val colorFondoTarjeta = if (tieneBorde) Color.White else Color(0xFFF5F0FB)
 
@@ -126,7 +130,14 @@ fun TarjetaProducto(
                                 tint = Color(0xFF49454F)
                             )
                         },
-                        onClick = { menuExpandido = false }
+                        onClick = {
+                            menuExpandido = false
+                            val intent = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, "Mira $nombre en TECSUP Store a S/ $precio")
+                            }
+                            context.startActivity(Intent.createChooser(intent, "Compartir producto"))
+                        }
                     )
 
                     HorizontalDivider(color = Color(0xFFE7E0EC))
@@ -141,7 +152,10 @@ fun TarjetaProducto(
                                 tint = Color(0xFF49454F)
                             )
                         },
-                        onClick = { menuExpandido = false }
+                        onClick = {
+                            menuExpandido = false
+                            Toast.makeText(context, "Reporte de $nombre enviado", Toast.LENGTH_SHORT).show()
+                        }
                     )
                 }
             }
