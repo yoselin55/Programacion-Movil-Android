@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -82,32 +84,17 @@ fun LoginScreen(onLoginExitoso: () -> Unit, onIrRegistro: () -> Unit, onBack: ()
     Scaffold(
         // Fase 2: fondo blanco; BarraSuperior trae fondo blanco, flecha y título de 26sp negrita azul marino
         containerColor = Color.White,
-        topBar = { BarraSuperior("Iniciar sesión", onBack) },
-        // Fase 2: "¿No tienes cuenta? Regístrate" anclado abajo con 40dp de margen, como en Registro
-        bottomBar = {
-            Row(
-                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(top = 8.dp, bottom = 40.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("¿No tienes cuenta? ", fontSize = 20.sp, color = TextoPrincipal)
-                Text(
-                    "Regístrate",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = AzulPrimario,
-                    modifier = Modifier.clickable(onClick = onIrRegistro)
-                )
-            }
-        }
+        topBar = { BarraSuperior("Iniciar sesión", onBack) }
     ) { padding ->
         // Fase 2: contenido desplazable con 20dp de margen lateral; imePadding deja sitio al teclado
+        // Fase 3: el enlace de abajo va dentro del contenido: queda anclado abajo si hay espacio y, si un
+        // mensaje de error lo alarga, baja con el scroll en vez de taparse
+        BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(padding).imePadding()) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .imePadding()
+                .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
+                .heightIn(min = maxHeight)
                 .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -139,7 +126,7 @@ fun LoginScreen(onLoginExitoso: () -> Unit, onIrRegistro: () -> Unit, onBack: ()
 
             if (credencialesIncorrectas) {
                 Spacer(Modifier.height(16.dp))
-                Text("Teléfono o contraseña incorrectos", fontSize = 15.sp, color = MaterialTheme.colorScheme.error)
+                Text("Teléfono o contraseña incorrectos", fontSize = 16.sp, color = MaterialTheme.colorScheme.error)
             }
 
             // Fase 2: botón "Ingresar" de 72dp, esquinas 18dp y texto 24sp
@@ -159,7 +146,24 @@ fun LoginScreen(onLoginExitoso: () -> Unit, onIrRegistro: () -> Unit, onBack: ()
                     }
                 }
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.weight(1f).heightIn(min = 16.dp))
+
+            // Fase 2: enlace anclado abajo con 40dp de margen
+            Row(
+                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(top = 8.dp, bottom = 40.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("¿No tienes cuenta? ", fontSize = 20.sp, color = TextoPrincipal)
+                Text(
+                    "Regístrate",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = AzulPrimario,
+                    modifier = Modifier.clickable(onClick = onIrRegistro)
+                )
+            }
+        }
         }
     }
 }

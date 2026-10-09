@@ -124,7 +124,7 @@ fun ResultadosScreen(onNavegar: (String) -> Unit) {
 private fun EncabezadoCita(titulo: String, fecha: String) {
     Column(modifier = Modifier.padding(top = 6.dp)) {
         Text(titulo, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = AzulOscuro)
-        Text(fecha, fontSize = 17.sp, color = TextoSecundario)
+        Text(fecha, fontSize = 18.sp, color = TextoSecundario)
     }
 }
 
@@ -168,7 +168,7 @@ private fun EtiquetaEstado(estado: String) {
             .background(fondo, RoundedCornerShape(8.dp))
             .padding(horizontal = 10.dp, vertical = 3.dp)
     ) {
-        Text(estado, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = texto)
+        Text(estado, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = texto)
     }
 }
 

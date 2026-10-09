@@ -31,7 +31,7 @@ import com.flores.saludplus.ui.components.CampoBusqueda
 import com.flores.saludplus.ui.components.TarjetaMedico
 
 // Relaciones:
-// - La llama AppNavigation en Rutas.MEDICOS y recibe especialidadId de la ruta
+// - La llama AppNavigation en Rutas.MEDICOS y recibe sedeId y especialidadId de la ruta (Fase 3: solo médicos de esa sede)
 // - Usa BarraSuperior, CampoBusqueda y TarjetaMedico (Componentes.kt)
 // - Fase 2: muestra 4 tarjetas por pantalla (alto calculado con BoxWithConstraints) y el resto con scroll
 //   (la lista ocupa el alto libre con weight(1f) y deja 24dp abajo)
@@ -39,18 +39,18 @@ import com.flores.saludplus.ui.components.TarjetaMedico
 
 // Commit 6: médicos de la especialidad recibida por parámetro, con búsqueda
 @Composable
-fun MedicosScreen(especialidadId: Int, onMedico: (Int) -> Unit, onBack: () -> Unit) {
+fun MedicosScreen(sedeId: Int, especialidadId: Int, onMedico: (Int) -> Unit, onBack: () -> Unit) {
     var texto by rememberSaveable { mutableStateOf("") }
     var mostrarBusqueda by rememberSaveable { mutableStateOf(false) }
 
     val especialidad = Repositorio.obtenerEspecialidad(especialidadId)
     val nombreEspecialidad = especialidad?.nombre ?: ""
-    val lista = Repositorio.buscarMedicos(especialidadId, texto)
+    val lista = Repositorio.buscarMedicos(especialidadId, texto, sedeId)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            BarraSuperior("Médicos de $nombreEspecialidad", onBack, acciones = {
+            BarraSuperior(nombreEspecialidad, onBack, acciones = {
                 // La lupa muestra u oculta el campo de búsqueda
                 IconButton(onClick = { mostrarBusqueda = !mostrarBusqueda; if (!mostrarBusqueda) texto = "" }) {
                     Icon(

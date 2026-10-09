@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.flores.saludplus.data.repository.Repositorio
 import com.flores.saludplus.navigation.Rutas
 import com.flores.saludplus.ui.components.BarraInferior
+import com.flores.saludplus.ui.components.EncabezadoConMenu
 import com.flores.saludplus.ui.components.BotonPrincipal
 import com.flores.saludplus.ui.components.TarjetaCita
 import com.flores.saludplus.ui.theme.AzulClaro
@@ -46,12 +47,12 @@ import com.flores.saludplus.ui.theme.TextoSecundario
 // - Usa BarraInferior y TarjetaCita (Componentes.kt); Fase 2: también BotonPrincipal
 // - Llama a Repositorio.citasDelUsuario, obtenerMedico y obtenerEspecialidad
 // - Al tocar una cita envía su id al Detalle (onDetalle)
-// - Fase 2: el botón del estado vacío navega a Rutas.ESPECIALIDADES (onNavegar)
+// - Fase 3: es la "Agenda" del menú lateral (onMenu); el botón del estado vacío navega a Rutas.SEDES (onNavegar)
 
 // Commit 9: lista de citas del usuario, con mensaje cuando no hay ninguna
 // Fase 2: título de 34sp, tarjetas con foto y estado vacío con botón "Agendar cita"
 @Composable
-fun MisCitasScreen(onDetalle: (Int) -> Unit, onNavegar: (String) -> Unit) {
+fun MisCitasScreen(onDetalle: (Int) -> Unit, onNavegar: (String) -> Unit, onMenu: () -> Unit) {
     val citas = Repositorio.citasDelUsuario()
 
     Scaffold(
@@ -59,17 +60,11 @@ fun MisCitasScreen(onDetalle: (Int) -> Unit, onNavegar: (String) -> Unit) {
         bottomBar = { BarraInferior(Rutas.MIS_CITAS, onNavegar) }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 20.dp)) {
-            // Fase 2: título 34sp negrita azul marino a la izquierda
-            Text(
-                "Mis citas",
-                fontSize = 34.sp,
-                fontWeight = FontWeight.Bold,
-                color = AzulOscuro,
-                modifier = Modifier.padding(top = 24.dp, bottom = 16.dp)
-            )
+            // Fase 3: botón de menú y título "Agenda" (34sp) iguales a los de Sedes y Doctores
+            EncabezadoConMenu("Agenda", onMenu)
 
             if (citas.isEmpty()) {
-                EstadoSinCitas(onAgendar = { onNavegar(Rutas.ESPECIALIDADES) })
+                EstadoSinCitas(onAgendar = { onNavegar(Rutas.SEDES) })
             } else {
                 // Fase 2: la lista ocupa el alto libre (weight) y deja 24dp sobre la barra inferior
                 LazyColumn(
@@ -115,7 +110,7 @@ private fun EstadoSinCitas(onAgendar: () -> Unit) {
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(6.dp))
-            Text("Agenda una desde el Inicio", fontSize = 18.sp, color = TextoSecundario, textAlign = TextAlign.Center)
+            Text("Agenda una desde Sedes", fontSize = 18.sp, color = TextoSecundario, textAlign = TextAlign.Center)
             Spacer(Modifier.height(28.dp))
             BotonPrincipal(
                 "Agendar cita",

@@ -51,6 +51,7 @@ import com.flores.saludplus.ui.theme.AzulPrimario
 import com.flores.saludplus.ui.theme.LineaSeparadora
 import com.flores.saludplus.ui.theme.RojoAviso
 import com.flores.saludplus.util.Fechas
+import com.flores.saludplus.util.Validaciones
 
 // Relaciones:
 // - La llama AppNavigation en Rutas.CONFIRMAR y recibe medicoId, fecha y hora de la ruta
@@ -139,7 +140,7 @@ fun ConfirmarCitaScreen(
                         Triple(Icons.Filled.CalendarMonth, "Fecha", Fechas.textoLargoDesdeIso(fecha)),
                         Triple(Icons.Filled.AccessTime, "Hora", rangoHora),
                         Triple(Icons.Filled.Info, "Tipo de atención", "Consulta presencial"),
-                        Triple(Icons.Filled.LocationOn, "Sede", sede?.let { "${it.nombre} - ${it.direccion}" } ?: "")
+                        Triple(Icons.Filled.LocationOn, "Sede ${sede?.nombre ?: ""}", sede?.direccion ?: "")
                     )
                     Column(modifier = Modifier.weight(1f).heightIn(min = 280.dp)) {
                         datos.forEach { (icono, titulo, valor) ->
@@ -160,7 +161,8 @@ fun ConfirmarCitaScreen(
                     Text("Motivo de consulta (opcional)", fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
                     OutlinedTextField(
                         value = motivo,
-                        onValueChange = { motivo = it },
+                        // Fase 3: el motivo admite como máximo Validaciones.MAX_MOTIVO caracteres
+                        onValueChange = { if (it.length <= Validaciones.MAX_MOTIVO) motivo = it },
                         placeholder = { Text("Consulta de rutina", fontSize = 18.sp) },
                         textStyle = TextStyle(fontSize = 18.sp),
                         shape = RoundedCornerShape(12.dp),
@@ -168,8 +170,13 @@ fun ConfirmarCitaScreen(
                         modifier = Modifier.fillMaxWidth().height(80.dp)
                     )
 
+                    // Fase 3: contador del motivo y avisos de error del mismo tamaño (16sp)
+                    Text("${motivo.length}/${Validaciones.MAX_MOTIVO}", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (medico == null) {
+                        Text("No encontramos al doctor. Vuelve y elige otro.", fontSize = 16.sp, color = MaterialTheme.colorScheme.error)
+                    }
                     if (horarioOcupado) {
-                        Text("Ese horario ya fue reservado. Vuelve y elige otro.", fontSize = 16.sp, color = MaterialTheme.colorScheme.error)
+                        Text("Ese horario ya no está disponible. Vuelve y elige otro.", fontSize = 16.sp, color = MaterialTheme.colorScheme.error)
                     }
                     // Fase 2: aviso en rojo si el paciente ya tiene otra cita a esa fecha y hora
                     avisoCruce?.let { Text(it, fontSize = 16.sp, color = RojoAviso) }
@@ -177,7 +184,7 @@ fun ConfirmarCitaScreen(
             }
 
             // Fase 2: botón fijo abajo, fuera de la zona desplazable
-            BotonPrincipal("Agendar cita", onClick = {
+            BotonPrincipal("Agendar cita", enabled = medico != null, onClick = {
                 // Fase 2: antes de agendar comprueba si el paciente ya tiene una cita a esa fecha y hora
                 val cruce = Repositorio.citaDelUsuarioEn(fecha, hora)
                 if (cruce != null) {

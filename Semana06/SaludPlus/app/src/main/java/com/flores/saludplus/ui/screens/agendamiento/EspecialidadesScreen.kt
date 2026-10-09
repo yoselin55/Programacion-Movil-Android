@@ -18,17 +18,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.flores.saludplus.data.repository.Repositorio
 import com.flores.saludplus.ui.components.BarraSuperior
 import com.flores.saludplus.ui.components.CampoBusqueda
 import com.flores.saludplus.ui.components.ItemEspecialidad
+import com.flores.saludplus.ui.theme.AzulPrimario
 import com.flores.saludplus.ui.theme.Divisor
 import com.flores.saludplus.ui.theme.TextoSecundario
 
 // Relaciones:
-// - La llama AppNavigation en Rutas.ESPECIALIDADES
+// - La llama AppNavigation en Rutas.ESPECIALIDADES y recibe sedeId (Fase 3: solo lista las de esa sede)
 // - Usa BarraSuperior, CampoBusqueda e ItemEspecialidad (Componentes.kt)
 // - Fase 2: ItemEspecialidad dibuja la imagen nombreRecurso(nombre) con ImagenEspecialidad (ImagenPorNombre.kt)
 // - Llama a Repositorio.buscarEspecialidades; al elegir una pasa su id a Médicos (onEspecialidad)
@@ -37,10 +39,13 @@ import com.flores.saludplus.ui.theme.TextoSecundario
 // Commit 6: lista de especialidades con búsqueda en tiempo real
 // Fase 2: lista plana sobre fondo blanco, sin tarjetas ni sombras
 @Composable
-fun EspecialidadesScreen(onEspecialidad: (Int) -> Unit, onBack: () -> Unit) {
+fun EspecialidadesScreen(sedeId: Int, onEspecialidad: (Int) -> Unit, onBack: () -> Unit) {
     var texto by rememberSaveable { mutableStateOf("") }
     // Se recalcula cada vez que cambia el texto
-    val lista = Repositorio.buscarEspecialidades(texto)
+    // Fase 3: solo las especialidades que tienen médicos en la sede elegida
+    val enSede = Repositorio.especialidadesDeSede(sedeId).map { it.id }
+    val lista = Repositorio.buscarEspecialidades(texto).filter { it.id in enSede }
+    val sede = Repositorio.obtenerSede(sedeId)
 
     Scaffold(
         // Fase 2: fondo blanco en toda la pantalla
@@ -49,6 +54,12 @@ fun EspecialidadesScreen(onEspecialidad: (Int) -> Unit, onBack: () -> Unit) {
         topBar = { BarraSuperior("Especialidades", onBack) }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            // Fase 3: recuerda la sede elegida
+            Text(
+                if (sede != null) "Sede ${sede.nombre}" else "Sede no encontrada",
+                fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = AzulPrimario,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+            )
             // Fase 2: buscador de ancho completo con margen de 16dp y 12dp de espacio debajo
             CampoBusqueda(
                 texto, { texto = it }, "Buscar especialidad...",

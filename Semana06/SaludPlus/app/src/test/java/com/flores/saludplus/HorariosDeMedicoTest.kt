@@ -117,6 +117,8 @@ class HorariosDeMedicoTest {
     @Test
     fun resumenYEtiquetaDeDisponibilidad() {
         assertEquals("Mar y Jue · 15:00 a 19:00", Repositorio.resumenHorario(Repositorio.obtenerMedico(2)!!))
+        assertEquals("Lun a Vie · 08:00 a 12:00", Repositorio.resumenHorario(Repositorio.obtenerMedico(1)!!))
+        assertEquals("Lun, Mié y Vie · 15:00 a 19:00", Repositorio.resumenHorario(Repositorio.obtenerMedico(3)!!))
         // jueves 1 oct 08:00: el médico 1 atiende hoy por la mañana
         assertEquals("Disponible hoy", Repositorio.etiquetaDisponibilidad(1, AHORA_PRUEBA))
         // el médico 3 (lun/mié/vie por la tarde) atiende mañana (viernes)

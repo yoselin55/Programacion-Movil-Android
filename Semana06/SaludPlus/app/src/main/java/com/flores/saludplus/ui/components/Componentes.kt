@@ -182,7 +182,7 @@ fun CampoFila(
             ) {
                 Text(
                     etiqueta,
-                    fontSize = 19.sp,
+                    fontSize = 20.sp,
                     lineHeight = 22.sp,
                     color = TextoSecundario,
                     modifier = Modifier.padding(start = 14.dp)
@@ -212,12 +212,12 @@ fun CampoFila(
                 )
             }
         }
-        // Fase 2: mensaje de error bajo la fila, en rojo de 15sp
+        // Fase 2: mensaje de error bajo la fila, en rojo de 16sp (Fase 3: mismo tamaño que el texto secundario)
         if (error != null) {
             Text(
                 error,
                 color = MaterialTheme.colorScheme.error,
-                fontSize = 15.sp,
+                fontSize = 16.sp,
                 modifier = Modifier.padding(start = 8.dp, top = 6.dp)
             )
         }
@@ -302,7 +302,7 @@ fun TarjetaCita(
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             // Fase 2: nombre 20sp negrita y especialidad 17sp gris
             Text(medico, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = AzulOscuro)
-            Text(especialidad, fontSize = 17.sp, color = TextoSecundario)
+            Text(especialidad, fontSize = 18.sp, color = TextoSecundario)
             // Fase 2: fecha y hora con íconos de 22dp; FlowRow pasa la hora abajo si no cabe al lado
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -489,11 +489,10 @@ fun ItemEspecialidad(especialidad: Especialidad, onClick: () -> Unit) {
 }
 
 // Commit 6: tarjeta de un médico (nombre, especialidad, calificación y disponibilidad)
-// Fase 3: muestra también la sede y la etiqueta de disponibilidad sale de los horarios reales del médico
+// Fase 3: la etiqueta de disponibilidad sale de los horarios reales del médico y va bajo la calificación
 @Composable
 // Fase 2: modifier opcional (con valor por defecto) para que la lista le asigne el alto
 fun TarjetaMedico(medico: Medico, especialidad: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val sede = Repositorio.obtenerSede(medico.sedeId)?.nombre ?: ""
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
@@ -511,26 +510,66 @@ fun TarjetaMedico(medico: Medico, especialidad: String, onClick: () -> Unit, mod
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(medico.nombre, fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 Text(especialidad, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                // Fase 3: sede donde atiende
-                Text("Sede $sede", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.Star, contentDescription = null, tint = Estrella, modifier = Modifier.size(20.dp))
                     Text(" ${medico.calificacion} (${medico.resenas})", fontSize = 16.sp)
                 }
-            }
-            // Fase 2: etiqueta de disponibilidad ("Disponible hoy") a la derecha, abajo de la tarjeta
-            Box(
-                modifier = Modifier
-                    .align(Alignment.Bottom)
-                    .background(VerdeClaro, RoundedCornerShape(8.dp))
-                    .padding(horizontal = 8.dp, vertical = 2.dp)
-            ) {
-                Text(
-                    Repositorio.etiquetaDisponibilidad(medico.id),
-                    fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = VerdeDisponible
-                )
+                // Fase 3: etiqueta de disponibilidad ("Disponible hoy", "Próx. Lun 12 oct")
+                Box(
+                    modifier = Modifier
+                        .background(VerdeClaro, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        Repositorio.etiquetaDisponibilidad(medico.id),
+                        fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = VerdeDisponible
+                    )
+                }
             }
         }
+    }
+}
+
+// Fase 3: ficha de datos de un médico para el directorio de Doctores: foto, nombre, especialidad y las filas
+// Código, Sede, Teléfono y Horario (etiqueta gris de 16sp y valor de 18sp en todas las filas) y,
+// si se indica onAgendar, el botón "Agendar cita"
+@Composable
+fun TarjetaDatosMedico(medico: Medico, modifier: Modifier = Modifier, onAgendar: (() -> Unit)? = null) {
+    val especialidad = Repositorio.obtenerEspecialidad(medico.especialidadId)?.nombre ?: ""
+    val sede = Repositorio.obtenerSede(medico.sedeId)?.nombre ?: ""
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(Color.White, RoundedCornerShape(18.dp))
+            .border(1.dp, BordeSuave, RoundedCornerShape(18.dp))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            FotoMedico(medico.nombre, 72.dp)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(medico.nombre, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = AzulOscuro)
+                Text(especialidad, fontSize = 18.sp, color = TextoSecundario)
+            }
+        }
+        HorizontalDivider(thickness = 1.dp, color = BordeSuave)
+        DatoMedico("Código", medico.codigo)
+        DatoMedico("Sede", sede)
+        DatoMedico("Teléfono", medico.telefono)
+        DatoMedico("Horario", Repositorio.resumenHorario(medico))
+        // Fase 3: con onAgendar la ficha permite agendar con este doctor (su sede ya es la de la ficha)
+        if (onAgendar != null) {
+            BotonPrincipal("Agendar cita", onClick = onAgendar, alto = 52.dp, tamanoTexto = 18.sp)
+        }
+    }
+}
+
+// Fase 3: una fila "etiqueta: valor" de la ficha del médico
+@Composable
+private fun DatoMedico(etiqueta: String, valor: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(etiqueta, fontSize = 16.sp, color = TextoSecundario, modifier = Modifier.width(84.dp))
+        Text(valor, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = TextoPrincipal, modifier = Modifier.weight(1f))
     }
 }
 

@@ -65,6 +65,8 @@ fun DetalleCitaScreen(citaId: Int, onBack: () -> Unit) {
     val cita = remember(citaId) { Repositorio.obtenerCita(citaId) }
     val medico = cita?.let { Repositorio.obtenerMedico(it.medicoId) }
     val especialidad = medico?.let { Repositorio.obtenerEspecialidad(it.especialidadId)?.nombre } ?: ""
+    // Fase 3: sede del médico (su nombre y dirección reemplazan a la dirección fija)
+    val sede = medico?.let { Repositorio.obtenerSede(it.sedeId) }
     var mostrarDialogo by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
@@ -120,7 +122,7 @@ fun DetalleCitaScreen(citaId: Int, onBack: () -> Unit) {
                     Triple(Icons.Filled.CalendarMonth, "Fecha", Fechas.textoLargoDesdeIso(cita.fecha)),
                     Triple(Icons.Filled.AccessTime, "Hora", Fechas.rangoHora(cita.hora)),
                     Triple(Icons.Filled.Info, "Tipo de atención", "Consulta presencial"),
-                    Triple(Icons.Filled.LocationOn, "Dirección", "Av. Los Olivos 123, Lima"),
+                    Triple(Icons.Filled.LocationOn, "Sede ${sede?.nombre ?: ""}", sede?.direccion ?: ""),
                     Triple(Icons.Filled.EditNote, "Motivo de consulta", cita.motivo.ifBlank { "Sin motivo" })
                 )
                 datos.forEach { (icono, titulo, valor) ->

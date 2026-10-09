@@ -63,6 +63,8 @@ fun CitaExitosaScreen(citaId: Int, onVerMisCitas: () -> Unit, onIrInicio: () -> 
     val cita = Repositorio.obtenerCita(citaId)
     val medico = cita?.let { Repositorio.obtenerMedico(it.medicoId) }
     val especialidad = medico?.let { Repositorio.obtenerEspecialidad(it.especialidadId)?.nombre } ?: ""
+    // Fase 3: sede del médico (su nombre y dirección reemplazan a la dirección fija)
+    val sede = medico?.let { Repositorio.obtenerSede(it.sedeId) }
 
     Scaffold(containerColor = Color.White) { padding ->
         // Fase 2: contenido centrado verticalmente si cabe y desplazable si no cabe
@@ -121,7 +123,7 @@ fun CitaExitosaScreen(citaId: Int, onVerMisCitas: () -> Unit, onIrInicio: () -> 
                         val datos = listOf(
                             Triple(Icons.Filled.CalendarMonth, "Fecha", Fechas.textoLargoDesdeIso(cita.fecha)),
                             Triple(Icons.Filled.AccessTime, "Hora", Fechas.rangoHora(cita.hora)),
-                            Triple(Icons.Filled.LocationOn, "Dirección", "Av. Los Olivos 123, Lima")
+                            Triple(Icons.Filled.LocationOn, "Sede ${sede?.nombre ?: ""}", sede?.direccion ?: "")
                         )
                         datos.forEach { (icono, titulo, valor) ->
                             HorizontalDivider(thickness = 1.dp, color = Divisor)

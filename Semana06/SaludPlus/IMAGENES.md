@@ -65,3 +65,27 @@ circular con fondo transparente (Python + Pillow).
 | `dr_jorge_salas.png` | https://www.pexels.com/photo/man-in-white-coat-4989142/ | Ivan S | Licencia de Pexels |
 | `dr_ricardo_nunez.png` | https://www.pexels.com/photo/middle-aged-doctor-in-white-apron-5531446/ | Kevin Steven Ortega Eliett | Licencia de Pexels |
 | `dr_andres_quispe.png` | https://www.pexels.com/photo/doctor-19438560/ | Oys Photography | Licencia de Pexels |
+
+## Fase 3: fotos de los médicos nuevos y de las sedes
+
+Descargadas de [Pexels](https://www.pexels.com) (Licencia de Pexels: uso gratuito sin atribución obligatoria; el
+autor aparece en cada enlace). Los médicos van recortados a 256x256 (`.png`); las sedes a 600x400 (`.jpg`) con el
+nombre `sede_` + nombre de la sede (`nombreRecurso`). Si falta una foto de sede, se dibuja un recuadro crema con el ícono.
+
+| Archivo | Pexels |
+|---|---|
+| `dr_miguel_herrera.png` | https://www.pexels.com/photo/6129500/ |
+| `dra_valeria_cruz.png` | https://www.pexels.com/photo/7904457/ |
+| `dra_camila_ortega.png` | https://www.pexels.com/photo/32254667/ |
+| `dr_fernando_diaz.png` | https://www.pexels.com/photo/29995617/ |
+| `dra_rosa_medina.png` | https://www.pexels.com/photo/7578811/ |
+| `dr_hector_rivas.png` | https://www.pexels.com/photo/6762862/ |
+| `dra_natalia_silva.png` | https://www.pexels.com/photo/32115905/ |
+| `dr_oscar_benitez.png` | https://www.pexels.com/photo/19438563/ |
+| `dr_daniel_flores.png` | https://www.pexels.com/photo/15962798/ |
+| `sede_santa_anita.jpg` | https://www.pexels.com/photo/6473188/ |
+| `sede_ate.jpg` | https://www.pexels.com/photo/9741531/ |
+| `sede_la_molina.jpg` | https://www.pexels.com/photo/36938793/ |
+| `sede_san_isidro.jpg` | https://www.pexels.com/photo/20242798/ |
+
+`banner_clinica.jpg` (banner vertical del Inicio): https://www.pexels.com/photo/14438789/ (Pexels).

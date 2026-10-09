@@ -14,6 +14,9 @@ Validaciones {
     const val MAX_NOMBRE = 40
     const val MAX_CORREO = 60
 
+    // Fase 3: largo máximo del motivo de consulta
+    const val MAX_MOTIVO = 200
+
     // Fase 2: solo letras (incluidas tildes, ü y ñ), espacios y guion; sin números ni símbolos
     private val REGEX_CARACTERES_NOMBRE = Regex("^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\\s-]+$")
 

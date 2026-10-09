@@ -20,27 +20,75 @@ import com.flores.saludplus.ui.screens.citas.DetalleCitaScreen
 import com.flores.saludplus.ui.screens.citas.MisCitasScreen
 import com.flores.saludplus.ui.screens.home.HomeScreen
 import com.flores.saludplus.ui.screens.notificaciones.NotificacionesScreen
+import androidx.activity.compose.BackHandler
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import com.flores.saludplus.data.repository.Repositorio
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.flores.saludplus.ui.components.MenuLateral
+import com.flores.saludplus.ui.screens.doctores.DoctoresEspecialidadScreen
+import com.flores.saludplus.ui.screens.doctores.DoctoresScreen
 import com.flores.saludplus.ui.screens.perfil.PerfilScreen
 import com.flores.saludplus.ui.screens.resultados.ResultadosScreen
+import com.flores.saludplus.ui.screens.sedes.SedeDetalleScreen
+import com.flores.saludplus.ui.screens.sedes.SedesScreen
+import kotlinx.coroutines.launch
 
 // Relaciones:
 // - Lo llama MainActivity
 // - Usa Rutas (navigation/Rutas.kt) para registrar y abrir cada destino
-// - Llama a las 15 pantallas de ui/screens y les pasa los parámetros y callbacks
+// - Llama a las pantallas de ui/screens y les pasa los parámetros y callbacks
+// - Fase 3: envuelve el NavHost en un único ModalNavigationDrawer (MenuLateral) que abren Inicio, Sedes,
+//   Doctores y Agenda con onMenu
 
 // Grafo de navegación de toda la app
 @Composable
 fun AppNavigation() {
     val nav = rememberNavController()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    val rutaActual = nav.currentBackStackEntryAsState().value?.destination?.route
 
-    // Navegación de la barra inferior: vuelve a Inicio y abre el destino sin apilar copias
+    // Navegación de la barra inferior y del menú: vuelve a Inicio y abre el destino sin apilar copias
     val irA: (String) -> Unit = { ruta ->
         nav.navigate(ruta) {
             popUpTo(Rutas.HOME)
             launchSingleTop = true
         }
     }
+    val abrirMenu: () -> Unit = { scope.launch { drawerState.open() } }
 
+    // Fase 3: sin sesión (por ejemplo, tras reiniciarse la app) no se entra a pantallas protegidas: vuelve al Splash
+    LaunchedEffect(rutaActual) {
+        if (rutaActual != null && rutaActual !in rutasPublicas && Repositorio.usuarioActual == null) {
+            nav.navigate(Rutas.SPLASH) { popUpTo(0) }
+        }
+    }
+
+    // El botón Atrás del sistema cierra el menú si está abierto
+    BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        // Solo se abre deslizando en las pantallas principales (no en Splash, Registro ni Login)
+        gesturesEnabled = rutaActual in rutasConMenu,
+        drawerContent = {
+            MenuLateral(
+                rutaActual = rutaActual,
+                onNavegar = { ruta -> scope.launch { drawerState.close(); irA(ruta) } },
+                onCerrarSesion = {
+                    scope.launch {
+                        drawerState.close()
+                        // Limpia toda la pila y vuelve al Splash
+                        nav.navigate(Rutas.SPLASH) { popUpTo(0) }
+                    }
+                }
+            )
+        }
+    ) {
     NavHost(navController = nav, startDestination = Rutas.SPLASH) {
 
         composable(Rutas.SPLASH) {
@@ -69,23 +117,68 @@ fun AppNavigation() {
         }
         composable(Rutas.HOME) {
             HomeScreen(
-                onAgendar = { nav.navigate(Rutas.ESPECIALIDADES) },
-                onEspecialidad = { id -> nav.navigate(Rutas.medicos(id)) },
+                onEspecialidad = { id -> nav.navigate(Rutas.doctoresEspecialidad(id)) },
+                onVerEspecialidades = { irA(Rutas.DOCTORES) },
                 onNotificaciones = { nav.navigate(Rutas.NOTIFICACIONES) },
+                onNavegar = irA,
+                onMenu = abrirMenu
+            )
+        }
+        composable(Rutas.SEDES) {
+            SedesScreen(
+                onSede = { id -> nav.navigate(Rutas.sedeDetalle(id)) },
+                onMenu = abrirMenu,
                 onNavegar = irA
             )
         }
-        composable(Rutas.ESPECIALIDADES) {
+        composable(
+            Rutas.SEDE_DETALLE,
+            arguments = listOf(navArgument("sedeId") { type = NavType.IntType })
+        ) { entrada ->
+            val sedeId = entrada.arguments!!.getInt("sedeId")
+            SedeDetalleScreen(
+                sedeId = sedeId,
+                onAgendar = { nav.navigate(Rutas.especialidades(sedeId)) },
+                onBack = { nav.popBackStack() }
+            )
+        }
+        composable(Rutas.DOCTORES) {
+            DoctoresScreen(
+                onEspecialidad = { id -> nav.navigate(Rutas.doctoresEspecialidad(id)) },
+                onMenu = abrirMenu,
+                onNavegar = irA
+            )
+        }
+        composable(
+            Rutas.DOCTORES_ESPECIALIDAD,
+            arguments = listOf(navArgument("especialidadId") { type = NavType.IntType })
+        ) { entrada ->
+            DoctoresEspecialidadScreen(
+                especialidadId = entrada.arguments!!.getInt("especialidadId"),
+                onAgendar = { medicoId -> nav.navigate(Rutas.fechaHora(medicoId)) },
+                onBack = { nav.popBackStack() }
+            )
+        }
+        composable(
+            Rutas.ESPECIALIDADES,
+            arguments = listOf(navArgument("sedeId") { type = NavType.IntType })
+        ) { entrada ->
+            val sedeId = entrada.arguments!!.getInt("sedeId")
             EspecialidadesScreen(
-                onEspecialidad = { id -> nav.navigate(Rutas.medicos(id)) },
+                sedeId = sedeId,
+                onEspecialidad = { id -> nav.navigate(Rutas.medicos(sedeId, id)) },
                 onBack = { nav.popBackStack() }
             )
         }
         composable(
             Rutas.MEDICOS,
-            arguments = listOf(navArgument("especialidadId") { type = NavType.IntType })
+            arguments = listOf(
+                navArgument("sedeId") { type = NavType.IntType },
+                navArgument("especialidadId") { type = NavType.IntType }
+            )
         ) { entrada ->
             MedicosScreen(
+                sedeId = entrada.arguments!!.getInt("sedeId"),
                 especialidadId = entrada.arguments!!.getInt("especialidadId"),
                 onMedico = { id -> nav.navigate(Rutas.fechaHora(id)) },
                 onBack = { nav.popBackStack() }
@@ -134,7 +227,8 @@ fun AppNavigation() {
         composable(Rutas.MIS_CITAS) {
             MisCitasScreen(
                 onDetalle = { id -> nav.navigate(Rutas.detalleCita(id)) },
-                onNavegar = irA
+                onNavegar = irA,
+                onMenu = abrirMenu
             )
         }
         composable(Rutas.RESULTADOS) {
@@ -162,7 +256,16 @@ fun AppNavigation() {
             NotificacionesScreen(onBack = { nav.popBackStack() })
         }
     }
+    }
 }
+
+// Fase 3: pantallas que se pueden ver sin haber iniciado sesión
+private val rutasPublicas = listOf(Rutas.SPLASH, Rutas.REGISTRO, Rutas.LOGIN, Rutas.TERMINOS)
+
+// Fase 3: pantallas principales donde se puede abrir el menú lateral deslizando
+private val rutasConMenu = listOf(
+    Rutas.HOME, Rutas.SEDES, Rutas.DOCTORES, Rutas.MIS_CITAS, Rutas.RESULTADOS, Rutas.PERFIL
+)
 
 // Entra a Inicio y quita Splash, Registro y Login de la pila
 private fun entrarAInicio(nav: NavHostController) {

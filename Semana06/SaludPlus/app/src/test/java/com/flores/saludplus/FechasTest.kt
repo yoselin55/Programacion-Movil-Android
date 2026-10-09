@@ -105,4 +105,13 @@ class FechasTest {
         assertEquals("hora-invalida", Fechas.rangoHora("hora-invalida"))
         assertEquals("25:99", Fechas.rangoHora("25:99"))
     }
+
+    // Fase 3: verifica el día y mes abreviados sin año, el nombre corto de un día y el plural para avisos
+    @Test
+    fun textoDiaMes_nombreCorto_nombreDiaPlural() {
+        assertEquals("Lun 12 oct", Fechas.textoDiaMes(LocalDate.of(2026, 10, 12)))
+        assertEquals("Mié", Fechas.nombreCorto(java.time.DayOfWeek.WEDNESDAY))
+        assertEquals("martes", Fechas.nombreDiaPlural(java.time.DayOfWeek.TUESDAY))
+        assertEquals("sábados", Fechas.nombreDiaPlural(java.time.DayOfWeek.SATURDAY))
+    }
 }

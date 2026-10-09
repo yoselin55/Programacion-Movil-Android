@@ -111,6 +111,16 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
         containerColor = MaterialTheme.colorScheme.background,
         topBar = { BarraSuperior("Seleccionar fecha y hora", onBack) }
     ) { padding ->
+        // Fase 3: si el doctor no existe se avisa en lugar de mostrar una pantalla rota
+        if (medico == null) {
+            Text(
+                "No encontramos al doctor. Vuelve y elige otro.",
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(padding).padding(16.dp)
+            )
+            return@Scaffold
+        }
         Column(
             modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -157,6 +167,7 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
                     Fechas.mesYAnio(dias.first()),
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
                 // Fase 2: ">" siempre habilitada, avanza una semana

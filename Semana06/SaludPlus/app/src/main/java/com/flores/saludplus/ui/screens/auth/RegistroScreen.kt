@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -101,37 +103,22 @@ fun RegistroScreen(
 
     Scaffold(
         // Fase 2: fondo blanco
-        containerColor = Color.White,
-        // Fase 2: "¿Ya tienes cuenta? Iniciar sesión" anclado abajo con 40dp de margen inferior
-        bottomBar = {
-            Row(
-                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(top = 8.dp, bottom = 40.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("¿Ya tienes cuenta? ", fontSize = 20.sp, color = TextoPrincipal)
-                Text(
-                    "Iniciar sesión",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = AzulPrimario,
-                    modifier = Modifier.clickable(onClick = onIrLogin)
-                )
-            }
-        }
+        containerColor = Color.White
     ) { padding ->
         // Fase 2: contenido desplazable con 20dp de margen lateral; imePadding deja sitio al teclado
+        // Fase 3: el enlace de abajo va dentro del contenido: queda anclado abajo si hay espacio y, si un
+        // mensaje de error lo alarga, baja con el scroll en vez de taparse
+        BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(padding).imePadding()) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .imePadding()
+                .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
+                .heightIn(min = maxHeight)
                 .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Fase 2: 64dp bajo la barra de estado
-            Spacer(Modifier.height(64.dp))
+            // Fase 3: 40dp bajo la barra de estado (antes 64dp) para que quepa más contenido
+            Spacer(Modifier.height(40.dp))
 
             // Fase 2: título 38sp y subtítulo 20sp, centrados
             Text("Crear cuenta", fontSize = 38.sp, fontWeight = FontWeight.Bold, color = AzulOscuro)
@@ -199,7 +186,24 @@ fun RegistroScreen(
                 color = AzulPrimario,
                 modifier = Modifier.clickable(onClick = onTerminos).padding(vertical = 4.dp)
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.weight(1f).heightIn(min = 16.dp))
+
+            // Fase 2: enlace anclado abajo con 40dp de margen
+            Row(
+                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(top = 8.dp, bottom = 40.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("¿Ya tienes cuenta? ", fontSize = 20.sp, color = TextoPrincipal)
+                Text(
+                    "Iniciar sesión",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = AzulPrimario,
+                    modifier = Modifier.clickable(onClick = onIrLogin)
+                )
+            }
+        }
         }
     }
 }

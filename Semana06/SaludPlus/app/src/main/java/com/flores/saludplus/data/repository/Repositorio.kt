@@ -169,8 +169,13 @@ object Repositorio {
         val dias = medico.horario.filterValues { it.isNotEmpty() }.keys.sortedBy { it.value }
         if (dias.isEmpty()) return "Sin horarios de atención"
         val nombres = dias.map { Fechas.nombreCorto(it) }
-        val textoDias = if (nombres.size == 1) nombres.first()
-        else nombres.dropLast(1).joinToString(", ") + " y " + nombres.last()
+        // Fase 3: varios días seguidos se resumen como "Lun a Vie"
+        val seguidos = dias.size >= 3 && dias.last().value - dias.first().value == dias.size - 1
+        val textoDias = when {
+            nombres.size == 1 -> nombres.first()
+            seguidos -> "${nombres.first()} a ${nombres.last()}"
+            else -> nombres.dropLast(1).joinToString(", ") + " y " + nombres.last()
+        }
         val horas = medico.horasDe(dias.first())
         val rango = Fechas.rangoHora(horas.first()).substringBefore(" a ") + " a " +
             Fechas.rangoHora(horas.last()).substringAfter(" a ")

@@ -391,3 +391,39 @@ Este prompt se ejecutó en varias vueltas, porque el resultado inicial no coinci
 5. **Especialidades como tarjetas.** El diseño es una lista plana; se corrigió con filas de 96dp, divisores y fondo blanco.
 6. **Médicos y pantallas siguientes.** La etiqueta "Disponible hoy" debía ir a la derecha, las tarjetas debían ocupar todo el alto, y los días y horas debían ser más grandes y con color gris claro, como el diseño. Se agregaron esas medidas al prompt.
 7. **Detalles.** Un nombre de usuario muy largo desbordaba el saludo; se resolvió con `maxLines = 1`. El botón flotante con tres rayas que se veía en las capturas es una herramienta del emulador, no de la app.
+
+---
+
+## Prompt 6 — Sedes, menú lateral, horarios por doctor y confirmaciones
+
+### Prompt
+
+```
+Con la app ClinicaSaludPlus agrega lo siguiente (en 3 partes, una por commit):
+1. Al registrarse o iniciar sesión debe salir un mensaje de confirmación con el logo.
+2. Menú lateral con SEDES, DOCTORES, AGENDA y CERRAR SESIÓN. Lo que está en el menú ya no se repite en el
+   Inicio (se quita "Agendar cita" del Inicio).
+3. Para agendar: Sedes > elegir sede (Santa Anita, Ate, La Molina, San Isidro) > Agendar cita > especialidad >
+   doctor de esa sede > fecha y hora > confirmación. El paciente NO elige cualquier día y hora: cada doctor
+   tiene sus días y horarios de atención. Una cita agendada (por ejemplo, 9 de octubre a las 5 pm) ya no debe
+   aparecer disponible para ese doctor.
+4. Cada doctor tiene nombre, especialidad, código, sede y teléfono; Doctores > Especialidad > fichas.
+5. Validaciones comprobadas para que la app no se rompa y tamaños de texto iguales en cada sección.
+Mantén los colores. Ejecuta ./gradlew testDebugUnitTest y ./gradlew assembleDebug.
+```
+
+### Respuesta resumida
+
+- **Parte 1:** modelos `Sede` y `Medico` (sede, código, teléfono y horario semanal); `horariosDisponibles` y
+  `agendarCita` respetan el horario del doctor, quitan las horas reservadas y las que ya pasaron; mensaje de
+  confirmación (`DialogoConfirmacion`) al registrarse e iniciar sesión.
+- **Parte 2:** un único menú lateral en `AppNavigation` (`MenuLateral`); pantallas Sedes, Sede, Doctores y ficha
+  por especialidad; el agendamiento pasa por la sede; Inicio sin "Agendar cita".
+- **Parte 3:** guarda de sesión, doctor inexistente, límite del motivo, escala única de tamaños en `Type.kt`
+  y pruebas nuevas.
+
+### Qué tuve que corregir
+
+- La tarjeta del doctor quedaba apretada al añadir la sede: la etiqueta de disponibilidad pasó bajo la calificación.
+- "Cita agendada" y "Detalle de cita" seguían con una dirección fija: ahora usan la sede del doctor.
+- Las pruebas usaban fechas fijas: ahora reciben un "ahora" fijo (`AHORA_PRUEBA`) y no dependen del día.
