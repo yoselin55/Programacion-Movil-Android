@@ -1,6 +1,7 @@
 package com.flores.saludplus.ui.screens.agendamiento
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -31,6 +32,7 @@ import com.flores.saludplus.ui.theme.TextoSecundario
 // - Usa BarraSuperior, CampoBusqueda e ItemEspecialidad (Componentes.kt)
 // - Fase 2: ItemEspecialidad dibuja la imagen nombreRecurso(nombre) con ImagenEspecialidad (ImagenPorNombre.kt)
 // - Llama a Repositorio.buscarEspecialidades; al elegir una pasa su id a Médicos (onEspecialidad)
+// - Fase 2: la LazyColumn usa weight(1f) y 24dp de margen inferior para desplazarse sin límite
 
 // Commit 6: lista de especialidades con búsqueda en tiempo real
 // Fase 2: lista plana sobre fondo blanco, sin tarjetas ni sombras
@@ -62,7 +64,11 @@ fun EspecialidadesScreen(onEspecialidad: (Int) -> Unit, onBack: () -> Unit) {
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
-            LazyColumn {
+            // Fase 2: la lista ocupa todo el alto libre y se desplaza con cualquier cantidad de elementos
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(bottom = 24.dp)
+            ) {
                 itemsIndexed(lista, key = { _, especialidad -> especialidad.id }) { indice, especialidad ->
                     // Fase 2: fila plana de 96dp (margen interno de 16dp)
                     ItemEspecialidad(especialidad, onClick = { onEspecialidad(especialidad.id) })

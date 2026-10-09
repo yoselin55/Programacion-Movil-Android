@@ -2,13 +2,17 @@ package com.flores.saludplus.util
 
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 // Relaciones:
 // - Lo usará FechaHoraScreen (ui/screens/agendamiento) para armar el calendario dinámico
 // - Lo usan ConfirmarCitaScreen, CitaExitosaScreen y TarjetaCita para mostrar fechas ISO en español
+// - Fase 2: lo usan DetalleCitaScreen, NotificacionesScreen y ResultadosScreen para las fechas
+// - Fase 2: rangoHora lo usan ConfirmarCitaScreen, CitaExitosaScreen y DetalleCitaScreen
 // - Lo prueba FechasTest (app/src/test)
-// - Depende solo de java.time.LocalDate (requiere minSdk 26)
+// - Depende solo de java.time (LocalDate y LocalTime; requiere minSdk 26)
 
 // Fase 2: utilidades de fechas en español, sin depender del Locale del dispositivo
 object Fechas {
@@ -86,6 +90,22 @@ object Fechas {
     // Fase 2: convierte una fecha ISO ("2026-10-06") a texto corto ("Mar 6 oct 2026").
     // Si el texto no es una fecha válida, devuelve el mismo texto sin lanzar excepción.
     fun textoCortoDesdeIso(iso: String): String = desdeIso(iso, ::textoCorto)
+
+    // Fase 2: duración de cada consulta en minutos (los horarios base van cada 30 minutos)
+    private const val MINUTOS_CONSULTA = 30L
+
+    // Fase 2: devuelve el rango de la consulta desde la hora indicada, por ejemplo "09:30" -> "09:30 a 10:00".
+    // Si la hora no es válida, devuelve el mismo texto sin lanzar excepción.
+    fun rangoHora(hora: String): String =
+        try {
+            val inicio = LocalTime.parse(hora, formatoHora)
+            "${inicio.format(formatoHora)} a ${inicio.plusMinutes(MINUTOS_CONSULTA).format(formatoHora)}"
+        } catch (e: DateTimeParseException) {
+            hora
+        }
+
+    // Fase 2: formato de hora de 24 horas con dos dígitos ("09:30")
+    private val formatoHora = DateTimeFormatter.ofPattern("HH:mm")
 
     // Fase 2: aplica el formato a la fecha ISO; devuelve el texto original si no se puede convertir
     private fun desdeIso(iso: String, formato: (LocalDate) -> String): String =

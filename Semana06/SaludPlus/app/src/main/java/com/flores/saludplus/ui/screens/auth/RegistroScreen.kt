@@ -41,11 +41,13 @@ import com.flores.saludplus.ui.theme.AzulPrimario
 import com.flores.saludplus.ui.theme.GrisMarcado
 import com.flores.saludplus.ui.theme.TextoPrincipal
 import com.flores.saludplus.ui.theme.TextoSecundario
+import com.flores.saludplus.util.Validaciones
 
 // Relaciones:
 // - La llama AppNavigation en el destino Rutas.REGISTRO
 // - Llama a BotonPrincipal y CampoTexto (Componentes.kt; Fase 2: CampoTexto dibuja una CampoFila de 80dp:
 //   recuadro de ícono de 78dp + etiqueta y caja blanca de 54dp)
+// - Fase 2: valida nombre, teléfono, correo y contraseña con util/Validaciones.kt
 // - Llama a Repositorio.registrarUsuario; si se registra va a Inicio (onRegistrado)
 // - Sus enlaces llevan a Términos (onTerminos) y a Login (onIrLogin)
 
@@ -65,17 +67,25 @@ fun RegistroScreen(
     var intentoRegistrar by rememberSaveable { mutableStateOf(false) } // los errores salen al pulsar el botón
     var telefonoRepetido by rememberSaveable { mutableStateOf(false) }
 
-    // Validaciones: cada una devuelve el mensaje de error o null si está bien
-    val errorNombre = if (intentoRegistrar && nombre.isBlank()) "Ingresa tu nombre completo" else null
+    // Fase 2: nombre y correo sin espacios sobrantes (inicio, final y espacios repetidos)
+    val nombreLimpio = nombre.trim().replace(Regex("\\s+"), " ")
+    val correoLimpio = correo.trim()
+
+    // Fase 2: reglas de util/Validaciones.kt; cada una devuelve el mensaje de error o null si está bien
+    val reglaNombre = Validaciones.errorNombre(nombreLimpio)
+    val reglaTelefono = Validaciones.errorTelefono(telefono)
+    val reglaCorreo = Validaciones.errorCorreo(correoLimpio)
+    val reglaContrasena = Validaciones.errorContrasena(contrasena)
+
+    // Fase 2: el error de cada campo se muestra si el usuario ya escribió en él o pulsó "Registrarme"
+    val errorNombre = reglaNombre.takeIf { intentoRegistrar || nombre.isNotEmpty() }
     val errorTelefono = when {
         telefonoRepetido -> "Este teléfono ya está registrado"
-        intentoRegistrar && telefono.length != 9 -> "El teléfono debe tener 9 dígitos"
+        intentoRegistrar || telefono.isNotEmpty() -> reglaTelefono
         else -> null
     }
-    val errorCorreo = if (intentoRegistrar && correo.isNotBlank() &&
-        !android.util.Patterns.EMAIL_ADDRESS.matcher(correo).matches()
-    ) "Correo no válido" else null
-    val errorContrasena = if (intentoRegistrar && contrasena.length < 6) "Mínimo 6 caracteres" else null
+    val errorCorreo = reglaCorreo.takeIf { intentoRegistrar || correo.isNotEmpty() }
+    val errorContrasena = reglaContrasena.takeIf { intentoRegistrar || contrasena.isNotEmpty() }
 
     Scaffold(
         // Fase 2: fondo blanco
@@ -123,7 +133,13 @@ fun RegistroScreen(
 
             // Fase 2: cuatro filas de campo de 80dp con 26dp de separación
             Column(verticalArrangement = Arrangement.spacedBy(26.dp)) {
-                CampoTexto(nombre, { nombre = it }, "Nombre completo", Icons.Filled.Person, error = errorNombre)
+                // Fase 2: el nombre solo deja escribir letras, espacios y guion (máx. 40 caracteres)
+                CampoTexto(
+                    nombre,
+                    { if (it.length <= Validaciones.MAX_NOMBRE && it.all { c -> c.isLetter() || c == ' ' || c == '-' }) nombre = it },
+                    "Nombre completo", Icons.Filled.Person, error = errorNombre
+                )
+                // El teléfono solo deja escribir dígitos (máx. 9)
                 CampoTexto(
                     telefono,
                     { if (it.length <= 9 && it.all(Char::isDigit)) { telefono = it; telefonoRepetido = false } },
@@ -148,11 +164,11 @@ fun RegistroScreen(
                 tamanoTexto = 24.sp,
                 onClick = {
                     intentoRegistrar = true
-                    val datosValidos = nombre.isNotBlank() && telefono.length == 9 &&
-                        (correo.isBlank() || android.util.Patterns.EMAIL_ADDRESS.matcher(correo).matches()) &&
-                        contrasena.length >= 6
+                    // Fase 2: no registra mientras alguna regla devuelva un error
+                    val datosValidos = listOf(reglaNombre, reglaTelefono, reglaCorreo, reglaContrasena).all { it == null }
                     if (datosValidos) {
-                        if (Repositorio.registrarUsuario(nombre.trim(), telefono, correo.trim(), contrasena)) {
+                        // Fase 2: guarda el nombre y el correo sin espacios sobrantes
+                        if (Repositorio.registrarUsuario(nombreLimpio, telefono, correoLimpio, contrasena)) {
                             onRegistrado()
                         } else {
                             telefonoRepetido = true

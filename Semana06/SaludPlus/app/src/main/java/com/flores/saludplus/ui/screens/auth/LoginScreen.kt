@@ -40,8 +40,10 @@ import com.flores.saludplus.ui.theme.AzulOscuro
 import com.flores.saludplus.ui.theme.AzulPrimario
 import com.flores.saludplus.ui.theme.TextoPrincipal
 import com.flores.saludplus.ui.theme.TextoSecundario
+import com.flores.saludplus.util.Validaciones
 
 // Relaciones:
+// - Fase 2: valida el teléfono con util/Validaciones.kt (errorTelefono)
 // - La llama AppNavigation en el destino Rutas.LOGIN
 // - Llama a BarraSuperior, BotonPrincipal y CampoTexto (ui/components/Componentes.kt)
 // - Fase 2: sigue el estilo de RegistroScreen (fondo blanco, filas de 80dp con recuadro de 78dp y caja de 54dp, botón de 72dp)
@@ -56,9 +58,14 @@ fun LoginScreen(onLoginExitoso: () -> Unit, onIrRegistro: () -> Unit, onBack: ()
     var intentoIngresar by rememberSaveable { mutableStateOf(false) }
     var credencialesIncorrectas by rememberSaveable { mutableStateOf(false) }
 
-    // Validaciones de campos vacíos o con formato incorrecto
-    val errorTelefono = if (intentoIngresar && telefono.length != 9) "El teléfono debe tener 9 dígitos" else null
-    val errorContrasena = if (intentoIngresar && contrasena.isBlank()) "Ingresa tu contraseña" else null
+    // Fase 2: valida el teléfono con util/Validaciones.kt (9 dígitos que empiezan con 9)
+    val reglaTelefono = Validaciones.errorTelefono(telefono)
+    // Fase 2: valida que la contraseña no esté vacía
+    val reglaContrasena = if (contrasena.isEmpty()) "Ingresa tu contraseña" else null
+
+    // Fase 2: el error del teléfono sale al escribir o al pulsar "Ingresar"; el de la contraseña al pulsar
+    val errorTelefono = reglaTelefono.takeIf { intentoIngresar || telefono.isNotEmpty() }
+    val errorContrasena = reglaContrasena.takeIf { intentoIngresar }
 
     Scaffold(
         // Fase 2: fondo blanco; BarraSuperior trae fondo blanco, flecha y título de 26sp negrita azul marino
@@ -132,7 +139,9 @@ fun LoginScreen(onLoginExitoso: () -> Unit, onIrRegistro: () -> Unit, onBack: ()
                 tamanoTexto = 24.sp,
                 onClick = {
                     intentoIngresar = true
-                    if (telefono.length == 9 && contrasena.isNotBlank()) {
+                    // Fase 2: solo consulta el Repositorio si los datos son válidos;
+                    // si no coinciden con ningún usuario muestra "Teléfono o contraseña incorrectos"
+                    if (reglaTelefono == null && reglaContrasena == null) {
                         if (Repositorio.iniciarSesion(telefono, contrasena)) onLoginExitoso()
                         else credencialesIncorrectas = true
                     }

@@ -1,11 +1,14 @@
 package com.flores.saludplus.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -46,12 +49,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -74,9 +79,11 @@ import com.flores.saludplus.ui.theme.AzulClaro
 import com.flores.saludplus.ui.theme.AzulOscuro
 import com.flores.saludplus.ui.theme.BordeCampo
 import com.flores.saludplus.ui.theme.FondoBusqueda
+import com.flores.saludplus.ui.theme.FondoCampo
 import com.flores.saludplus.ui.theme.AzulPrimario
 import com.flores.saludplus.ui.theme.BordeSuave
 import com.flores.saludplus.ui.theme.Estrella
+import com.flores.saludplus.ui.theme.RojoAviso
 import com.flores.saludplus.ui.theme.TextoPrincipal
 import com.flores.saludplus.ui.theme.TextoSecundario
 import com.flores.saludplus.ui.theme.VerdeClaro
@@ -89,6 +96,9 @@ import com.flores.saludplus.util.Fechas
 // - Fase 2: usan los colores BordeSuave, BordeCampo, FondoBusqueda y TextoSecundario de ui/theme/Color.kt
 // - Fase 2: EspecialidadesScreen usa CampoBusqueda e ItemEspecialidad como lista plana
 // - Fase 2: ItemEspecialidad y TarjetaMedico usan ImagenEspecialidad y FotoMedico (ImagenPorNombre.kt)
+// - Fase 2: TarjetaCita (MisCitasScreen) usa FotoMedico; BotonContornoRojo lo usan DetalleCitaScreen
+//   y PerfilScreen; RojoAviso viene de ui/theme/Color.kt
+// - Fase 2: ChipSeleccion(atenuado = true) lo usa FechaHoraScreen para las horas con cruce de citas (FondoCampo)
 
 // Botón azul de ancho completo (Comenzar, Registrarme, Ingresar...)
 // Fase 2: alto, radio y tamaño de texto configurables (por defecto 56dp, 14dp y 16sp)
@@ -260,24 +270,82 @@ fun LogoClinica(tamano: Int = 96) {
 }
 
 // Commit 9: tarjeta de una cita (médico, especialidad, fecha y hora)
+// Fase 2: tarjeta blanca de esquinas 18dp, borde 1dp BordeSuave y padding 16dp: foto de 72dp a la
+// izquierda, datos en el centro y chevron a la derecha. modifier es opcional (con valor por defecto)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TarjetaCita(cita: Cita, medico: String, especialidad: String, onClick: () -> Unit) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
+fun TarjetaCita(
+    cita: Cita,
+    medico: String,
+    especialidad: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(Color.White)
+            .border(1.dp, BordeSuave, RoundedCornerShape(18.dp))
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(medico, fontWeight = FontWeight.Bold)
-            Text(especialidad, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Event, contentDescription = null, tint = AzulPrimario, modifier = Modifier.size(18.dp))
-                // Fase 2: fecha corta en español, por ejemplo "Mar 6 oct 2026"
-                Text(Fechas.textoCortoDesdeIso(cita.fecha), style = MaterialTheme.typography.bodyMedium)
-                Icon(Icons.Filled.Schedule, contentDescription = null, tint = AzulPrimario, modifier = Modifier.size(18.dp))
-                Text(cita.hora, style = MaterialTheme.typography.bodyMedium)
+        // Fase 2: foto del médico por nombre (o silueta de respaldo), de 72dp
+        FotoMedico(medico, 72.dp)
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            // Fase 2: nombre 20sp negrita y especialidad 17sp gris
+            Text(medico, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = AzulOscuro)
+            Text(especialidad, fontSize = 17.sp, color = TextoSecundario)
+            // Fase 2: fecha y hora con íconos de 22dp; FlowRow pasa la hora abajo si no cabe al lado
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Icon(Icons.Filled.Event, contentDescription = null, tint = AzulPrimario, modifier = Modifier.size(22.dp))
+                    // Fase 2: fecha corta en español, por ejemplo "Mar 6 oct 2026"
+                    Text(Fechas.textoCortoDesdeIso(cita.fecha), fontSize = 18.sp, color = TextoPrincipal)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Icon(Icons.Filled.Schedule, contentDescription = null, tint = AzulPrimario, modifier = Modifier.size(22.dp))
+                    Text(cita.hora, fontSize = 18.sp, color = TextoPrincipal)
+                }
             }
         }
+        // Fase 2: chevron ">" de 28dp
+        Icon(
+            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = TextoPrincipal,
+            modifier = Modifier.size(28.dp)
+        )
+    }
+}
+
+// Fase 2: botón de contorno rojo para acciones delicadas (Cancelar cita, Cerrar sesión).
+// Dibuja un botón de ancho completo de 64dp, esquinas 16dp, borde rojo de 1.5dp y texto rojo
+// de 22sp SemiBold; si recibe icono lo muestra a la izquierda del texto
+@Composable
+fun BotonContornoRojo(
+    texto: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icono: ImageVector? = null
+) {
+    OutlinedButton(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.5.dp, RojoAviso),
+        colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White, contentColor = RojoAviso),
+        modifier = modifier.fillMaxWidth().height(64.dp)
+    ) {
+        if (icono != null) {
+            Icon(icono, contentDescription = null, modifier = Modifier.size(26.dp))
+            Spacer(Modifier.width(10.dp))
+        }
+        Text(texto, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -311,6 +379,8 @@ fun FilaDetalle(
 
 // Commit 7: botón seleccionable para días y horas; se pinta de azul al elegirlo
 // Fase 2: alto y tamaño de texto configurables (por defecto 56dp y el estilo labelMedium)
+// Fase 2: atenuado (por defecto false) lo dibuja con fondo gris claro y texto gris (hora en la que
+// el paciente ya tiene otra cita); sigue recibiendo el clic para poder mostrar el aviso
 @Composable
 fun ChipSeleccion(
     texto: String,
@@ -319,13 +389,23 @@ fun ChipSeleccion(
     modifier: Modifier = Modifier,
     subtitulo: String? = null,
     alto: Dp = 56.dp,
-    tamanoTexto: TextUnit = TextUnit.Unspecified
+    tamanoTexto: TextUnit = TextUnit.Unspecified,
+    atenuado: Boolean = false
 ) {
-    val colorTexto = if (seleccionado) Color.White else MaterialTheme.colorScheme.onSurface
+    val colorTexto = when {
+        seleccionado -> Color.White
+        atenuado -> TextoSecundario.copy(alpha = 0.6f)
+        else -> MaterialTheme.colorScheme.onSurface
+    }
+    val colorFondo = when {
+        seleccionado -> AzulPrimario
+        atenuado -> FondoCampo
+        else -> AzulClaro
+    }
     Column(
         modifier = modifier
             .height(alto)
-            .background(if (seleccionado) AzulPrimario else AzulClaro, RoundedCornerShape(12.dp))
+            .background(colorFondo, RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -521,7 +601,7 @@ fun TarjetaAccion(
 }
 
 // Contenido temporal de cada pantalla pendiente, con botones para seguir el flujo.
-// TODO: quitar su uso en cada pantalla al terminarla
+// Fase 2: ya ninguna pantalla lo usa; se conserva por si se agrega una pantalla nueva
 @Composable
 fun PantallaEnConstruccion(
     titulo: String,

@@ -46,6 +46,8 @@ import com.flores.saludplus.ui.components.ChipSeleccion
 import com.flores.saludplus.ui.components.FotoMedico
 import com.flores.saludplus.ui.theme.AzulClaro
 import com.flores.saludplus.ui.theme.AzulPrimario
+import com.flores.saludplus.ui.theme.RojoAviso
+import com.flores.saludplus.data.model.Cita
 import com.flores.saludplus.util.Fechas
 import java.time.LocalDate
 
@@ -54,8 +56,18 @@ import java.time.LocalDate
 // - Usa BarraSuperior, ChipSeleccion y BotonPrincipal (Componentes.kt)
 // - Fase 2: usa FotoMedico (ImagenPorNombre.kt) para la foto del médico
 // - Llama a Repositorio.obtenerMedico y horariosDisponibles
+// - Fase 2: llama a Repositorio.citaDelUsuarioEn para atenuar las horas en las que el paciente ya tiene cita
+// - Fase 2: mensajeCruce también lo usa ConfirmarCitaScreen
 // - Usa util/Fechas.kt (Fase 2) para generar los días hábiles, el mes y el año con LocalDate
 // - Al continuar envía fecha (ISO "yyyy-MM-dd") y hora a Confirmar cita (onContinuar)
+
+// Fase 2: devuelve el aviso de cruce para una cita existente del paciente, por ejemplo
+// "Ya tienes una cita el Viernes 9 de octubre 2026 a las 08:30 con Dr. Ricardo Núñez. Elige otro horario."
+internal fun mensajeCruce(cita: Cita): String {
+    val medico = Repositorio.obtenerMedico(cita.medicoId)?.nombre ?: "otro médico"
+    return "Ya tienes una cita el ${Fechas.textoLargoDesdeIso(cita.fecha)} a las ${cita.hora} " +
+        "con $medico. Elige otro horario."
+}
 
 // Commit 7: elección de día y hora; los horarios salen de horariosDisponibles
 // Fase 2: los días se generan con LocalDate en lugar de una lista fija
@@ -71,12 +83,15 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
     var fechaSeleccionada by rememberSaveable { mutableStateOf<String?>(dias.first().toString()) }
     // Hora elegida; null mientras no se toque ningún horario
     var horaSeleccionada by rememberSaveable { mutableStateOf<String?>(null) }
+    // Fase 2: aviso de cruce al tocar una hora en la que el paciente ya tiene otra cita (null = sin aviso)
+    var avisoCruce by rememberSaveable { mutableStateOf<String?>(null) }
 
-    // Fase 2: cambia de semana, selecciona su primer día y reinicia la hora
+    // Fase 2: cambia de semana, selecciona su primer día y reinicia la hora y el aviso
     fun cambiarSemana(nuevoDesplazamiento: Int) {
         desplazamientoSemana = nuevoDesplazamiento
         fechaSeleccionada = Fechas.semana(hoy, nuevoDesplazamiento).first().toString()
         horaSeleccionada = null
+        avisoCruce = null
     }
 
     val medico = Repositorio.obtenerMedico(medicoId)
@@ -142,7 +157,7 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
                         texto = Fechas.diaCorto(fecha),
                         subtitulo = fecha.dayOfMonth.toString(),
                         seleccionado = fecha.toString() == fechaSeleccionada,
-                        onClick = { fechaSeleccionada = fecha.toString(); horaSeleccionada = null },
+                        onClick = { fechaSeleccionada = fecha.toString(); horaSeleccionada = null; avisoCruce = null },
                         modifier = Modifier.weight(1f),
                         // Fase 2: los días más altos (100dp) que los botones de hora
                         alto = 100.dp
@@ -170,16 +185,38 @@ fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit, onBack
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(horarios, key = { it }) { hora ->
+                        // Fase 2: cita del paciente a esa misma fecha y hora con otro médico (null = libre)
+                        val cruce = fechaSeleccionada?.let { Repositorio.citaDelUsuarioEn(it, hora) }
                         ChipSeleccion(
                             texto = hora,
                             seleccionado = hora == horaSeleccionada,
-                            onClick = { horaSeleccionada = hora },
+                            onClick = {
+                                // Fase 2: una hora con cruce no se selecciona; solo muestra el aviso
+                                if (cruce != null) {
+                                    avisoCruce = mensajeCruce(cruce)
+                                } else {
+                                    horaSeleccionada = hora
+                                    avisoCruce = null
+                                }
+                            },
                             alto = altoHora,
-                            tamanoTexto = 20.sp
+                            tamanoTexto = 20.sp,
+                            atenuado = cruce != null
                         )
                     }
                 }
             }
+
+            // Fase 2: aviso de cruce en rojo (16sp); minLines reserva siempre su espacio para que la
+            // cuadrícula no cambie de tamaño cuando el aviso aparece o desaparece
+            Text(
+                avisoCruce ?: "",
+                fontSize = 16.sp,
+                lineHeight = 20.sp,
+                minLines = 3,
+                color = RojoAviso,
+                modifier = Modifier.fillMaxWidth()
+            )
 
             // Continuar solo con día y hora elegidos
             BotonPrincipal(

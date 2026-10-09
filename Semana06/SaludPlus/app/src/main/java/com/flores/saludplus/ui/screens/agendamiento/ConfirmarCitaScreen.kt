@@ -49,6 +49,7 @@ import com.flores.saludplus.ui.components.FotoMedico
 import com.flores.saludplus.ui.theme.AzulClaro
 import com.flores.saludplus.ui.theme.AzulPrimario
 import com.flores.saludplus.ui.theme.LineaSeparadora
+import com.flores.saludplus.ui.theme.RojoAviso
 import com.flores.saludplus.util.Fechas
 
 // Relaciones:
@@ -57,7 +58,8 @@ import com.flores.saludplus.util.Fechas
 // - Fase 2: usa FotoMedico (ImagenPorNombre.kt) para la foto del médico
 // - Fase 2: usa el color LineaSeparadora (ui/theme/Color.kt) para las líneas entre los datos de la cita
 // - Llama a Repositorio.obtenerMedico y agendarCita (la fecha se guarda en ISO)
-// - Usa util/Fechas.kt (Fase 2) para mostrar la fecha en español
+// - Fase 2: llama a Repositorio.citaDelUsuarioEn y usa mensajeCruce (FechaHoraScreen.kt) para avisar cruces
+// - Usa util/Fechas.kt (Fase 2) para mostrar la fecha en español y el rango de hora (rangoHora)
 // - Al agendar envía el id de la cita a Cita agendada (onCitaAgendada)
 
 // Commit 8: resumen de la cita con motivo opcional; al confirmar se guarda en el Repositorio
@@ -71,14 +73,15 @@ fun ConfirmarCitaScreen(
 ) {
     var motivo by rememberSaveable { mutableStateOf("") }
     var horarioOcupado by rememberSaveable { mutableStateOf(false) }
+    // Fase 2: aviso de cruce con otra cita del paciente (null = sin cruce)
+    var avisoCruce by rememberSaveable { mutableStateOf<String?>(null) }
 
     val medico = Repositorio.obtenerMedico(medicoId)
     val especialidad = medico?.let { Repositorio.obtenerEspecialidad(it.especialidadId)?.nombre } ?: ""
 
     // Rango de la consulta: la hora elegida hasta 30 minutos después
-    val (h, m) = hora.split(":").map { it.toInt() }
-    val fin = h * 60 + m + 30
-    val rangoHora = "$hora a %02d:%02d".format(fin / 60, fin % 60)
+    // Fase 2: se calcula con Fechas.rangoHora (igual que en Cita agendada y Detalle de cita)
+    val rangoHora = Fechas.rangoHora(hora)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -166,13 +169,22 @@ fun ConfirmarCitaScreen(
                     if (horarioOcupado) {
                         Text("Ese horario ya fue reservado. Vuelve y elige otro.", fontSize = 16.sp, color = MaterialTheme.colorScheme.error)
                     }
+                    // Fase 2: aviso en rojo si el paciente ya tiene otra cita a esa fecha y hora
+                    avisoCruce?.let { Text(it, fontSize = 16.sp, color = RojoAviso) }
                 }
             }
 
             // Fase 2: botón fijo abajo, fuera de la zona desplazable
             BotonPrincipal("Agendar cita", onClick = {
-                val cita = Repositorio.agendarCita(medicoId, fecha, hora, motivo.trim())
-                if (cita != null) onCitaAgendada(cita.id) else horarioOcupado = true
+                // Fase 2: antes de agendar comprueba si el paciente ya tiene una cita a esa fecha y hora
+                val cruce = Repositorio.citaDelUsuarioEn(fecha, hora)
+                if (cruce != null) {
+                    avisoCruce = mensajeCruce(cruce)
+                    horarioOcupado = false
+                } else {
+                    val cita = Repositorio.agendarCita(medicoId, fecha, hora, motivo.trim())
+                    if (cita != null) onCitaAgendada(cita.id) else horarioOcupado = true
+                }
             }, modifier = Modifier.padding(bottom = 16.dp))
         }
     }

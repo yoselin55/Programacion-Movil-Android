@@ -34,6 +34,7 @@ import com.flores.saludplus.ui.components.TarjetaMedico
 // - La llama AppNavigation en Rutas.MEDICOS y recibe especialidadId de la ruta
 // - Usa BarraSuperior, CampoBusqueda y TarjetaMedico (Componentes.kt)
 // - Fase 2: muestra 4 tarjetas por pantalla (alto calculado con BoxWithConstraints) y el resto con scroll
+//   (la lista ocupa el alto libre con weight(1f) y deja 24dp abajo)
 // - Llama a Repositorio.obtenerEspecialidad y buscarMedicos; al elegir uno pasa medicoId a Fecha y hora
 
 // Commit 6: médicos de la especialidad recibida por parámetro, con búsqueda
@@ -76,7 +77,8 @@ fun MedicosScreen(especialidadId: Int, onMedico: (Int) -> Unit, onBack: () -> Un
                 val altoTarjeta = ((maxHeight - 12.dp * 3 - 16.dp) / 4).coerceAtLeast(110.dp)
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 16.dp),
+                    // Fase 2: 24dp abajo para que la última tarjeta no quede pegada al borde
+                    contentPadding = PaddingValues(bottom = 24.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(lista, key = { it.id }) { medico ->

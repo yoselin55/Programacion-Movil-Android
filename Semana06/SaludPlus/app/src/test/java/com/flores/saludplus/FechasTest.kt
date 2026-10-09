@@ -7,7 +7,7 @@ import org.junit.Test
 import java.time.LocalDate
 
 // Relaciones:
-// - Prueba el object Fechas (util/Fechas.kt)
+// - Prueba el object Fechas (util/Fechas.kt), incluido rangoHora (Fase 2)
 // - Usa JUnit 4 y java.time.LocalDate
 
 // Fase 2: pruebas unitarias de la utilidad de fechas
@@ -85,5 +85,24 @@ class FechasTest {
     @Test
     fun textoLargoDesdeIso_textoInvalido_devuelveMismoTexto() {
         assertEquals("fecha-invalida", Fechas.textoLargoDesdeIso("fecha-invalida"))
+    }
+
+    // Fase 2: verifica el rango de 30 minutos dentro de la misma hora ("09:30" -> "09:30 a 10:00")
+    @Test
+    fun rangoHora_nueveYMedia() {
+        assertEquals("09:30 a 10:00", Fechas.rangoHora("09:30"))
+    }
+
+    // Fase 2: verifica el rango cuando la consulta empieza en hora en punto ("08:00" -> "08:00 a 08:30")
+    @Test
+    fun rangoHora_horaEnPunto() {
+        assertEquals("08:00 a 08:30", Fechas.rangoHora("08:00"))
+    }
+
+    // Fase 2: verifica que una hora inválida se devuelve igual, sin lanzar excepción
+    @Test
+    fun rangoHora_textoInvalido_devuelveMismoTexto() {
+        assertEquals("hora-invalida", Fechas.rangoHora("hora-invalida"))
+        assertEquals("25:99", Fechas.rangoHora("25:99"))
     }
 }

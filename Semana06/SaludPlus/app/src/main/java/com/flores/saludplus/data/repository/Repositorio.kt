@@ -17,6 +17,7 @@ import com.flores.saludplus.data.model.Usuario
 // - Usa los modelos Usuario, Especialidad, Medico y Cita (data/model)
 // - Lo llamarán las pantallas de ui/screens para leer y guardar datos
 // - Es un object único: sus colecciones se comparten en toda la app
+// - Fase 2: citaDelUsuarioEn lo usan FechaHoraScreen y ConfirmarCitaScreen para evitar cruces de citas
 
 // Datos en memoria (sin base de datos): se pierden al cerrar la app
 object Repositorio {
@@ -110,9 +111,11 @@ object Repositorio {
     }
 
     // Crea la cita si hay sesión y el horario sigue libre (any); si no, devuelve null
+    // Fase 2: también devuelve null si el paciente ya tiene otra cita a esa fecha y hora (citaDelUsuarioEn)
     fun agendarCita(medicoId: Int, fecha: String, hora: String, motivo: String): Cita? {
         val usuario = usuarioActual ?: return null
         if (citas.any { it.medicoId == medicoId && it.fecha == fecha && it.hora == hora }) return null
+        if (citaDelUsuarioEn(fecha, hora) != null) return null
         val nueva = Cita((citas.maxOfOrNull { it.id } ?: 0) + 1, usuario.id, medicoId, fecha, hora, motivo)
         citas.add(nueva)
         return nueva
@@ -123,9 +126,15 @@ object Repositorio {
         citas.filter { it.usuarioId == usuarioActual?.id }
             .sortedWith(compareBy({ it.fecha }, { it.hora }))
 
+    // Fase 2: busca con find, entre las citas del usuario en sesión, la que tenga exactamente esa fecha
+    // y hora (con cualquier médico); devuelve null si no hay ninguna
+    fun citaDelUsuarioEn(fecha: String, hora: String): Cita? =
+        citasDelUsuario().find { it.fecha == fecha && it.hora == hora }
+
     // Busca con find la cita por id (null si no existe)
     fun obtenerCita(id: Int): Cita? = citas.find { it.id == id }
 
-    // TODO: removeIf por id y devolver si se eliminó
-    fun cancelarCita(id: Int): Boolean = false
+    // Fase 2: elimina con removeIf la cita con ese id; devuelve true si se eliminó y false si no existía.
+    // Al quitarla, su hora vuelve a aparecer en horariosDisponibles
+    fun cancelarCita(id: Int): Boolean = citas.removeIf { it.id == id }
 }

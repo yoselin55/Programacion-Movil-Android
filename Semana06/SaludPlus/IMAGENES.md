@@ -10,10 +10,9 @@ Todas están en `app/src/main/res/drawable`. Al reemplazar una imagen **el códi
 ## Estado actual
 
 - Las **7 imágenes de especialidades** ya existen (`.png` circulares de 256x256 con su fondo pastel).
-- Las **4 fotos reales de médicos** ya existen: `dra_ana_torres`, `dra_claudia_rojas`, `dr_luis_ramirez`, `dra_mariana_soto`.
-- Los **otros 8 médicos** usan placeholders `.xml` (círculo azul claro con silueta): `dr_carlos_mendoza`,
-  `dra_lucia_vargas`, `dra_sofia_paredes`, `dr_jorge_salas`, `dr_ricardo_nunez`, `dra_patricia_leon`,
-  `dr_andres_quispe`, `dra_elena_campos`.
+- Los **12 médicos ya tienen foto real** (`.png` circulares de 256x256 con fondo transparente):
+  4 del diseño (`dra_ana_torres`, `dra_claudia_rojas`, `dr_luis_ramirez`, `dra_mariana_soto`) y 8 descargadas
+  de Pexels en la Fase 2 (ver **Créditos**). Ya no quedan placeholders `.xml` de médicos.
 
 | Archivo | Corresponde en la interfaz a | Estado |
 |---|---|---|
@@ -30,14 +29,14 @@ Todas están en `app/src/main/res/drawable`. Al reemplazar una imagen **el códi
 | `dra_claudia_rojas.png` | Foto de Dra. Claudia Rojas en Médicos, Fecha y hora y Confirmar | Imagen real |
 | `dr_luis_ramirez.png` | Foto de Dr. Luis Ramírez en Médicos, Fecha y hora y Confirmar | Imagen real |
 | `dra_mariana_soto.png` | Foto de Dra. Mariana Soto en Médicos, Fecha y hora y Confirmar | Imagen real |
-| `dr_carlos_mendoza.xml` | Foto de Dr. Carlos Mendoza en Médicos, Fecha y hora y Confirmar | Placeholder (reemplazar) |
-| `dra_lucia_vargas.xml` | Foto de Dra. Lucía Vargas en Médicos, Fecha y hora y Confirmar | Placeholder (reemplazar) |
-| `dra_sofia_paredes.xml` | Foto de Dra. Sofía Paredes en Médicos, Fecha y hora y Confirmar | Placeholder (reemplazar) |
-| `dr_jorge_salas.xml` | Foto de Dr. Jorge Salas en Médicos, Fecha y hora y Confirmar | Placeholder (reemplazar) |
-| `dr_ricardo_nunez.xml` | Foto de Dr. Ricardo Núñez en Médicos, Fecha y hora y Confirmar | Placeholder (reemplazar) |
-| `dra_patricia_leon.xml` | Foto de Dra. Patricia León en Médicos, Fecha y hora y Confirmar | Placeholder (reemplazar) |
-| `dr_andres_quispe.xml` | Foto de Dr. Andrés Quispe en Médicos, Fecha y hora y Confirmar | Placeholder (reemplazar) |
-| `dra_elena_campos.xml` | Foto de Dra. Elena Campos en Médicos, Fecha y hora y Confirmar | Placeholder (reemplazar) |
+| `dr_carlos_mendoza.png` | Foto de Dr. Carlos Mendoza en Médicos, Fecha y hora y Confirmar | Imagen real (Pexels, ver Créditos) |
+| `dra_lucia_vargas.png` | Foto de Dra. Lucía Vargas en Médicos, Fecha y hora y Confirmar | Imagen real (Pexels, ver Créditos) |
+| `dra_sofia_paredes.png` | Foto de Dra. Sofía Paredes en Médicos, Fecha y hora y Confirmar | Imagen real (Pexels, ver Créditos) |
+| `dr_jorge_salas.png` | Foto de Dr. Jorge Salas en Médicos, Fecha y hora y Confirmar | Imagen real (Pexels, ver Créditos) |
+| `dr_ricardo_nunez.png` | Foto de Dr. Ricardo Núñez en Médicos, Fecha y hora y Confirmar | Imagen real (Pexels, ver Créditos) |
+| `dra_patricia_leon.png` | Foto de Dra. Patricia León en Médicos, Fecha y hora y Confirmar | Imagen real (Pexels, ver Créditos) |
+| `dr_andres_quispe.png` | Foto de Dr. Andrés Quispe en Médicos, Fecha y hora y Confirmar | Imagen real (Pexels, ver Créditos) |
+| `dra_elena_campos.png` | Foto de Dra. Elena Campos en Médicos, Fecha y hora y Confirmar | Imagen real (Pexels, ver Créditos) |
 
 ## Cómo reemplazar un placeholder de médico
 
@@ -48,3 +47,21 @@ Todas están en `app/src/main/res/drawable`. Al reemplazar una imagen **el códi
 Para cambiar una imagen que ya es real, reemplaza el archivo por otro con el mismo nombre
 (si cambias la extensión, borra el anterior). Si una especialidad no tuviera imagen, la app dibuja
 un círculo pastel con su ícono.
+
+## Créditos
+
+Las 8 fotos se descargaron de [Pexels](https://www.pexels.com). La [licencia de Pexels](https://www.pexels.com/license/)
+permite el uso gratuito, también comercial, sin atribución obligatoria; se dejan los créditos por cortesía.
+Cada foto se recortó en cuadrado centrado en el rostro, se redujo a 256x256 px y se le aplicó una máscara
+circular con fondo transparente (Python + Pillow).
+
+| Archivo | Página de origen | Fotógrafo | Licencia |
+|---|---|---|---|
+| `dra_lucia_vargas.png` | https://www.pexels.com/photo/a-woman-wearing-a-stethoscope-6749773/ | Antoni Shkraba | Licencia de Pexels |
+| `dra_sofia_paredes.png` | https://www.pexels.com/photo/smiling-doctor-with-a-stethoscope-around-her-neck-18828741/ | Tessy Agbonome | Licencia de Pexels |
+| `dra_patricia_leon.png` | https://www.pexels.com/photo/portrait-of-doctor-15752232/ | Yasin Aydın | Licencia de Pexels |
+| `dra_elena_campos.png` | https://www.pexels.com/photo/portrait-of-smiling-black-woman-doctor-in-medical-robe-19596247/ | MARTINS JOHN | Licencia de Pexels |
+| `dr_carlos_mendoza.png` | https://www.pexels.com/photo/a-doctor-wearing-a-white-coat-8460090/ | Los Muertos Crew | Licencia de Pexels |
+| `dr_jorge_salas.png` | https://www.pexels.com/photo/man-in-white-coat-4989142/ | Ivan S | Licencia de Pexels |
+| `dr_ricardo_nunez.png` | https://www.pexels.com/photo/middle-aged-doctor-in-white-apron-5531446/ | Kevin Steven Ortega Eliett | Licencia de Pexels |
+| `dr_andres_quispe.png` | https://www.pexels.com/photo/doctor-19438560/ | Oys Photography | Licencia de Pexels |
