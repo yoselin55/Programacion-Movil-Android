@@ -38,11 +38,15 @@ import com.flores.lavacampus.model.Rol
 import com.flores.lavacampus.ui.estudiante.DetallePedidoScreen
 import com.flores.lavacampus.ui.estudiante.InicioScreen
 import com.flores.lavacampus.ui.estudiante.LoginScreen
+import com.flores.lavacampus.ui.estudiante.MisPedidosScreen
+import com.flores.lavacampus.ui.estudiante.TarifasScreen
 import com.flores.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.flores.lavacampus.ui.estudiante.SplashScreen
 import com.flores.lavacampus.viewmodel.DetallePedidoViewModel
 import com.flores.lavacampus.viewmodel.InicioViewModel
 import com.flores.lavacampus.viewmodel.LavaViewModelFactory
+import com.flores.lavacampus.viewmodel.MisPedidosViewModel
+import com.flores.lavacampus.viewmodel.TarifasViewModel
 import com.flores.lavacampus.viewmodel.NuevoPedidoViewModel
 import com.flores.lavacampus.viewmodel.SesionViewModel
 
@@ -168,8 +172,24 @@ fun NavLava(
                 )
                 DetallePedidoScreen(vm = vm, onVolver = { nav.popBackStack() })
             }
-            composable(Rutas.PEDIDOS) { Provisional("Mis pedidos (Paso 10)") }
-            composable(Rutas.TARIFAS) { Provisional("Tarifas (Paso 10)") }
+            composable(Rutas.PEDIDOS) {
+                usuario?.let { u ->
+                    val vm: MisPedidosViewModel = viewModel(
+                        key = "pedidos${u.id}",
+                        factory = LavaViewModelFactory(repo, prefs, u)
+                    )
+                    MisPedidosScreen(
+                        vm = vm,
+                        onVolver = { nav.popBackStack(Rutas.INICIO, inclusive = false) },
+                        onVerPedido = { nav.navigate(Rutas.detalle(it)) },
+                        onNuevoPedido = { nav.navigate(Rutas.NUEVO_PEDIDO) }
+                    )
+                }
+            }
+            composable(Rutas.TARIFAS) {
+                val vm: TarifasViewModel = viewModel(factory = LavaViewModelFactory(repo, prefs))
+                TarifasScreen(vm = vm, onVolver = { nav.popBackStack(Rutas.INICIO, inclusive = false) })
+            }
             composable(Rutas.PERFIL) { Provisional("Perfil (Paso 13)") }
             composable(Rutas.PANEL) { Provisional("Panel del administrador") }
         }
