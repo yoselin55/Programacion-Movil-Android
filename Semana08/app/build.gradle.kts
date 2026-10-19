@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp) // procesador que genera el codigo de Room
 }
 
 android {
@@ -11,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.flores.lavacampus"
-        minSdk = 24
+        minSdk = 26 // java.time (LocalDate) sin librerias extra
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
@@ -43,6 +44,20 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
+
+    // Iconos Material, navegacion y ViewModel para Compose
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // Room: base de datos SQLite local (ksp genera el codigo de los DAO)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // DataStore: preferencias pequenas (perfil activo, modo oscuro)
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
