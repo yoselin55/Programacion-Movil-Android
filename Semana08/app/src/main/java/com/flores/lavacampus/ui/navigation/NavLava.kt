@@ -35,9 +35,11 @@ import com.flores.lavacampus.data.repository.LavaRepository
 import com.flores.lavacampus.model.Rol
 import com.flores.lavacampus.ui.estudiante.InicioScreen
 import com.flores.lavacampus.ui.estudiante.LoginScreen
+import com.flores.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.flores.lavacampus.ui.estudiante.SplashScreen
 import com.flores.lavacampus.viewmodel.InicioViewModel
 import com.flores.lavacampus.viewmodel.LavaViewModelFactory
+import com.flores.lavacampus.viewmodel.NuevoPedidoViewModel
 import com.flores.lavacampus.viewmodel.SesionViewModel
 
 private fun destinoDe(rol: Rol) = if (rol == Rol.ADMIN) Rutas.PANEL else Rutas.INICIO
@@ -73,10 +75,15 @@ fun NavLava(
                         NavigationBarItem(
                             selected = rutaActual == p.ruta,
                             onClick = {
-                                nav.navigate(p.ruta) {
-                                    popUpTo(Rutas.INICIO) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
+                                if (p.ruta == Rutas.INICIO) {
+                                    // Inicio es la base de la pila: se vuelve a ella sin restaurar nada
+                                    nav.popBackStack(Rutas.INICIO, inclusive = false)
+                                } else {
+                                    nav.navigate(p.ruta) {
+                                        popUpTo(Rutas.INICIO) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
                                 }
                             },
                             icon = { Icon(p.icono, contentDescription = p.texto) },
@@ -130,7 +137,22 @@ fun NavLava(
                 }
             }
             // Pantallas provisionales: se reemplazan en los pasos siguientes
-            composable(Rutas.NUEVO_PEDIDO) { Provisional("Nuevo pedido (Paso 8)") }
+            composable(Rutas.NUEVO_PEDIDO) {
+                usuario?.let { u ->
+                    val vm: NuevoPedidoViewModel = viewModel(
+                        key = "nuevo${u.id}",
+                        factory = LavaViewModelFactory(repo, prefs, u)
+                    )
+                    NuevoPedidoScreen(
+                        vm = vm,
+                        onVolver = { nav.popBackStack() },
+                        // Al crear el pedido se vuelve a Mis pedidos (sin dejar Nuevo pedido atras)
+                        onPedidoCreado = {
+                            nav.navigate(Rutas.PEDIDOS) { popUpTo(Rutas.NUEVO_PEDIDO) { inclusive = true } }
+                        }
+                    )
+                }
+            }
             composable(Rutas.DETALLE) { Provisional("Detalle del pedido (Paso 9)") }
             composable(Rutas.PEDIDOS) { Provisional("Mis pedidos (Paso 10)") }
             composable(Rutas.TARIFAS) { Provisional("Tarifas (Paso 10)") }

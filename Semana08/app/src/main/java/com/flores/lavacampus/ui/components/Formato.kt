@@ -1,6 +1,8 @@
 package com.flores.lavacampus.ui.components
 
+import com.flores.lavacampus.data.local.entity.Servicio
 import com.flores.lavacampus.data.local.relation.PedidoConDetalle
+import com.flores.lavacampus.model.Unidad
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -27,3 +29,6 @@ fun PedidoConDetalle.resumenCantidad(): String {
         if (piezas > 0) "$piezas prendas" else null
     ).joinToString(" + ")
 }
+
+// "S/ 8.00 por kg", "S/ 2.50 por prenda", "S/ 20.00 por unidad"
+fun Servicio.textoPrecio(): String = "${precio.soles()} por ${Unidad.de(unidad).texto}"

@@ -1,0 +1,180 @@
+package com.flores.lavacampus.ui.estudiante
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.flores.lavacampus.data.local.entity.Servicio
+import com.flores.lavacampus.model.Unidad
+import com.flores.lavacampus.ui.components.AppTopBar
+import com.flores.lavacampus.ui.components.IconoServicio
+import com.flores.lavacampus.ui.components.LavaButton
+import com.flores.lavacampus.ui.components.LavaTextField
+import com.flores.lavacampus.ui.components.SelectorCantidad
+import com.flores.lavacampus.ui.components.fechaCorta
+import com.flores.lavacampus.ui.components.soles
+import com.flores.lavacampus.ui.components.textoPrecio
+import com.flores.lavacampus.viewmodel.NuevoPedidoViewModel
+import java.util.Locale
+
+// La View solo muestra el estado y avisa los clics; las reglas estan en el ViewModel
+@Composable
+fun NuevoPedidoScreen(vm: NuevoPedidoViewModel, onVolver: () -> Unit, onPedidoCreado: () -> Unit) {
+    val servicios by vm.servicios.collectAsState()
+    val cantidades by vm.cantidades.collectAsState()
+    val total by vm.total.collectAsState()
+    val fechaEntrega by vm.fechaEntrega.collectAsState()
+    val nota by vm.nota.collectAsState()
+    val mensaje by vm.mensaje.collectAsState()
+    val puedeConfirmar by vm.puedeConfirmar.collectAsState()
+    val gris = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+
+    Column(Modifier.fillMaxSize()) {
+        AppTopBar("Nuevo pedido", onVolver)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text("¿Qué necesitas?", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+
+            servicios.forEach { s ->
+                val cantidad = cantidades[s.id] ?: 0.0
+                val unidad = Unidad.de(s.unidad)
+                FilaServicio(
+                    servicio = s,
+                    cantidad = cantidad,
+                    onMenos = { vm.cambiarCantidad(s.id, -unidad.paso) },
+                    onMas = { vm.cambiarCantidad(s.id, unidad.paso) }
+                )
+            }
+
+            LavaTextField(
+                value = nota,
+                onValueChange = vm::cambiarNota,
+                etiqueta = "Nota (opcional)",
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Resumen: una linea por servicio elegido
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Resumen", fontWeight = FontWeight.Bold)
+                    val elegidos = servicios.filter { (cantidades[it.id] ?: 0.0) > 0 }
+                    if (elegidos.isEmpty()) Text("Aún no elegiste servicios", color = gris, fontSize = 13.sp)
+                    elegidos.forEach { s ->
+                        val c = cantidades.getValue(s.id)
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("${s.nombre} (${texto(c)} ${if (c == 1.0) Unidad.de(s.unidad).texto else Unidad.de(s.unidad).plural})", fontSize = 13.sp)
+                            Text((c * s.precio).soles(), fontSize = 13.sp)
+                        }
+                    }
+                    HorizontalDivider()
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Total", fontWeight = FontWeight.Bold)
+                        Text(total.soles(), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    }
+                    Text(
+                        "Entrega estimada: ${fechaEntrega?.fechaCorta() ?: "—"}",
+                        fontSize = 12.sp,
+                        color = gris
+                    )
+                }
+            }
+            mensaje?.let { Text(it, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold) }
+        }
+
+        LavaButton(
+            texto = "Confirmar pedido",
+            onClick = { vm.confirmar(onPedidoCreado) },
+            habilitado = puedeConfirmar,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        )
+    }
+}
+
+@Composable
+private fun FilaServicio(servicio: Servicio, cantidad: Double, onMenos: () -> Unit, onMas: () -> Unit) {
+    val unidad = Unidad.de(servicio.unidad)
+    val elegido = cantidad > 0
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (elegido) MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surface
+        ),
+        border = BorderStroke(
+            if (elegido) 1.5.dp else 1.dp,
+            if (elegido) MaterialTheme.colorScheme.primary else Color(0xFFE2E8F0)
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            Modifier.padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+            ) {
+                IconoServicio(servicio.icono, MaterialTheme.colorScheme.primary)
+            }
+            Column(Modifier.weight(1f)) {
+                Text(servicio.nombre, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(
+                    "${servicio.textoPrecio()} · ${servicio.horasEntrega} h",
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+            SelectorCantidad(
+                valor = cantidad,
+                paso = unidad.paso,
+                maximo = unidad.maximo,
+                onMenos = onMenos,
+                onMas = onMas
+            )
+        }
+    }
+}
+
+// 3.5 -> "3.5", 5.0 -> "5"
+private fun texto(c: Double): String =
+    if (c % 1.0 == 0.0) c.toInt().toString() else String.format(Locale.US, "%.1f", c)
