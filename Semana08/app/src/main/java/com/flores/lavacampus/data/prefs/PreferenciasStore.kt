@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.map
 private val Context.dataStore by preferencesDataStore("ajustes")
 
 // Solo preferencias pequenas (clave-valor). Pedidos, servicios y usuarios van en Room
+// Guarda: perfil activo, modo oscuro, avisos y si la lavanderia recibe pedidos
 class PreferenciasStore(private val context: Context) {
 
     private object Claves {
