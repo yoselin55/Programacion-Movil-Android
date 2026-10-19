@@ -3,13 +3,16 @@ package com.flores.lavacampus
 import android.app.Application
 import com.flores.lavacampus.data.local.DatosIniciales
 import com.flores.lavacampus.data.local.LavaDatabase
+import com.flores.lavacampus.data.repository.LavaRepository
+import com.flores.lavacampus.data.repository.LavaRepositoryRoom
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class LavaApp : Application() {
     val database: LavaDatabase by lazy { LavaDatabase.obtener(this) }
-    // TODO (Paso 4): val repository = LavaRepositoryRoom(database)
+    // Los ViewModels reciben el repository como interface (LavaRepository)
+    val repository: LavaRepository by lazy { LavaRepositoryRoom(database) }
 
     override fun onCreate() {
         super.onCreate()
