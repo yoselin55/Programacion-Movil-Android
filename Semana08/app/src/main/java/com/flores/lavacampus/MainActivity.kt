@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavLava(sesionVm)
+                    NavLava(sesionVm, (application as LavaApp).repository, (application as LavaApp).prefs)
                 }
             }
         }
