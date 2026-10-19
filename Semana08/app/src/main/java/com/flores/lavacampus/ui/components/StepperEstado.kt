@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -76,6 +78,68 @@ fun StepperEstado(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f)
                 )
+            }
+        }
+    }
+}
+
+// Version vertical (pantalla Detalle): una fila por etapa con un texto a la derecha
+@Composable
+fun StepperEstadoVertical(
+    estado: EstadoPedido,
+    colorActivo: Color,
+    colorInactivo: Color,
+    colorTexto: Color,
+    textoDerecha: (EstadoPedido) -> String,
+    modifier: Modifier = Modifier
+) {
+    val actual = etapas.indexOf(estado)
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        etapas.forEachIndexed { i, etapa ->
+            val alcanzada = i <= actual
+            Row(modifier = Modifier.fillMaxWidth().height(52.dp)) {
+                Canvas(modifier = Modifier.width(32.dp).height(52.dp)) {
+                    val cx = size.width / 2
+                    val cy = 14.dp.toPx()
+                    val radio = 11.dp.toPx()
+                    // Linea hacia la etapa siguiente
+                    if (i < etapas.size - 1) {
+                        drawLine(
+                            color = if (i < actual) colorActivo else colorInactivo,
+                            start = Offset(cx, cy + radio),
+                            end = Offset(cx, size.height + 14.dp.toPx() - radio),
+                            strokeWidth = 3.dp.toPx()
+                        )
+                    }
+                    val c = Offset(cx, cy)
+                    if (alcanzada) {
+                        drawCircle(colorActivo, radio, c)
+                        val g = 2.dp.toPx()
+                        drawLine(Color.White, Offset(cx - 4.dp.toPx(), cy), Offset(cx - 1.dp.toPx(), cy + 3.dp.toPx()), g, StrokeCap.Round)
+                        drawLine(Color.White, Offset(cx - 1.dp.toPx(), cy + 3.dp.toPx()), Offset(cx + 4.dp.toPx(), cy - 3.dp.toPx()), g, StrokeCap.Round)
+                    } else {
+                        drawCircle(Color.White, radio, c)
+                        drawCircle(colorInactivo, radio, c, style = Stroke(2.dp.toPx()))
+                    }
+                }
+                Row(
+                    modifier = Modifier.weight(1f).padding(start = 10.dp, top = 6.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Text(
+                        etapa.texto,
+                        fontSize = 14.sp,
+                        fontWeight = if (i == actual) FontWeight.Bold else FontWeight.Normal,
+                        color = if (alcanzada) colorTexto else colorInactivo,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        textoDerecha(etapa),
+                        fontSize = 12.sp,
+                        color = if (alcanzada) colorTexto.copy(alpha = 0.7f) else colorInactivo
+                    )
+                }
             }
         }
     }

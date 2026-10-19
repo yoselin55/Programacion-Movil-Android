@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -33,10 +35,12 @@ import androidx.navigation.compose.rememberNavController
 import com.flores.lavacampus.data.prefs.PreferenciasStore
 import com.flores.lavacampus.data.repository.LavaRepository
 import com.flores.lavacampus.model.Rol
+import com.flores.lavacampus.ui.estudiante.DetallePedidoScreen
 import com.flores.lavacampus.ui.estudiante.InicioScreen
 import com.flores.lavacampus.ui.estudiante.LoginScreen
 import com.flores.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.flores.lavacampus.ui.estudiante.SplashScreen
+import com.flores.lavacampus.viewmodel.DetallePedidoViewModel
 import com.flores.lavacampus.viewmodel.InicioViewModel
 import com.flores.lavacampus.viewmodel.LavaViewModelFactory
 import com.flores.lavacampus.viewmodel.NuevoPedidoViewModel
@@ -153,7 +157,17 @@ fun NavLava(
                     )
                 }
             }
-            composable(Rutas.DETALLE) { Provisional("Detalle del pedido (Paso 9)") }
+            composable(
+                Rutas.DETALLE,
+                arguments = listOf(navArgument("id") { type = NavType.IntType })
+            ) { entrada ->
+                val id = entrada.arguments?.getInt("id") ?: 0
+                val vm: DetallePedidoViewModel = viewModel(
+                    key = "detalle$id",
+                    factory = LavaViewModelFactory(repo, prefs, pedidoId = id)
+                )
+                DetallePedidoScreen(vm = vm, onVolver = { nav.popBackStack() })
+            }
             composable(Rutas.PEDIDOS) { Provisional("Mis pedidos (Paso 10)") }
             composable(Rutas.TARIFAS) { Provisional("Tarifas (Paso 10)") }
             composable(Rutas.PERFIL) { Provisional("Perfil (Paso 13)") }

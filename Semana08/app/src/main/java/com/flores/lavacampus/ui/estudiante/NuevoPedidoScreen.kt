@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -26,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.flores.lavacampus.data.local.entity.Servicio
@@ -52,6 +55,7 @@ fun NuevoPedidoScreen(vm: NuevoPedidoViewModel, onVolver: () -> Unit, onPedidoCr
     val mensaje by vm.mensaje.collectAsState()
     val puedeConfirmar by vm.puedeConfirmar.collectAsState()
     val gris = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    val primario = MaterialTheme.colorScheme.primary
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar("Nuevo pedido", onVolver)
@@ -62,14 +66,13 @@ fun NuevoPedidoScreen(vm: NuevoPedidoViewModel, onVolver: () -> Unit, onPedidoCr
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("¿Qué necesitas?", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text("¿Qué necesitas?", fontWeight = FontWeight.Bold, fontSize = 16.sp)
 
             servicios.forEach { s ->
-                val cantidad = cantidades[s.id] ?: 0.0
                 val unidad = Unidad.de(s.unidad)
                 FilaServicio(
                     servicio = s,
-                    cantidad = cantidad,
+                    cantidad = cantidades[s.id] ?: 0.0,
                     onMenos = { vm.cambiarCantidad(s.id, -unidad.paso) },
                     onMas = { vm.cambiarCantidad(s.id, unidad.paso) }
                 )
@@ -84,35 +87,56 @@ fun NuevoPedidoScreen(vm: NuevoPedidoViewModel, onVolver: () -> Unit, onPedidoCr
 
             // Resumen: una linea por servicio elegido
             Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                ),
+                border = BorderStroke(1.dp, primario.copy(alpha = 0.35f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Resumen", fontWeight = FontWeight.Bold)
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Resumen", fontWeight = FontWeight.Bold, color = primario, fontSize = 13.sp)
                     val elegidos = servicios.filter { (cantidades[it.id] ?: 0.0) > 0 }
-                    if (elegidos.isEmpty()) Text("Aún no elegiste servicios", color = gris, fontSize = 13.sp)
+                    if (elegidos.isEmpty()) Text("Aún no elegiste servicios", color = gris, fontSize = 12.sp)
                     elegidos.forEach { s ->
                         val c = cantidades.getValue(s.id)
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("${s.nombre} (${texto(c)} ${if (c == 1.0) Unidad.de(s.unidad).texto else Unidad.de(s.unidad).plural})", fontSize = 13.sp)
-                            Text((c * s.precio).soles(), fontSize = 13.sp)
+                        val u = Unidad.de(s.unidad)
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text(s.nombre, fontSize = 12.sp)
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                "${texto(c)} ${if (c == 1.0) u.texto else u.plural}",
+                                fontSize = 12.sp,
+                                color = gris,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text((c * s.precio).soles(), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
-                    HorizontalDivider()
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Total", fontWeight = FontWeight.Bold)
-                        Text(total.soles(), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    HorizontalDivider(color = primario.copy(alpha = 0.25f))
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text("Total", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                        Text(total.soles(), fontWeight = FontWeight.Bold, fontSize = 20.sp, color = primario)
                     }
-                    Text(
-                        "Entrega estimada: ${fechaEntrega?.fechaCorta() ?: "—"}",
-                        fontSize = 12.sp,
-                        color = gris
-                    )
                 }
             }
-            mensaje?.let { Text(it, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold) }
+
+            Text(
+                "Entrega estimada: ${fechaEntrega?.fechaCorta() ?: "—"}",
+                fontSize = 12.sp,
+                color = gris,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            mensaje?.let {
+                Text(
+                    it,
+                    color = MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
         LavaButton(
@@ -130,47 +154,51 @@ fun NuevoPedidoScreen(vm: NuevoPedidoViewModel, onVolver: () -> Unit, onPedidoCr
 private fun FilaServicio(servicio: Servicio, cantidad: Double, onMenos: () -> Unit, onMas: () -> Unit) {
     val unidad = Unidad.de(servicio.unidad)
     val elegido = cantidad > 0
+    val primario = MaterialTheme.colorScheme.primary
+
     Card(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (elegido) MaterialTheme.colorScheme.primaryContainer
+            containerColor = if (elegido) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
             else MaterialTheme.colorScheme.surface
         ),
         border = BorderStroke(
             if (elegido) 1.5.dp else 1.dp,
-            if (elegido) MaterialTheme.colorScheme.primary else Color(0xFFE2E8F0)
+            if (elegido) primario else Color(0xFFE2E8F0)
         ),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
-            Modifier.padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-            ) {
-                IconoServicio(servicio.icono, MaterialTheme.colorScheme.primary)
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                // Icono: turquesa si esta elegido, gris si no
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (elegido) MaterialTheme.colorScheme.primaryContainer else Color(0xFFF1F5F9))
+                ) {
+                    IconoServicio(servicio.icono, if (elegido) primario else Color(0xFF64748B), 28.dp)
+                }
+                Column {
+                    Text(servicio.nombre, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(
+                        "${servicio.textoPrecio()} · ${servicio.horasEntrega} h",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
             }
-            Column(Modifier.weight(1f)) {
-                Text(servicio.nombre, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Text(
-                    "${servicio.textoPrecio()} · ${servicio.horasEntrega} h",
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                SelectorCantidad(
+                    valor = cantidad,
+                    paso = unidad.paso,
+                    maximo = unidad.maximo,
+                    onMenos = onMenos,
+                    onMas = onMas,
+                    sufijo = if (unidad == Unidad.KG) "kg" else ""
                 )
             }
-            SelectorCantidad(
-                valor = cantidad,
-                paso = unidad.paso,
-                maximo = unidad.maximo,
-                onMenos = onMenos,
-                onMas = onMas
-            )
         }
     }
 }

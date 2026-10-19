@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -25,7 +26,9 @@ class NuevoPedidoViewModel(
     private val usuario: Usuario
 ) : ViewModel() {
 
+    // Se muestran en el orden del catalogo (por id) y no alfabetico
     val servicios: StateFlow<List<Servicio>> = repo.observarServiciosActivos()
+        .map { lista -> lista.sortedBy { it.id } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // servicioId -> cantidad (si no esta en el mapa, el servicio esta apagado)

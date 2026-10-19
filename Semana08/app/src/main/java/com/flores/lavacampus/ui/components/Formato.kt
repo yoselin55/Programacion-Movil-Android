@@ -32,3 +32,12 @@ fun PedidoConDetalle.resumenCantidad(): String {
 
 // "S/ 8.00 por kg", "S/ 2.50 por prenda", "S/ 20.00 por unidad"
 fun Servicio.textoPrecio(): String = "${precio.soles()} por ${Unidad.de(unidad).texto}"
+
+private val formatoFechaHora = DateTimeFormatter.ofPattern("d MMM HH:mm", Locale("es", "PE"))
+
+// Marca de tiempo (Long) -> "19 oct 06:30"
+fun Long.fechaHora(): String =
+    java.time.Instant.ofEpochMilli(this)
+        .atZone(java.time.ZoneId.systemDefault())
+        .format(formatoFechaHora)
+        .replace(".", "")

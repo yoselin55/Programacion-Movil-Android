@@ -10,13 +10,15 @@ import com.flores.lavacampus.data.repository.LavaRepository
 class LavaViewModelFactory(
     private val repo: LavaRepository,
     private val prefs: PreferenciasStore,
-    private val usuario: Usuario? = null // para los ViewModels que dependen del estudiante
+    private val usuario: Usuario? = null, // para los ViewModels que dependen del estudiante
+    private val pedidoId: Int = 0         // para el detalle de un pedido
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
         modelClass.isAssignableFrom(SesionViewModel::class.java) -> SesionViewModel(repo, prefs) as T
         modelClass.isAssignableFrom(InicioViewModel::class.java) -> InicioViewModel(repo, usuario!!) as T
         modelClass.isAssignableFrom(NuevoPedidoViewModel::class.java) -> NuevoPedidoViewModel(repo, usuario!!) as T
+        modelClass.isAssignableFrom(DetallePedidoViewModel::class.java) -> DetallePedidoViewModel(repo, pedidoId) as T
         else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     }
 }
