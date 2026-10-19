@@ -12,6 +12,10 @@ interface UsuarioDao {
     @Query("SELECT * FROM usuarios WHERE correo = :correo AND clave = :clave LIMIT 1")
     suspend fun login(correo: String, clave: String): Usuario?
 
+    // Para recuperar la sesion guardada en DataStore (solo se guarda el id)
+    @Query("SELECT * FROM usuarios WHERE id = :id")
+    suspend fun obtener(id: Int): Usuario?
+
     @Insert
     suspend fun insertarTodos(lista: List<Usuario>)
 

@@ -1,55 +1,66 @@
 package com.flores.lavacampus.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import com.flores.lavacampus.model.Rol
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+// Estudiante: turquesa. Administrador: violeta
+private val ClienteClaro = lightColorScheme(
+    primary = Color(0xFF0891B2),
     onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primaryContainer = Color(0xFFCFFAFE),
+    secondaryContainer = Color(0xFFCFFAFE),
+    onPrimaryContainer = Color(0xFF164E63),
+    background = Color(0xFFF0FCFF),
+    surface = Color.White
 )
 
+private val ClienteOscuro = darkColorScheme(
+    primary = Color(0xFF67E8F9),
+    onPrimary = Color(0xFF083344),
+    primaryContainer = Color(0xFF155E75),
+    secondaryContainer = Color(0xFF155E75),
+    onPrimaryContainer = Color(0xFFCFFAFE),
+    background = Color(0xFF0B1A1F),
+    surface = Color(0xFF10252C)
+)
+
+private val AdminClaro = lightColorScheme(
+    primary = Color(0xFF6D28D9),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFEDE9FE),
+    secondaryContainer = Color(0xFFEDE9FE),
+    onPrimaryContainer = Color(0xFF4C1D95),
+    background = Color(0xFFFAF8FF),
+    surface = Color.White
+)
+
+private val AdminOscuro = darkColorScheme(
+    primary = Color(0xFFC4B5FD),
+    onPrimary = Color(0xFF2E1065),
+    primaryContainer = Color(0xFF5B21B6),
+    secondaryContainer = Color(0xFF5B21B6),
+    onPrimaryContainer = Color(0xFFEDE9FE),
+    background = Color(0xFF17121F),
+    surface = Color(0xFF1F1829)
+)
+
+// En las pantallas se usa MaterialTheme.colorScheme.primary, nunca un color fijo
 @Composable
-fun LavaCampusTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+fun LavaTheme(
+    rol: Rol = Rol.CLIENTE,
+    darkTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        rol == Rol.ADMIN && darkTheme -> AdminOscuro
+        rol == Rol.ADMIN -> AdminClaro
+        darkTheme -> ClienteOscuro
+        else -> ClienteClaro
     }
-
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
