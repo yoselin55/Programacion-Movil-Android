@@ -15,6 +15,8 @@ object Rutas {
     const val SERVICIOS = "servicios"
     const val CLIENTES = "clientes"
     const val AJUSTES = "ajustes"
+    const val GESTION = "gestion/{id}"
 
     fun detalle(id: Int) = "detalle/$id"
+    fun gestion(id: Int) = "gestion/$id"
 }

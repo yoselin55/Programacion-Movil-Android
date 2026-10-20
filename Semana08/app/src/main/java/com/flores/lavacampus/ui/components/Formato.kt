@@ -26,7 +26,7 @@ fun PedidoConDetalle.resumenCantidad(): String {
     val piezas = detalles.filter { it.servicio.unidad != "KG" }.sumOf { it.detalle.cantidad }.toInt()
     return listOfNotNull(
         if (kilos > 0) String.format(Locale.US, "%.1f kg", kilos) else null,
-        if (piezas > 0) "$piezas prendas" else null
+        if (piezas > 0) "$piezas ${if (piezas == 1) "prenda" else "prendas"}" else null
     ).joinToString(" + ")
 }
 
@@ -41,3 +41,13 @@ fun Long.fechaHora(): String =
         .atZone(java.time.ZoneId.systemDefault())
         .format(formatoFechaHora)
         .replace(".", "")
+
+// "Luis Rojas" -> "Luis R."
+fun String.nombreCorto(): String {
+    val partes = trim().split(" ").filter { it.isNotEmpty() }
+    return if (partes.size < 2) this else "${partes[0]} ${partes[1].first()}."
+}
+
+// "Ana Garcia" -> "AG"
+fun String.iniciales(): String =
+    trim().split(" ").filter { it.isNotEmpty() }.take(2).joinToString("") { it.first().uppercase() }

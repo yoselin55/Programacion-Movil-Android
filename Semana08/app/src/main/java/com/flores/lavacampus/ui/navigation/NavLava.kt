@@ -37,6 +37,8 @@ import androidx.navigation.compose.rememberNavController
 import com.flores.lavacampus.data.prefs.PreferenciasStore
 import com.flores.lavacampus.data.repository.LavaRepository
 import com.flores.lavacampus.model.Rol
+import com.flores.lavacampus.ui.administrador.BandejaScreen
+import com.flores.lavacampus.ui.administrador.GestionPedidoScreen
 import com.flores.lavacampus.ui.administrador.PanelScreen
 import com.flores.lavacampus.ui.estudiante.DetallePedidoScreen
 import com.flores.lavacampus.ui.estudiante.InicioScreen
@@ -45,7 +47,9 @@ import com.flores.lavacampus.ui.estudiante.MisPedidosScreen
 import com.flores.lavacampus.ui.estudiante.TarifasScreen
 import com.flores.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.flores.lavacampus.ui.estudiante.SplashScreen
+import com.flores.lavacampus.viewmodel.BandejaViewModel
 import com.flores.lavacampus.viewmodel.DetallePedidoViewModel
+import com.flores.lavacampus.viewmodel.GestionPedidoViewModel
 import com.flores.lavacampus.viewmodel.InicioViewModel
 import com.flores.lavacampus.viewmodel.LavaViewModelFactory
 import com.flores.lavacampus.viewmodel.MisPedidosViewModel
@@ -210,7 +214,25 @@ fun NavLava(
                 val vm: PanelViewModel = viewModel(factory = LavaViewModelFactory(repo, prefs))
                 PanelScreen(vm = vm, onVerListos = { nav.navigate(Rutas.BANDEJA) })
             }
-            composable(Rutas.BANDEJA) { Provisional("Bandeja de pedidos (Paso 12)") }
+            composable(Rutas.BANDEJA) {
+                val vm: BandejaViewModel = viewModel(factory = LavaViewModelFactory(repo, prefs))
+                BandejaScreen(
+                    vm = vm,
+                    onVolver = { nav.popBackStack(Rutas.PANEL, inclusive = false) },
+                    onAbrir = { nav.navigate(Rutas.gestion(it)) }
+                )
+            }
+            composable(
+                Rutas.GESTION,
+                arguments = listOf(navArgument("id") { type = NavType.IntType })
+            ) { entrada ->
+                val id = entrada.arguments?.getInt("id") ?: 0
+                val vm: GestionPedidoViewModel = viewModel(
+                    key = "gestion$id",
+                    factory = LavaViewModelFactory(repo, prefs, pedidoId = id)
+                )
+                GestionPedidoScreen(vm = vm, onVolver = { nav.popBackStack() })
+            }
             composable(Rutas.SERVICIOS) { Provisional("Servicios (Paso 13)") }
             composable(Rutas.CLIENTES) { Provisional("Clientes (Paso 13)") }
             composable(Rutas.AJUSTES) { Provisional("Ajustes (Paso 13)") }
