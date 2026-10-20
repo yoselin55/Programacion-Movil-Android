@@ -27,6 +27,7 @@ class LavaRepositoryRoom(private val db: LavaDatabase) : LavaRepository {
         usuarioDao.login(correo, clave)
 
     override suspend fun obtenerUsuario(id: Int): Usuario? = usuarioDao.obtener(id)
+    override suspend fun usuarioDeRol(rol: String): Usuario? = usuarioDao.primeroPorRol(rol)
 
     override fun observarClientes(): Flow<List<ClienteResumen>> = usuarioDao.observarClientes()
 

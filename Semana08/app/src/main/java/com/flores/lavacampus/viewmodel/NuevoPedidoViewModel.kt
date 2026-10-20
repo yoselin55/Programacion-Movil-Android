@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flores.lavacampus.data.local.entity.Servicio
 import com.flores.lavacampus.data.local.entity.Usuario
+import com.flores.lavacampus.data.prefs.PreferenciasStore
 import com.flores.lavacampus.data.repository.LavaRepository
 import com.flores.lavacampus.model.LineaPedido
 import com.flores.lavacampus.model.Unidad
@@ -23,8 +24,13 @@ private const val MAX_PEDIDOS_ACTIVOS = 3
 // Reglas de "Nuevo pedido": cantidades, total, fecha de entrega y limite de pedidos
 class NuevoPedidoViewModel(
     private val repo: LavaRepository,
-    private val usuario: Usuario
+    private val usuario: Usuario,
+    prefs: PreferenciasStore
 ) : ViewModel() {
+
+    // Si el administrador cerro la recepcion, el estudiante no puede crear pedidos
+    val recibiendoPedidos: StateFlow<Boolean> = prefs.recibirPedidos
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     // Se muestran en el orden del catalogo (por id) y no alfabetico
     val servicios: StateFlow<List<Servicio>> = repo.observarServiciosActivos()
@@ -61,8 +67,8 @@ class NuevoPedidoViewModel(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     // Boton habilitado solo si hay al menos un servicio con cantidad > 0
-    val puedeConfirmar: StateFlow<Boolean> = combine(_cantidades, _guardando) { cant, guardando ->
-        cant.values.any { it > 0 } && !guardando
+    val puedeConfirmar: StateFlow<Boolean> = combine(_cantidades, _guardando, recibiendoPedidos) { cant, guardando, recibe ->
+        cant.values.any { it > 0 } && !guardando && recibe
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     fun cambiarNota(texto: String) {

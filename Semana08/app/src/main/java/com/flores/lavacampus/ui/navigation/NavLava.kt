@@ -37,7 +37,15 @@ import androidx.navigation.compose.rememberNavController
 import com.flores.lavacampus.data.prefs.PreferenciasStore
 import com.flores.lavacampus.data.repository.LavaRepository
 import com.flores.lavacampus.model.Rol
+import com.flores.lavacampus.ui.administrador.AjustesScreen
 import com.flores.lavacampus.ui.administrador.BandejaScreen
+import com.flores.lavacampus.ui.administrador.ClientesScreen
+import com.flores.lavacampus.ui.administrador.FormularioServicioScreen
+import com.flores.lavacampus.ui.administrador.ServiciosScreen
+import com.flores.lavacampus.ui.estudiante.PerfilScreen
+import com.flores.lavacampus.viewmodel.ClientesViewModel
+import com.flores.lavacampus.viewmodel.PerfilViewModel
+import com.flores.lavacampus.viewmodel.ServiciosViewModel
 import com.flores.lavacampus.ui.administrador.GestionPedidoScreen
 import com.flores.lavacampus.ui.administrador.PanelScreen
 import com.flores.lavacampus.ui.estudiante.DetallePedidoScreen
@@ -90,6 +98,15 @@ fun NavLava(
     val usuario by sesion.usuarioActual.collectAsState()
     val rutaActual = nav.currentBackStackEntryAsState().value?.destination?.route
 
+    // Cambiar de perfil: navega al grafo del otro rol y limpia la pila
+    fun irAlPerfil(rol: Rol) {
+        nav.navigate(destinoDe(rol)) { popUpTo(nav.graph.id) { inclusive = true } }
+    }
+
+    fun irAlLogin() {
+        nav.navigate(Rutas.LOGIN) { popUpTo(nav.graph.id) { inclusive = true } }
+    }
+
     Scaffold(
         bottomBar = {
             // La barra solo se ve en las pantallas principales de cada perfil
@@ -97,7 +114,7 @@ fun NavLava(
                 .firstOrNull { grupo -> grupo.any { it.ruta == rutaActual } }
             if (pestanas != null) {
                 val base = pestanas.first().ruta // Inicio o Panel: base de la pila
-                NavigationBar(containerColor = Color.White) {
+                NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                     pestanas.forEach { p ->
                         NavigationBarItem(
                             selected = rutaActual == p.ruta,
@@ -209,7 +226,21 @@ fun NavLava(
                 val vm: TarifasViewModel = viewModel(factory = LavaViewModelFactory(repo, prefs))
                 TarifasScreen(vm = vm, onVolver = { nav.popBackStack(Rutas.INICIO, inclusive = false) })
             }
-            composable(Rutas.PERFIL) { Provisional("Perfil (Paso 13)") }
+            composable(Rutas.PERFIL) {
+                usuario?.let { u ->
+                    val vm: PerfilViewModel = viewModel(
+                        key = "perfil${u.id}",
+                        factory = LavaViewModelFactory(repo, prefs, u)
+                    )
+                    PerfilScreen(
+                        vm = vm,
+                        sesion = sesion,
+                        onVolver = { nav.popBackStack(Rutas.INICIO, inclusive = false) },
+                        onCambiarPerfil = ::irAlPerfil,
+                        onCerrarSesion = ::irAlLogin
+                    )
+                }
+            }
             composable(Rutas.PANEL) {
                 val vm: PanelViewModel = viewModel(factory = LavaViewModelFactory(repo, prefs))
                 PanelScreen(vm = vm, onVerListos = { nav.navigate(Rutas.BANDEJA) })
@@ -233,9 +264,38 @@ fun NavLava(
                 )
                 GestionPedidoScreen(vm = vm, onVolver = { nav.popBackStack() })
             }
-            composable(Rutas.SERVICIOS) { Provisional("Servicios (Paso 13)") }
-            composable(Rutas.CLIENTES) { Provisional("Clientes (Paso 13)") }
-            composable(Rutas.AJUSTES) { Provisional("Ajustes (Paso 13)") }
+            composable(Rutas.SERVICIOS) {
+                val vm: ServiciosViewModel = viewModel(factory = LavaViewModelFactory(repo, prefs))
+                ServiciosScreen(
+                    vm = vm,
+                    onVolver = { nav.popBackStack(Rutas.PANEL, inclusive = false) },
+                    onEditar = { nav.navigate(Rutas.servicio(it)) },
+                    onNuevo = { nav.navigate(Rutas.servicio(0)) }
+                )
+            }
+            composable(
+                Rutas.SERVICIO,
+                arguments = listOf(navArgument("id") { type = NavType.IntType })
+            ) { entrada ->
+                val id = entrada.arguments?.getInt("id") ?: 0
+                val vm: ServiciosViewModel = viewModel(
+                    key = "formServicio",
+                    factory = LavaViewModelFactory(repo, prefs)
+                )
+                FormularioServicioScreen(vm = vm, servicioId = id, onVolver = { nav.popBackStack() })
+            }
+            composable(Rutas.CLIENTES) {
+                val vm: ClientesViewModel = viewModel(factory = LavaViewModelFactory(repo, prefs))
+                ClientesScreen(vm = vm, onVolver = { nav.popBackStack(Rutas.PANEL, inclusive = false) })
+            }
+            composable(Rutas.AJUSTES) {
+                AjustesScreen(
+                    sesion = sesion,
+                    onVolver = { nav.popBackStack(Rutas.PANEL, inclusive = false) },
+                    onCambiarPerfil = ::irAlPerfil,
+                    onCerrarSesion = ::irAlLogin
+                )
+            }
         }
     }
 }

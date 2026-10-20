@@ -15,11 +15,11 @@ object DatosIniciales {
         Servicio(1, "Lavado y secado", "Lavado y secado por kilo", "KG", 8.0, 24, true, "wash"),
         Servicio(2, "Planchado", "Planchado por prenda", "PRENDA", 2.5, 48, true, "iron"),
         Servicio(3, "Lavado en seco", "Prendas delicadas", "PRENDA", 12.0, 48, true, "shirt"),
-        Servicio(4, "Edredon / frazada", "Lavado de edredones", "UNIDAD", 20.0, 48, false, "wash")
+        Servicio(4, "Edredón / frazada", "Lavado de edredones", "UNIDAD", 20.0, 48, false, "wash")
     )
 
     private val usuarios = listOf(
-        Usuario(1, "Ana Garcia", "U202310234", "ana@correo.test", "1234", "CLIENTE"),
+        Usuario(1, "Ana García", "U202310234", "ana@correo.test", "1234", "CLIENTE"),
         Usuario(2, "Luis Rojas", "U202310587", "luis@correo.test", "1234", "CLIENTE"),
         Usuario(3, "Marta Quispe", "U202311042", "marta@correo.test", "1234", "CLIENTE"),
         Usuario(4, "Administrador", "", "admin@lavacampus.test", "admin", "ADMIN")

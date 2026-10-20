@@ -54,6 +54,7 @@ fun NuevoPedidoScreen(vm: NuevoPedidoViewModel, onVolver: () -> Unit, onPedidoCr
     val nota by vm.nota.collectAsState()
     val mensaje by vm.mensaje.collectAsState()
     val puedeConfirmar by vm.puedeConfirmar.collectAsState()
+    val recibiendo by vm.recibiendoPedidos.collectAsState()
     val gris = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
     val primario = MaterialTheme.colorScheme.primary
 
@@ -66,6 +67,19 @@ fun NuevoPedidoScreen(vm: NuevoPedidoViewModel, onVolver: () -> Unit, onPedidoCr
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            if (!recibiendo) {
+                Text(
+                    "La lavandería no está recibiendo pedidos",
+                    color = MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFFEE2E2))
+                        .padding(12.dp)
+                )
+            }
             Text("¿Qué necesitas?", fontWeight = FontWeight.Bold, fontSize = 16.sp)
 
             servicios.forEach { s ->
