@@ -11,6 +11,10 @@ object Rutas {
     const val PEDIDOS = "pedidos"
     const val TARIFAS = "tarifas"
     const val PERFIL = "perfil"
+    const val BANDEJA = "bandeja"
+    const val SERVICIOS = "servicios"
+    const val CLIENTES = "clientes"
+    const val AJUSTES = "ajustes"
 
     fun detalle(id: Int) = "detalle/$id"
 }

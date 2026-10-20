@@ -15,7 +15,7 @@ fun String.fechaCorta(): String =
         .getOrDefault(this)
 
 // 40.5 -> "S/ 40.50"
-fun Double.soles(): String = "S/ " + String.format(Locale.US, "%.2f", this)
+fun Double.soles(): String = "S/ " + String.format(Locale.US, "%,.2f", this)
 
 // 12 -> "#012"
 fun Int.codigoPedido(): String = "#" + toString().padStart(3, '0')

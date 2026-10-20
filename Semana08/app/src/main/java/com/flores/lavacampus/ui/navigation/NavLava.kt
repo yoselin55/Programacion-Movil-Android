@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Sell
@@ -35,6 +37,7 @@ import androidx.navigation.compose.rememberNavController
 import com.flores.lavacampus.data.prefs.PreferenciasStore
 import com.flores.lavacampus.data.repository.LavaRepository
 import com.flores.lavacampus.model.Rol
+import com.flores.lavacampus.ui.administrador.PanelScreen
 import com.flores.lavacampus.ui.estudiante.DetallePedidoScreen
 import com.flores.lavacampus.ui.estudiante.InicioScreen
 import com.flores.lavacampus.ui.estudiante.LoginScreen
@@ -48,6 +51,7 @@ import com.flores.lavacampus.viewmodel.LavaViewModelFactory
 import com.flores.lavacampus.viewmodel.MisPedidosViewModel
 import com.flores.lavacampus.viewmodel.TarifasViewModel
 import com.flores.lavacampus.viewmodel.NuevoPedidoViewModel
+import com.flores.lavacampus.viewmodel.PanelViewModel
 import com.flores.lavacampus.viewmodel.SesionViewModel
 
 private fun destinoDe(rol: Rol) = if (rol == Rol.ADMIN) Rutas.PANEL else Rutas.INICIO
@@ -60,6 +64,14 @@ private val pestanasEstudiante = listOf(
     Pestana(Rutas.PEDIDOS, "Pedidos", Icons.Outlined.Menu),
     Pestana(Rutas.TARIFAS, "Tarifas", Icons.Outlined.Sell),
     Pestana(Rutas.PERFIL, "Perfil", Icons.Outlined.Person)
+)
+
+private val pestanasAdmin = listOf(
+    Pestana(Rutas.PANEL, "Panel", Icons.Outlined.BarChart),
+    Pestana(Rutas.BANDEJA, "Pedidos", Icons.Outlined.Menu),
+    Pestana(Rutas.SERVICIOS, "Servicios", Icons.Outlined.Sell),
+    Pestana(Rutas.CLIENTES, "Clientes", Icons.Outlined.Person),
+    Pestana(Rutas.AJUSTES, "Ajustes", Icons.Outlined.Settings)
 )
 
 // Grafo de navegacion. Splash -> Login (o directo a Inicio/Panel si ya hay perfil)
@@ -76,19 +88,22 @@ fun NavLava(
 
     Scaffold(
         bottomBar = {
-            // La barra solo se ve en las 4 pantallas principales del estudiante
-            if (pestanasEstudiante.any { it.ruta == rutaActual }) {
+            // La barra solo se ve en las pantallas principales de cada perfil
+            val pestanas = listOf(pestanasEstudiante, pestanasAdmin)
+                .firstOrNull { grupo -> grupo.any { it.ruta == rutaActual } }
+            if (pestanas != null) {
+                val base = pestanas.first().ruta // Inicio o Panel: base de la pila
                 NavigationBar(containerColor = Color.White) {
-                    pestanasEstudiante.forEach { p ->
+                    pestanas.forEach { p ->
                         NavigationBarItem(
                             selected = rutaActual == p.ruta,
                             onClick = {
-                                if (p.ruta == Rutas.INICIO) {
-                                    // Inicio es la base de la pila: se vuelve a ella sin restaurar nada
-                                    nav.popBackStack(Rutas.INICIO, inclusive = false)
+                                if (p.ruta == base) {
+                                    // La base de la pila: se vuelve a ella sin restaurar nada
+                                    nav.popBackStack(base, inclusive = false)
                                 } else {
                                     nav.navigate(p.ruta) {
-                                        popUpTo(Rutas.INICIO) { saveState = true }
+                                        popUpTo(base) { saveState = true }
                                         launchSingleTop = true
                                         restoreState = true
                                     }
@@ -191,7 +206,14 @@ fun NavLava(
                 TarifasScreen(vm = vm, onVolver = { nav.popBackStack(Rutas.INICIO, inclusive = false) })
             }
             composable(Rutas.PERFIL) { Provisional("Perfil (Paso 13)") }
-            composable(Rutas.PANEL) { Provisional("Panel del administrador") }
+            composable(Rutas.PANEL) {
+                val vm: PanelViewModel = viewModel(factory = LavaViewModelFactory(repo, prefs))
+                PanelScreen(vm = vm, onVerListos = { nav.navigate(Rutas.BANDEJA) })
+            }
+            composable(Rutas.BANDEJA) { Provisional("Bandeja de pedidos (Paso 12)") }
+            composable(Rutas.SERVICIOS) { Provisional("Servicios (Paso 13)") }
+            composable(Rutas.CLIENTES) { Provisional("Clientes (Paso 13)") }
+            composable(Rutas.AJUSTES) { Provisional("Ajustes (Paso 13)") }
         }
     }
 }
