@@ -10,8 +10,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 // Bandeja del administrador: todos los pedidos con filtro por estado y buscador
 class BandejaViewModel(private val repo: LavaRepository) : ViewModel() {
@@ -36,6 +38,11 @@ class BandejaViewModel(private val repo: LavaRepository) : ViewModel() {
                     p.pedido.id.toString() == q)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Ids de los pedidos atrasados: la tarjeta se marca en rojo
+    val atrasados: StateFlow<Set<Int>> = repo.observarPedidosAtrasados(LocalDate.now().toString())
+        .map { it.toSet() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
     fun elegirFiltro(estado: EstadoPedido?) {
         _filtro.value = estado

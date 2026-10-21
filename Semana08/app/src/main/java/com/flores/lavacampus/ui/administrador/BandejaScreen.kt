@@ -45,6 +45,7 @@ import com.flores.lavacampus.model.EstadoPedido
 import com.flores.lavacampus.ui.components.AppTopBar
 import com.flores.lavacampus.ui.components.EstadoPedidoChip
 import com.flores.lavacampus.ui.components.codigoPedido
+import com.flores.lavacampus.ui.components.fechaCorta
 import com.flores.lavacampus.ui.components.nombreCorto
 import com.flores.lavacampus.ui.components.resumenCantidad
 import com.flores.lavacampus.ui.components.soles
@@ -56,6 +57,7 @@ fun BandejaScreen(vm: BandejaViewModel, onVolver: () -> Unit, onAbrir: (Int) -> 
     val pedidos by vm.pedidos.collectAsState()
     val filtro by vm.filtro.collectAsState()
     val busqueda by vm.busqueda.collectAsState()
+    val atrasados by vm.atrasados.collectAsState()
     val primario = MaterialTheme.colorScheme.primary
 
     Column(Modifier.fillMaxSize()) {
@@ -100,7 +102,12 @@ fun BandejaScreen(vm: BandejaViewModel, onVolver: () -> Unit, onAbrir: (Int) -> 
                 )
             }
             pedidos.forEach { p ->
-                TarjetaBandeja(p, onClick = { onAbrir(p.pedido.id) }, onIniciar = { vm.iniciar(p) })
+                TarjetaBandeja(
+                    p,
+                    atrasado = p.pedido.id in atrasados,
+                    onClick = { onAbrir(p.pedido.id) },
+                    onIniciar = { vm.iniciar(p) }
+                )
             }
         }
     }
@@ -128,7 +135,12 @@ private fun Filtro(texto: String, seleccionado: Boolean, onClick: () -> Unit) {
 
 // Tarjeta: estudiante, detalle, total, estado y un boton de accion segun el estado
 @Composable
-private fun TarjetaBandeja(p: PedidoConDetalle, onClick: () -> Unit, onIniciar: () -> Unit) {
+private fun TarjetaBandeja(
+    p: PedidoConDetalle,
+    atrasado: Boolean,
+    onClick: () -> Unit,
+    onIniciar: () -> Unit
+) {
     val estado = EstadoPedido.valueOf(p.pedido.estado)
     val gris = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
     val primario = MaterialTheme.colorScheme.primary
@@ -145,7 +157,8 @@ private fun TarjetaBandeja(p: PedidoConDetalle, onClick: () -> Unit, onIniciar: 
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        // Atrasado: borde y fondo rojos
+        border = BorderStroke(if (atrasado) 1.5.dp else 1.dp, if (atrasado) EstadoPedido.CANCELADO.color else Color(0xFFE2E8F0)),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -167,6 +180,14 @@ private fun TarjetaBandeja(p: PedidoConDetalle, onClick: () -> Unit, onIniciar: 
                     color = gris
                 )
                 EstadoPedidoChip(estado)
+                if (atrasado) {
+                    Text(
+                        "Atrasado · era para el ${p.pedido.fechaEntrega.fechaCorta()}",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = EstadoPedido.CANCELADO.color
+                    )
+                }
             }
             Column(
                 horizontalAlignment = Alignment.End,

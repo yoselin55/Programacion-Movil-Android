@@ -32,6 +32,9 @@ class PanelViewModel(repo: LavaRepository) : ViewModel() {
     val enProceso: StateFlow<Int> = repo.observarCantidadPorEstado(EstadoPedido.EN_PROCESO).estado(0)
     val porRecoger: StateFlow<Int> = repo.observarCantidadPorEstado(EstadoPedido.LISTO).estado(0)
 
+    // Pedidos cuya entrega ya paso y siguen sin entregarse
+    val atrasados: StateFlow<Int> = repo.observarPedidosAtrasados(hoy).map { it.size }.estado(0)
+
     // Suma del total de los pedidos pagados desde el lunes
     val ingresosSemana: StateFlow<Double> = repo.observarIngresosDesde(inicioSemana).estado(0.0)
 

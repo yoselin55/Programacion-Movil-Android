@@ -43,6 +43,16 @@ interface PedidoDao {
     @Query("SELECT casillero FROM pedidos WHERE estado = 'LISTO' AND casillero IS NOT NULL")
     fun observarCasillerosOcupados(): Flow<List<String>>
 
+    // Atrasados: la fecha de entrega ya paso y el pedido no esta entregado ni cancelado
+    @Query(
+        """
+        SELECT id FROM pedidos
+        WHERE fechaEntrega < :hoy AND estado NOT IN ('ENTREGADO', 'CANCELADO')
+        ORDER BY id DESC
+        """
+    )
+    fun observarIdsAtrasados(hoy: String): Flow<List<Int>>
+
     // Panel
     @Query("SELECT COUNT(*) FROM pedidos WHERE fechaRegistro = :fecha AND estado <> 'CANCELADO'")
     fun contarPorFecha(fecha: String): Flow<Int>

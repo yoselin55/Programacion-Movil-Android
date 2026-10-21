@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -49,6 +50,7 @@ fun PanelScreen(vm: PanelViewModel, onVerListos: () -> Unit) {
     val pedidosHoy by vm.pedidosHoy.collectAsState()
     val enProceso by vm.enProceso.collectAsState()
     val porRecoger by vm.porRecoger.collectAsState()
+    val atrasados by vm.atrasados.collectAsState()
     val ingresos by vm.ingresosSemana.collectAsState()
     val pagados by vm.pedidosPagadosSemana.collectAsState()
     val porEstado by vm.porEstado.collectAsState()
@@ -135,6 +137,37 @@ fun PanelScreen(vm: PanelViewModel, onVerListos: () -> Unit) {
                 Text("Aún no hay ingresos esta semana", fontSize = 12.sp, color = gris)
             } else {
                 GraficoBarras(porServicio)
+            }
+        }
+
+        // Alerta roja si hay pedidos atrasados
+        if (atrasados > 0) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFFFEE2E2))
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)).background(Color.White)
+                ) { Icon(Icons.Outlined.Schedule, null, tint = EstadoPedido.CANCELADO.color) }
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        if (atrasados == 1) "1 pedido atrasado" else "$atrasados pedidos atrasados",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF991B1B),
+                        fontSize = 13.sp
+                    )
+                    Text("la fecha de entrega ya pasó", fontSize = 11.sp, color = Color(0xFF991B1B))
+                }
+                Button(
+                    onClick = onVerListos,
+                    colors = ButtonDefaults.buttonColors(containerColor = EstadoPedido.CANCELADO.color)
+                ) { Text("Ver") }
             }
         }
 

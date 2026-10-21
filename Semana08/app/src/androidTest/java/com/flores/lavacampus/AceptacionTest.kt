@@ -107,6 +107,16 @@ class AceptacionTest {
     }
 
     @Test
+    fun pedidos_atrasados_son_los_vencidos_que_no_estan_entregados_ni_cancelados() = runBlocking {
+        val hoy = LocalDate.now().toString()
+        val ids = repo.observarPedidosAtrasados(hoy).first()
+        assertEquals(listOf(7), ids) // el pedido de ejemplo con entrega de ayer
+        // Al entregarlo deja de estar atrasado
+        repo.cambiarEstado(7, EstadoPedido.ENTREGADO, null)
+        assertTrue(repo.observarPedidosAtrasados(hoy).first().isEmpty())
+    }
+
+    @Test
     fun un_servicio_usado_en_pedidos_no_se_puede_eliminar() = runBlocking {
         assertTrue(repo.servicioTieneDetalles(1))   // Lavado y secado esta en pedidos
         assertFalse(repo.servicioTieneDetalles(4))  // Edredon no esta en ninguno

@@ -32,7 +32,8 @@ object DatosIniciales {
         val estado: String,
         val pagado: Boolean,
         val casillero: String?,
-        val lineas: List<Pair<Int, Double>>
+        val lineas: List<Pair<Int, Double>>,
+        val entregaAyer: Boolean = false // pedido atrasado de ejemplo
     )
 
     private val ejemplos = listOf(
@@ -42,7 +43,7 @@ object DatosIniciales {
         Ejemplo(1, 1, "LISTO", false, "C-05", listOf(1 to 3.0)),
         Ejemplo(2, 1, "LISTO", false, "C-07", listOf(2 to 6.0)),
         Ejemplo(3, 1, "EN_PROCESO", false, null, listOf(1 to 2.5, 2 to 4.0)),
-        Ejemplo(2, 0, "EN_PROCESO", false, null, listOf(3 to 1.0)),
+        Ejemplo(2, 0, "EN_PROCESO", false, null, listOf(3 to 1.0), entregaAyer = true),
         Ejemplo(1, 0, "RECIBIDO", false, null, listOf(1 to 3.5)),
         Ejemplo(3, 0, "RECIBIDO", false, null, listOf(2 to 5.0)),
         Ejemplo(2, 0, "RECIBIDO", false, null, listOf(1 to 2.0, 2 to 2.0))
@@ -59,10 +60,11 @@ object DatosIniciales {
         val lunes = hoy.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
 
         for (e in ejemplos) {
-            val registro = maxOf(hoy.minusDays(e.diasAtras), lunes)
+            val registro = if (e.entregaAyer) hoy.minusDays(3) else maxOf(hoy.minusDays(e.diasAtras), lunes)
             val horas = e.lineas.maxOf { (id, _) -> servicios.first { it.id == id }.horasEntrega }
             var entrega = registro.plusDays((horas / 24).toLong())
             if (entrega.dayOfWeek == DayOfWeek.SUNDAY) entrega = entrega.plusDays(1)
+            if (e.entregaAyer) entrega = hoy.minusDays(1)
 
             // El total sale de la suma de sus detalles (precios congelados)
             val subtotales = e.lineas.map { (id, cant) -> cant * servicios.first { it.id == id }.precio }
