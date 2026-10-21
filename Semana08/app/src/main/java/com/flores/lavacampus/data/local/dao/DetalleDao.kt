@@ -16,10 +16,19 @@ interface DetalleDao {
     @Query("SELECT COUNT(*) FROM detalles_pedido WHERE servicioId = :servicioId")
     suspend fun contarPorServicio(servicioId: Int): Int
 
-    // Ingresos por servicio: JOIN + SUM + GROUP BY, solo pedidos pagados
+    // Ingresos por servicio: JOIN + SUM + GROUP BY, solo pedidos pagados.
+    // El descuento por volumen es del lavado (servicios por kilo): se resta a esas lineas,
+    // repartido segun el peso de cada linea dentro del lavado del pedido.
     @Query(
         """
-        SELECT s.nombre AS nombre, SUM(d.subtotal) AS total
+        SELECT s.nombre AS nombre,
+               SUM(d.subtotal - CASE
+                   WHEN s.unidad = 'KG' AND p.descuento > 0 THEN
+                       p.descuento * d.subtotal / (
+                           SELECT SUM(d2.subtotal) FROM detalles_pedido d2
+                           INNER JOIN servicios s2 ON d2.servicioId = s2.id
+                           WHERE d2.pedidoId = p.id AND s2.unidad = 'KG')
+                   ELSE 0.0 END) AS total
         FROM detalles_pedido d
         INNER JOIN servicios s ON d.servicioId = s.id
         INNER JOIN pedidos p ON d.pedidoId = p.id

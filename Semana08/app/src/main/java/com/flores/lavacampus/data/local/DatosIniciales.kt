@@ -4,6 +4,7 @@ import com.flores.lavacampus.data.local.entity.DetallePedido
 import com.flores.lavacampus.data.local.entity.Pedido
 import com.flores.lavacampus.data.local.entity.Servicio
 import com.flores.lavacampus.data.local.entity.Usuario
+import com.flores.lavacampus.model.Descuento
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
@@ -38,7 +39,7 @@ object DatosIniciales {
 
     private val ejemplos = listOf(
         Ejemplo(1, 3, "ENTREGADO", true, null, listOf(1 to 4.0, 2 to 3.0)),
-        Ejemplo(2, 2, "ENTREGADO", true, null, listOf(1 to 5.0)),
+        Ejemplo(2, 2, "ENTREGADO", true, null, listOf(1 to 6.0)),
         Ejemplo(3, 2, "ENTREGADO", true, null, listOf(3 to 2.0)),
         Ejemplo(1, 1, "LISTO", false, "C-05", listOf(1 to 3.0)),
         Ejemplo(2, 1, "LISTO", false, "C-07", listOf(2 to 6.0)),
@@ -68,13 +69,20 @@ object DatosIniciales {
 
             // El total sale de la suma de sus detalles (precios congelados)
             val subtotales = e.lineas.map { (id, cant) -> cant * servicios.first { it.id == id }.precio }
+            // Descuento por volumen: lavado (por kilo) de mas de 5 kg
+            val lavado = e.lineas.filter { (id, _) -> servicios.first { it.id == id }.unidad == "KG" }
+            val descuento = Descuento.sobreLavado(
+                lavado.sumOf { it.second },
+                lavado.sumOf { (id, cant) -> cant * servicios.first { it.id == id }.precio }
+            )
             val pedidoId = db.pedidoDao().insertar(
                 Pedido(
                     usuarioId = e.usuarioId,
                     fechaRegistro = registro.toString(),
                     fechaEntrega = entrega.toString(),
                     estado = e.estado,
-                    total = subtotales.sum(),
+                    total = subtotales.sum() - descuento,
+                    descuento = descuento,
                     casillero = e.casillero,
                     pagado = e.pagado
                 )

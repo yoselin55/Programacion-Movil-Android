@@ -6,6 +6,7 @@ import com.flores.lavacampus.data.local.entity.Servicio
 import com.flores.lavacampus.data.local.entity.Usuario
 import com.flores.lavacampus.data.prefs.PreferenciasStore
 import com.flores.lavacampus.data.repository.LavaRepository
+import com.flores.lavacampus.model.Descuento
 import com.flores.lavacampus.model.LineaPedido
 import com.flores.lavacampus.model.Unidad
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,10 +50,28 @@ class NuevoPedidoViewModel(
 
     private val _guardando = MutableStateFlow(false)
 
-    // total = suma de cantidad x precio de cada servicio elegido
-    val total: StateFlow<Double> = combine(servicios, _cantidades) { lista, cant ->
+    // subtotal = suma de cantidad x precio de cada servicio elegido
+    val subtotal: StateFlow<Double> = combine(servicios, _cantidades) { lista, cant ->
         lista.sumOf { (cant[it.id] ?: 0.0) * it.precio }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
+    // Kilos de lavado elegidos (servicios cobrados por kilo)
+    val kilosLavado: StateFlow<Double> = combine(servicios, _cantidades) { lista, cant ->
+        lista.filter { it.unidad == Unidad.KG.name }.sumOf { cant[it.id] ?: 0.0 }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
+    // Descuento por volumen: 10 % del lavado si supera 5 kg (misma regla que guarda el Repository)
+    val descuento: StateFlow<Double> = combine(servicios, _cantidades) { lista, cant ->
+        val lavado = lista.filter { it.unidad == Unidad.KG.name }
+        Descuento.sobreLavado(
+            lavado.sumOf { cant[it.id] ?: 0.0 },
+            lavado.sumOf { (cant[it.id] ?: 0.0) * it.precio }
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
+    // total = subtotal - descuento
+    val total: StateFlow<Double> = combine(subtotal, descuento) { s, d -> s - d }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 
     // hoy + mayor tiempo de entrega elegido (24 h = 1 dia); si cae domingo pasa al lunes
     val fechaEntrega: StateFlow<String?> = combine(servicios, _cantidades) { lista, cant ->
@@ -102,8 +121,13 @@ class NuevoPedidoViewModel(
             if (repo.contarActivos(usuario.id) >= MAX_PEDIDOS_ACTIVOS) {
                 _mensaje.value = "Ya tienes 3 pedidos activos"
             } else {
-                repo.crearPedido(usuario.id, lineas, entrega, _nota.value.trim())
-                onCreado()
+                try {
+                    repo.crearPedido(usuario.id, lineas, entrega, _nota.value.trim())
+                    onCreado()
+                } catch (e: IllegalArgumentException) {
+                    // El Repository valida cantidades y servicios: se muestra el motivo
+                    _mensaje.value = e.message ?: "No se pudo crear el pedido"
+                }
             }
             _guardando.value = false
         }

@@ -171,7 +171,12 @@ fun GestionPedidoScreen(vm: GestionPedidoViewModel, onVolver: () -> Unit) {
                 ) {
                     Column(Modifier.weight(1f)) {
                         Text("Total ${p.total.soles()}", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                        Text("Se cobra al entregar", fontSize = 11.sp, color = gris)
+                        Text(
+                            if (p.descuento > 0) "Incluye descuento de ${p.descuento.soles()} · se cobra al entregar"
+                            else "Se cobra al entregar",
+                            fontSize = 11.sp,
+                            color = gris
+                        )
                     }
                     Text("Cobrado", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     Box(Modifier.padding(start = 8.dp)) {

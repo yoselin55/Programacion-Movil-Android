@@ -137,6 +137,23 @@ fun DetallePedidoScreen(vm: DetallePedidoViewModel, onVolver: () -> Unit) {
                         }
                     }
                     HorizontalDivider()
+                    if (p.descuento > 0) {
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "Descuento por volumen (10 %)",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = EstadoPedido.LISTO.color,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                "-" + p.descuento.soles(),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = EstadoPedido.LISTO.color
+                            )
+                        }
+                    }
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text("Total", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                         Text(p.total.soles(), fontWeight = FontWeight.Bold, fontSize = 20.sp, color = primario)

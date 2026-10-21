@@ -66,6 +66,53 @@ class AceptacionTest {
     }
 
     @Test
+    fun mas_de_5_kg_de_lavado_aplica_10_por_ciento_y_se_guarda_en_el_pedido() = runBlocking {
+        val id = repo.crearPedido(3, listOf(LineaPedido(1, 6.0)), LocalDate.now().plusDays(1).toString(), "")
+        val pedido = repo.observarPedido(id.toInt()).first()!!.pedido
+        assertEquals(4.8, pedido.descuento, 0.001)   // 10 % de 48.00
+        assertEquals(43.2, pedido.total, 0.001)      // 48.00 - 4.80
+    }
+
+    @Test
+    fun hasta_5_kg_no_hay_descuento() = runBlocking {
+        val id = repo.crearPedido(3, listOf(LineaPedido(1, 5.0)), LocalDate.now().plusDays(1).toString(), "")
+        val pedido = repo.observarPedido(id.toInt()).first()!!.pedido
+        assertEquals(0.0, pedido.descuento, 0.001)
+        assertEquals(40.0, pedido.total, 0.001)
+    }
+
+    @Test
+    fun el_descuento_solo_alcanza_al_lavado_y_no_a_las_prendas() = runBlocking {
+        val id = repo.crearPedido(
+            3, listOf(LineaPedido(1, 5.5), LineaPedido(2, 4.0)), LocalDate.now().plusDays(2).toString(), ""
+        )
+        val pedido = repo.observarPedido(id.toInt()).first()!!.pedido
+        assertEquals(4.4, pedido.descuento, 0.001)   // 10 % de 44.00 (5.5 kg x 8)
+        assertEquals(49.6, pedido.total, 0.001)      // 44.00 + 10.00 - 4.40
+    }
+
+    @Test
+    fun el_repository_rechaza_cantidades_fuera_de_regla_y_servicios_inactivos() = runBlocking {
+        val antes = repo.observarPedidos().first().size
+        val fecha = LocalDate.now().plusDays(1).toString()
+        for (lineas in listOf(
+            listOf(LineaPedido(1, 10.5)),   // mas de 10 kg
+            listOf(LineaPedido(1, 1.3)),    // no es multiplo de 0.5
+            listOf(LineaPedido(2, 2.5)),    // prendas no admiten decimales
+            listOf(LineaPedido(4, 1.0)),    // servicio inactivo
+            emptyList()
+        )) {
+            try {
+                repo.crearPedido(3, lineas, fecha, "")
+                throw AssertionError("Debia rechazar $lineas")
+            } catch (e: IllegalArgumentException) {
+                // esperado
+            }
+        }
+        assertEquals(antes, repo.observarPedidos().first().size)
+    }
+
+    @Test
     fun un_pedido_con_servicio_inexistente_no_deja_pedido_sin_detalles() = runBlocking {
         val antes = repo.observarPedidos().first().size
         try {

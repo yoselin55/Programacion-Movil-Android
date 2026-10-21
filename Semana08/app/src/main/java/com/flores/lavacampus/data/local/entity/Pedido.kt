@@ -1,5 +1,6 @@
 package com.flores.lavacampus.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -25,7 +26,8 @@ data class Pedido(
     val fechaRegistro: String,   // aaaa-MM-dd
     val fechaEntrega: String,    // aaaa-MM-dd
     val estado: String,          // EstadoPedido.name
-    val total: Double,
+    val total: Double,           // ya con el descuento aplicado
+    @ColumnInfo(defaultValue = "0.0") val descuento: Double = 0.0, // descuento por volumen (S/)
     val casillero: String? = null, // nulo hasta estar LISTO
     val pagado: Boolean = false,
     val nota: String = "",

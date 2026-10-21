@@ -32,6 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.flores.lavacampus.data.local.entity.Servicio
+import com.flores.lavacampus.model.Descuento
+import com.flores.lavacampus.model.EstadoPedido
 import com.flores.lavacampus.model.Unidad
 import com.flores.lavacampus.ui.components.AppTopBar
 import com.flores.lavacampus.ui.components.IconoServicio
@@ -50,6 +52,9 @@ fun NuevoPedidoScreen(vm: NuevoPedidoViewModel, onVolver: () -> Unit, onPedidoCr
     val servicios by vm.servicios.collectAsState()
     val cantidades by vm.cantidades.collectAsState()
     val total by vm.total.collectAsState()
+    val subtotal by vm.subtotal.collectAsState()
+    val descuento by vm.descuento.collectAsState()
+    val kilos by vm.kilosLavado.collectAsState()
     val fechaEntrega by vm.fechaEntrega.collectAsState()
     val nota by vm.nota.collectAsState()
     val mensaje by vm.mensaje.collectAsState()
@@ -128,11 +133,54 @@ fun NuevoPedidoScreen(vm: NuevoPedidoViewModel, onVolver: () -> Unit, onPedidoCr
                         }
                     }
                     HorizontalDivider(color = primario.copy(alpha = 0.25f))
+                    // Descuento por volumen: visible solo cuando aplica
+                    if (descuento > 0) {
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text("Subtotal", fontSize = 12.sp, color = gris, modifier = Modifier.weight(1f))
+                            Text(subtotal.soles(), fontSize = 12.sp, color = gris)
+                        }
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "Descuento por volumen (10 %)",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = EstadoPedido.LISTO.color,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                "-" + descuento.soles(),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = EstadoPedido.LISTO.color
+                            )
+                        }
+                    }
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text("Total", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                         Text(total.soles(), fontWeight = FontWeight.Bold, fontSize = 20.sp, color = primario)
                     }
                 }
+            }
+
+            // Pista del descuento: aparece cuando hay lavado y todavia no llega a 5 kg, o cuando ya aplica
+            if (kilos > 0) {
+                val aplica = Descuento.aplica(kilos)
+                Text(
+                    if (aplica) "¡Descuento por volumen aplicado: 10 % en tu lavado!"
+                    else "Más de 5 kg de lavado: 10 % de descuento (llevas ${texto(kilos)} kg)",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (aplica) EstadoPedido.LISTO.color else primario,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(
+                            if (aplica) EstadoPedido.LISTO.color.copy(alpha = 0.12f)
+                            else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                        )
+                        .padding(10.dp)
+                )
             }
 
             Text(

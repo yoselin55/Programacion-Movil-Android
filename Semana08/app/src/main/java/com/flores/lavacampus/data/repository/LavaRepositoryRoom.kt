@@ -8,9 +8,11 @@ import com.flores.lavacampus.data.local.entity.Servicio
 import com.flores.lavacampus.data.local.entity.Usuario
 import com.flores.lavacampus.data.local.relation.PedidoConDetalle
 import com.flores.lavacampus.model.ClienteResumen
+import com.flores.lavacampus.model.Descuento
 import com.flores.lavacampus.model.EstadoPedido
 import com.flores.lavacampus.model.IngresoServicio
 import com.flores.lavacampus.model.LineaPedido
+import com.flores.lavacampus.model.Unidad
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -48,37 +50,51 @@ class LavaRepositoryRoom(private val db: LavaDatabase) : LavaRepository {
         detalleDao.contarPorServicio(id) > 0
 
     // Pedidos
-    // Una sola transaccion: si falla un detalle, tambien se deshace el pedido
+    // Una sola transaccion: si falla una validacion o un detalle, tambien se deshace el pedido
     override suspend fun crearPedido(
         usuarioId: Int,
         lineas: List<LineaPedido>,
         fechaEntrega: String,
         nota: String
     ): Long = db.withTransaction {
-        // Se copia el precio del servicio al detalle (precio congelado)
+        require(lineas.isNotEmpty()) { "El pedido no tiene servicios" }
+
+        // Se copia el precio del servicio al detalle (precio congelado) y se validan las cantidades
         val detalles = lineas.map { linea ->
             val servicio = servicioDao.obtener(linea.servicioId)
                 ?: throw IllegalArgumentException("Servicio ${linea.servicioId} no existe")
-            DetallePedido(
+            require(servicio.activo) { "El servicio ${servicio.nombre} ya no está disponible" }
+            val unidad = Unidad.de(servicio.unidad)
+            val enPasos = Math.abs(linea.cantidad / unidad.paso - Math.round(linea.cantidad / unidad.paso)) < 1e-9
+            require(linea.cantidad in unidad.minimo..unidad.maximo && enPasos) {
+                "Cantidad no válida para ${servicio.nombre}"
+            }
+            Triple(servicio, linea.cantidad, DetallePedido(
                 pedidoId = 0, // se completa cuando se conozca el id del pedido
                 servicioId = servicio.id,
                 cantidad = linea.cantidad,
                 precioUnitario = servicio.precio,
                 subtotal = linea.cantidad * servicio.precio
-            )
+            ))
         }
+
+        // Descuento por volumen: lavado (servicios por kilo) de mas de 5 kg
+        val lavado = detalles.filter { it.first.unidad == Unidad.KG.name }
+        val descuento = Descuento.sobreLavado(lavado.sumOf { it.second }, lavado.sumOf { it.third.subtotal })
+
         val pedidoId = pedidoDao.insertar(
             Pedido(
                 usuarioId = usuarioId,
                 fechaRegistro = LocalDate.now().toString(),
                 fechaEntrega = fechaEntrega,
                 estado = EstadoPedido.RECIBIDO.name,
-                total = detalles.sumOf { it.subtotal },
+                total = detalles.sumOf { it.third.subtotal } - descuento,
+                descuento = descuento,
                 pagado = false,
                 nota = nota
             )
         )
-        detalleDao.insertarTodos(detalles.map { it.copy(pedidoId = pedidoId.toInt()) })
+        detalleDao.insertarTodos(detalles.map { it.third.copy(pedidoId = pedidoId.toInt()) })
         pedidoId
     }
 
