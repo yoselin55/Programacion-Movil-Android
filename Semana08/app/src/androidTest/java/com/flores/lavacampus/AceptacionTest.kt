@@ -9,7 +9,9 @@ import com.flores.lavacampus.data.local.LavaDatabase
 import com.flores.lavacampus.data.repository.LavaRepositoryRoom
 import com.flores.lavacampus.model.EstadoPedido
 import com.flores.lavacampus.model.LineaPedido
+import com.flores.lavacampus.data.prefs.PreferenciasStore
 import com.flores.lavacampus.viewmodel.GestionPedidoViewModel
+import com.flores.lavacampus.viewmodel.NuevoPedidoViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -161,6 +163,39 @@ class AceptacionTest {
         // Al entregarlo deja de estar atrasado
         repo.cambiarEstado(7, EstadoPedido.ENTREGADO, null)
         assertTrue(repo.observarPedidosAtrasados(hoy).first().isEmpty())
+    }
+
+    @Test
+    fun pedir_de_nuevo_carga_las_mismas_lineas_con_los_precios_actuales() = runBlocking {
+        val contexto = InstrumentationRegistry.getInstrumentation().targetContext
+        val marta = repo.obtenerUsuario(3)!!
+        // Antes de repetir, el lavado en seco sube de S/ 12.00 a S/ 15.00
+        db.servicioDao().actualizar(db.servicioDao().obtener(3)!!.copy(precio = 15.0))
+        val vm = NuevoPedidoViewModel(repo, marta, PreferenciasStore(contexto), repetirId = 3) // pedido 3: 2 prendas de lavado en seco
+        delay(800)
+        assertEquals(mapOf(3 to 2.0), vm.cantidades.value)
+        val jobs = listOf(launch(Dispatchers.IO) { vm.total.collect { } }, launch(Dispatchers.IO) { vm.servicios.collect { } })
+        delay(500)
+        assertEquals(30.0, vm.total.value, 0.001) // 2 x 15.00 (precio actual, no el congelado de 12.00)
+        assertTrue(vm.aviso.value!!.contains("precios cambiaron"))
+        jobs.forEach { it.cancel() }
+    }
+
+    @Test
+    fun pedir_de_nuevo_omite_servicios_inactivos_y_rechaza_pedidos_ajenos() = runBlocking {
+        val contexto = InstrumentationRegistry.getInstrumentation().targetContext
+        val ana = repo.obtenerUsuario(1)!!
+        db.servicioDao().cambiarActivo(2, false) // planchado ya no esta disponible
+        val vm = NuevoPedidoViewModel(repo, ana, PreferenciasStore(contexto), repetirId = 1) // lavado 4 kg + planchado 3
+        delay(800)
+        assertEquals(mapOf(1 to 4.0), vm.cantidades.value)
+        assertTrue(vm.aviso.value!!.contains("se omitieron"))
+
+        // Un pedido de otro estudiante no se puede repetir
+        val ajeno = NuevoPedidoViewModel(repo, ana, PreferenciasStore(contexto), repetirId = 2)
+        delay(800)
+        assertTrue(ajeno.cantidades.value.isEmpty())
+        assertEquals("No se encontró el pedido que quieres repetir", ajeno.aviso.value)
     }
 
     @Test

@@ -173,7 +173,7 @@ fun NavLava(
                     )
                     InicioScreen(
                         vm = vm,
-                        onNuevoPedido = { nav.navigate(Rutas.NUEVO_PEDIDO) },
+                        onNuevoPedido = { nav.navigate(Rutas.nuevoPedido()) },
                         onVerPedido = { nav.navigate(Rutas.detalle(it)) },
                         onMisPedidos = { nav.navigate(Rutas.PEDIDOS) },
                         onTarifas = { nav.navigate(Rutas.TARIFAS) }
@@ -181,11 +181,16 @@ fun NavLava(
                 }
             }
             // Pantallas provisionales: se reemplazan en los pasos siguientes
-            composable(Rutas.NUEVO_PEDIDO) {
+            composable(
+                Rutas.NUEVO_PEDIDO,
+                arguments = listOf(navArgument("repetir") { type = NavType.IntType; defaultValue = 0 })
+            ) { entrada ->
                 usuario?.let { u ->
+                    // Si viene un id, el ViewModel carga las lineas de ese pedido con los precios actuales
+                    val repetir = entrada.arguments?.getInt("repetir") ?: 0
                     val vm: NuevoPedidoViewModel = viewModel(
-                        key = "nuevo${u.id}",
-                        factory = LavaViewModelFactory(repo, prefs, u)
+                        key = "nuevo${u.id}-$repetir",
+                        factory = LavaViewModelFactory(repo, prefs, u, repetirId = repetir)
                     )
                     NuevoPedidoScreen(
                         vm = vm,
@@ -206,7 +211,11 @@ fun NavLava(
                     key = "detalle$id",
                     factory = LavaViewModelFactory(repo, prefs, pedidoId = id)
                 )
-                DetallePedidoScreen(vm = vm, onVolver = { nav.popBackStack() })
+                DetallePedidoScreen(
+                    vm = vm,
+                    onVolver = { nav.popBackStack() },
+                    onRepetir = { nav.navigate(Rutas.nuevoPedido(it)) }
+                )
             }
             composable(Rutas.PEDIDOS) {
                 usuario?.let { u ->
@@ -218,7 +227,8 @@ fun NavLava(
                         vm = vm,
                         onVolver = { nav.popBackStack(Rutas.INICIO, inclusive = false) },
                         onVerPedido = { nav.navigate(Rutas.detalle(it)) },
-                        onNuevoPedido = { nav.navigate(Rutas.NUEVO_PEDIDO) }
+                        onNuevoPedido = { nav.navigate(Rutas.nuevoPedido()) },
+                        onRepetir = { nav.navigate(Rutas.nuevoPedido(it)) }
                     )
                 }
             }

@@ -58,6 +58,7 @@ fun NuevoPedidoScreen(vm: NuevoPedidoViewModel, onVolver: () -> Unit, onPedidoCr
     val fechaEntrega by vm.fechaEntrega.collectAsState()
     val nota by vm.nota.collectAsState()
     val mensaje by vm.mensaje.collectAsState()
+    val aviso by vm.aviso.collectAsState()
     val puedeConfirmar by vm.puedeConfirmar.collectAsState()
     val recibiendo by vm.recibiendoPedidos.collectAsState()
     val gris = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -82,6 +83,20 @@ fun NuevoPedidoScreen(vm: NuevoPedidoViewModel, onVolver: () -> Unit, onPedidoCr
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0xFFFEE2E2))
+                        .padding(12.dp)
+                )
+            }
+            // Aviso al repetir un pedido: que se cargo y que cambio
+            aviso?.let {
+                Text(
+                    it,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = primario,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f))
                         .padding(12.dp)
                 )
             }

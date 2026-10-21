@@ -14,11 +14,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
+import kotlin.math.abs
 
 private const val MAX_PEDIDOS_ACTIVOS = 3
 
@@ -26,7 +28,8 @@ private const val MAX_PEDIDOS_ACTIVOS = 3
 class NuevoPedidoViewModel(
     private val repo: LavaRepository,
     private val usuario: Usuario,
-    prefs: PreferenciasStore
+    prefs: PreferenciasStore,
+    repetirId: Int = 0
 ) : ViewModel() {
 
     // Si el administrador cerro la recepcion, el estudiante no puede crear pedidos
@@ -44,6 +47,10 @@ class NuevoPedidoViewModel(
 
     private val _nota = MutableStateFlow("")
     val nota: StateFlow<String> = _nota.asStateFlow()
+
+    // Aviso informativo cuando se repite un pedido (que se cargo, que cambio, que no esta disponible)
+    private val _aviso = MutableStateFlow<String?>(null)
+    val aviso: StateFlow<String?> = _aviso.asStateFlow()
 
     private val _mensaje = MutableStateFlow<String?>(null)
     val mensaje: StateFlow<String?> = _mensaje.asStateFlow()
@@ -89,6 +96,45 @@ class NuevoPedidoViewModel(
     val puedeConfirmar: StateFlow<Boolean> = combine(_cantidades, _guardando, recibiendoPedidos) { cant, guardando, recibe ->
         cant.values.any { it > 0 } && !guardando && recibe
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    init {
+        if (repetirId > 0) viewModelScope.launch { cargarDesde(repetirId) }
+    }
+
+    // "Pedir de nuevo": carga las mismas lineas. Los precios no se copian: el total se recalcula
+    // con las tarifas vigentes de los servicios activos (los inactivos se omiten)
+    private suspend fun cargarDesde(pedidoId: Int) {
+        val original = repo.observarPedido(pedidoId).first()
+        // Solo se puede repetir un pedido propio
+        if (original == null || original.pedido.usuarioId != usuario.id) {
+            _aviso.value = "No se encontró el pedido que quieres repetir"
+            return
+        }
+        val activos = repo.observarServiciosActivos().first()
+        val cantidades = mutableMapOf<Int, Double>()
+        var noDisponibles = 0
+        var precioCambio = 0
+        original.detalles.forEach { d ->
+            val actual = activos.firstOrNull { it.id == d.servicio.id }
+            if (actual == null) {
+                noDisponibles++
+            } else {
+                val unidad = Unidad.de(actual.unidad)
+                cantidades[actual.id] = d.detalle.cantidad.coerceIn(unidad.minimo, unidad.maximo)
+                if (abs(d.detalle.precioUnitario - actual.precio) > 0.001) precioCambio++
+            }
+        }
+        _cantidades.value = cantidades
+        _nota.value = original.pedido.nota
+        _aviso.value = when {
+            cantidades.isEmpty() -> "Ningún servicio de ese pedido está disponible ahora"
+            else -> buildString {
+                append("Cargamos tu pedido #%03d con los precios actuales.".format(pedidoId))
+                if (precioCambio > 0) append(" Algunos precios cambiaron.")
+                if (noDisponibles > 0) append(" $noDisponibles servicio(s) ya no están disponibles y se omitieron.")
+            }
+        }
+    }
 
     fun cambiarNota(texto: String) {
         _nota.value = texto

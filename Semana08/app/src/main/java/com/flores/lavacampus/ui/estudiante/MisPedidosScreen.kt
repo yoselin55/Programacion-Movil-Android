@@ -44,7 +44,8 @@ fun MisPedidosScreen(
     vm: MisPedidosViewModel,
     onVolver: () -> Unit,
     onVerPedido: (Int) -> Unit,
-    onNuevoPedido: () -> Unit
+    onNuevoPedido: () -> Unit,
+    onRepetir: (Int) -> Unit
 ) {
     val activos by vm.activos.collectAsState()
     val historial by vm.historial.collectAsState()
@@ -77,7 +78,8 @@ fun MisPedidosScreen(
                         pedido = pedido,
                         onClick = { onVerPedido(pedido.pedido.id) },
                         modoLista = true,
-                        onCancelar = { porCancelar = pedido }
+                        onCancelar = { porCancelar = pedido },
+                        onRepetir = { onRepetir(pedido.pedido.id) }
                     )
                 }
 

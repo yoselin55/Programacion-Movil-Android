@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LocalLaundryService
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -36,13 +38,15 @@ import com.flores.lavacampus.model.EstadoPedido
 // Tarjeta resumen de un pedido (se reutiliza en Inicio, Mis pedidos y Bandeja)
 // modoLista: estilo de "Mis pedidos" (borde y pastilla verde en LISTO, entrega en EN_PROCESO)
 // onCancelar: si no es nulo y el pedido esta RECIBIDO, muestra el enlace "Cancelar"
+// onRepetir: si no es nulo y el pedido ya termino (ENTREGADO o CANCELADO), muestra "Pedir de nuevo"
 @Composable
 fun PedidoCard(
     pedido: PedidoConDetalle,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     modoLista: Boolean = false,
-    onCancelar: (() -> Unit)? = null
+    onCancelar: (() -> Unit)? = null,
+    onRepetir: (() -> Unit)? = null
 ) {
     val p = pedido.pedido
     val estado = EstadoPedido.valueOf(p.estado)
@@ -114,6 +118,13 @@ fun PedidoCard(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
+                    (estado == EstadoPedido.ENTREGADO || estado == EstadoPedido.CANCELADO) && onRepetir != null ->
+                        Button(
+                            onClick = onRepetir,
+                            shape = RoundedCornerShape(50),
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) { Text("Pedir de nuevo", fontSize = 12.sp, fontWeight = FontWeight.SemiBold) }
                     estado == EstadoPedido.RECIBIDO && onCancelar != null ->
                         Text(
                             "Cancelar",

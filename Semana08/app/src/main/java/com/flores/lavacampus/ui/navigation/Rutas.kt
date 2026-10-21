@@ -6,7 +6,7 @@ object Rutas {
     const val LOGIN = "login"
     const val INICIO = "inicio"   // estudiante
     const val PANEL = "panel"     // administrador
-    const val NUEVO_PEDIDO = "nuevoPedido"
+    const val NUEVO_PEDIDO = "nuevoPedido?repetir={repetir}" // repetir = id del pedido a repetir (0 = pedido vacio)
     const val DETALLE = "detalle/{id}"
     const val PEDIDOS = "pedidos"
     const val TARIFAS = "tarifas"
@@ -18,6 +18,7 @@ object Rutas {
     const val GESTION = "gestion/{id}"
     const val SERVICIO = "servicio/{id}"
 
+    fun nuevoPedido(repetir: Int = 0) = "nuevoPedido?repetir=$repetir"
     fun detalle(id: Int) = "detalle/$id"
     fun gestion(id: Int) = "gestion/$id"
     fun servicio(id: Int) = "servicio/$id"

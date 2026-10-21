@@ -14,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -51,7 +52,7 @@ import java.util.Locale
 
 // La View solo observa el pedido y avisa la cancelacion; la regla esta en el ViewModel
 @Composable
-fun DetallePedidoScreen(vm: DetallePedidoViewModel, onVolver: () -> Unit) {
+fun DetallePedidoScreen(vm: DetallePedidoViewModel, onVolver: () -> Unit, onRepetir: (Int) -> Unit) {
     val detalle by vm.pedido.collectAsState()
     val puedeCancelar by vm.puedeCancelar.collectAsState()
     var confirmando by remember { mutableStateOf(false) }
@@ -162,6 +163,15 @@ fun DetallePedidoScreen(vm: DetallePedidoViewModel, onVolver: () -> Unit) {
             }
 
             RecuadroPago(d)
+
+            // Pedido terminado: se puede volver a pedir lo mismo
+            if (estado == EstadoPedido.ENTREGADO || estado == EstadoPedido.CANCELADO) {
+                Button(
+                    onClick = { onRepetir(p.id) },
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Pedir de nuevo", fontWeight = FontWeight.SemiBold) }
+            }
 
             OutlinedButton(
                 onClick = { confirmando = true },

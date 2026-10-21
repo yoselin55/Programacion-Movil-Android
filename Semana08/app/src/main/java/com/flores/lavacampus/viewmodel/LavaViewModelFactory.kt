@@ -11,13 +11,14 @@ class LavaViewModelFactory(
     private val repo: LavaRepository,
     private val prefs: PreferenciasStore,
     private val usuario: Usuario? = null, // para los ViewModels que dependen del estudiante
-    private val pedidoId: Int = 0         // para el detalle de un pedido
+    private val pedidoId: Int = 0,        // para el detalle de un pedido
+    private val repetirId: Int = 0        // pedido que se repite en Nuevo pedido (0 = ninguno)
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
         modelClass.isAssignableFrom(SesionViewModel::class.java) -> SesionViewModel(repo, prefs) as T
         modelClass.isAssignableFrom(InicioViewModel::class.java) -> InicioViewModel(repo, usuario!!) as T
-        modelClass.isAssignableFrom(NuevoPedidoViewModel::class.java) -> NuevoPedidoViewModel(repo, usuario!!, prefs) as T
+        modelClass.isAssignableFrom(NuevoPedidoViewModel::class.java) -> NuevoPedidoViewModel(repo, usuario!!, prefs, repetirId) as T
         modelClass.isAssignableFrom(DetallePedidoViewModel::class.java) -> DetallePedidoViewModel(repo, pedidoId) as T
         modelClass.isAssignableFrom(MisPedidosViewModel::class.java) -> MisPedidosViewModel(repo, usuario!!) as T
         modelClass.isAssignableFrom(TarifasViewModel::class.java) -> TarifasViewModel(repo) as T
