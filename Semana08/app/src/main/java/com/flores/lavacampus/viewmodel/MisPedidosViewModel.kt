@@ -58,7 +58,7 @@ class MisPedidosViewModel(
     fun cancelar(pedido: PedidoConDetalle) {
         if (estadoDe(pedido) != EstadoPedido.RECIBIDO) return
         viewModelScope.launch {
-            repo.cambiarEstado(pedido.pedido.id, EstadoPedido.CANCELADO, null)
+            repo.cambiarEstado(pedido.pedido.id, EstadoPedido.CANCELADO, null, porAdmin = false)
         }
     }
 

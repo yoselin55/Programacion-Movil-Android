@@ -1,10 +1,12 @@
 package com.flores.lavacampus.data.local
 
 import com.flores.lavacampus.data.local.entity.DetallePedido
+import com.flores.lavacampus.data.local.entity.Notificacion
 import com.flores.lavacampus.data.local.entity.Pedido
 import com.flores.lavacampus.data.local.entity.Servicio
 import com.flores.lavacampus.data.local.entity.Usuario
 import com.flores.lavacampus.model.Descuento
+import com.flores.lavacampus.model.TipoNotificacion
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
@@ -100,5 +102,21 @@ object DatosIniciales {
                 }
             )
         }
+
+        // Notificaciones de ejemplo, para que la pantalla no empiece vacia (los pedidos son #001 a #010)
+        val ahora = System.currentTimeMillis()
+        fun hace(minutos: Long) = ahora - minutos * 60_000
+        db.notificacionDao().insertarTodas(
+            listOf(
+                Notificacion(usuarioId = 1, pedidoId = 8, titulo = "Pedido #008 recibido", mensaje = "Recibimos tu pedido de 3.5 kg.", tipo = TipoNotificacion.RECIBIDO.name, fecha = hace(35)),
+                Notificacion(usuarioId = 1, pedidoId = 4, titulo = "Tu pedido #004 está listo", mensaje = "Recógelo en el casillero C-05.", tipo = TipoNotificacion.LISTO.name, fecha = hace(150)),
+                Notificacion(usuarioId = 1, pedidoId = 1, titulo = "Pedido #001 entregado", mensaje = "Gracias por usar LavaCampus.", tipo = TipoNotificacion.ENTREGADO.name, fecha = hace(3 * 24 * 60), leida = true),
+                Notificacion(usuarioId = 2, pedidoId = 5, titulo = "Tu pedido #005 está listo", mensaje = "Recógelo en el casillero C-07.", tipo = TipoNotificacion.LISTO.name, fecha = hace(180)),
+                Notificacion(usuarioId = 3, pedidoId = 6, titulo = "Tu pedido #006 está en proceso", mensaje = "Ya estamos lavando tu ropa.", tipo = TipoNotificacion.EN_PROCESO.name, fecha = hace(300)),
+                Notificacion(usuarioId = 4, pedidoId = 10, titulo = "Nuevo pedido #010", mensaje = "Luis Rojas pidió 2.0 kg y 2 prendas.", tipo = TipoNotificacion.NUEVO.name, fecha = hace(12)),
+                Notificacion(usuarioId = 4, pedidoId = 9, titulo = "Nuevo pedido #009", mensaje = "Marta Quispe pidió 5 prendas.", tipo = TipoNotificacion.NUEVO.name, fecha = hace(25)),
+                Notificacion(usuarioId = 4, pedidoId = 7, titulo = "Pedido #007 atrasado", mensaje = "La fecha de entrega de Luis R. ya pasó.", tipo = TipoNotificacion.ALERTA.name, fecha = hace(90))
+            )
+        )
     }
 }

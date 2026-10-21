@@ -3,6 +3,9 @@ package com.flores.lavacampus.ui.administrador
 import androidx.compose.foundation.layout.height
 import com.flores.lavacampus.ui.components.FotoConDegradado
 import com.flores.lavacampus.ui.components.AvatarUsuario
+import com.flores.lavacampus.ui.components.BarraSuperior
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import com.flores.lavacampus.data.prefs.FotoPerfil
 import com.flores.lavacampus.R
 import androidx.compose.foundation.BorderStroke
@@ -57,7 +60,12 @@ import java.time.LocalDate
 
 // La View solo muestra las cifras del ViewModel
 @Composable
-fun PanelScreen(vm: PanelViewModel, onVerListos: () -> Unit, foto: FotoPerfil? = null) {
+fun PanelScreen(
+    vm: PanelViewModel,
+    onVerListos: () -> Unit,
+    foto: FotoPerfil? = null,
+    onMenu: () -> Unit = {}
+) {
     val pedidosHoy by vm.pedidosHoy.collectAsState()
     val enProceso by vm.enProceso.collectAsState()
     val porRecoger by vm.porRecoger.collectAsState()
@@ -78,6 +86,9 @@ fun PanelScreen(vm: PanelViewModel, onVerListos: () -> Unit, foto: FotoPerfil? =
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
+        // Barra superior: logo y campana (ya no va encima de la foto)
+        BarraSuperior("Panel del administrador", onMenu)
+
         // Banner con foto, titulo, fecha y la foto de perfil del administrador
         FotoConDegradado(
             R.drawable.foto_toallas,
@@ -85,7 +96,7 @@ fun PanelScreen(vm: PanelViewModel, onVerListos: () -> Unit, foto: FotoPerfil? =
         ) {
             Row(Modifier.fillMaxSize().padding(20.dp), verticalAlignment = Alignment.Bottom) {
                 Column(Modifier.weight(1f)) {
-                    Text("Panel de la lavandería", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text("Panel de la lavandería", fontSize = 26.sp, lineHeight = 32.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     Text("Hoy · $hoy", fontSize = 14.sp, color = Color.White.copy(alpha = 0.85f))
                 }
                 AvatarUsuario("Administrador", foto, 64.dp)

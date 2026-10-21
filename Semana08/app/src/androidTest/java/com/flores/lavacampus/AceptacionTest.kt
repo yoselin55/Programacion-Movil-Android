@@ -25,6 +25,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -263,31 +264,33 @@ class AceptacionTest {
             launch(Dispatchers.IO) { vm.erroresRegistro.collect { } },
             launch(Dispatchers.IO) { vm.usuarioActual.collect { } }
         )
-        var rol: Rol? = null
+        var correoNuevo: String? = null
 
         // Datos vacios: un error por cada campo
-        vm.registrar("", "", "", "", "") { rol = it }
+        vm.registrar("", "", "", "", "") { correoNuevo = it }
         delay(300)
         assertEquals(setOf("nombre", "codigo", "correo", "clave", "confirmacion"), vm.erroresRegistro.value.keys)
-        assertNull(rol)
+        assertNull(correoNuevo)
 
         // Correo que ya existe (sin importar mayusculas)
-        vm.registrar("Carla Mendoza", "U202312345", "ANA@correo.test", "abcd", "abcd") { rol = it }
+        vm.registrar("Carla Mendoza", "U202312345", "ANA@correo.test", "abcd", "abcd") { correoNuevo = it }
         delay(600)
         assertEquals("Ese correo ya está registrado", vm.erroresRegistro.value["correo"])
-        assertNull(rol)
+        assertNull(correoNuevo)
 
         // Codigo que ya existe
-        vm.registrar("Carla Mendoza", "U202310234", "carla@correo.test", "abcd", "abcd") { rol = it }
+        vm.registrar("Carla Mendoza", "U202310234", "carla@correo.test", "abcd", "abcd") { correoNuevo = it }
         delay(600)
         assertEquals("Ese código ya está registrado", vm.erroresRegistro.value["codigo"])
-        assertNull(rol)
+        assertNull(correoNuevo)
 
-        // Datos validos: se crea como estudiante, con el nombre bien escrito, y se inicia sesion
-        vm.registrar("carla  mendoza", "u202312345", "Carla@Correo.test", "abcd", "abcd") { rol = it }
+        // Datos validos: se crea como estudiante, con el nombre bien escrito, y NO se abre sesion
+        vm.registrar("carla  mendoza", "u202312345", "Carla@Correo.test", "abcd", "abcd") { correoNuevo = it }
         delay(900)
-        assertEquals(Rol.CLIENTE, rol)
-        val creado = vm.usuarioActual.value!!
+        assertEquals("carla@correo.test", correoNuevo)
+        // Registrarse no abre la sesion de la cuenta nueva (puede haber otra sesion guardada de antes)
+        assertNotEquals("carla@correo.test", vm.usuarioActual.value?.correo)
+        val creado = repo.login("carla@correo.test", "abcd")!!
         assertEquals("Carla Mendoza", creado.nombre)
         assertEquals("U202312345", creado.codigo)
         assertEquals("carla@correo.test", creado.correo)
@@ -362,4 +365,72 @@ class AceptacionTest {
         launch(Dispatchers.IO) { vm.casillero.collect { } },
         launch(Dispatchers.IO) { vm.casillerosOcupados.collect { } }
     )
+
+    // ---------- Notificaciones (estudiante 1 = Ana, 3 = Marta; administrador = 4) ----------
+
+    @Test
+    fun el_administrador_avanza_un_pedido_y_el_estudiante_recibe_la_notificacion() = runBlocking {
+        val antes = repo.observarNotificaciones(1).first().size
+        val sinLeerAntes = repo.observarNoLeidas(1).first()
+
+        repo.cambiarEstado(8, EstadoPedido.EN_PROCESO, null) // el pedido #008 es de Ana
+
+        val lista = repo.observarNotificaciones(1).first()
+        assertEquals(antes + 1, lista.size)
+        val nueva = lista.first() // la mas reciente va primero
+        assertEquals("Tu pedido #008 está en proceso", nueva.titulo)
+        assertEquals(8, nueva.pedidoId)
+        assertFalse(nueva.leida)
+        assertEquals(sinLeerAntes + 1, repo.observarNoLeidas(1).first())
+    }
+
+    @Test
+    fun el_aviso_de_pedido_listo_dice_el_casillero() = runBlocking {
+        repo.cambiarEstado(6, EstadoPedido.LISTO, "C-12") // el pedido #006 es de Marta
+        val n = repo.observarNotificaciones(3).first().first()
+        assertEquals("Tu pedido #006 está listo", n.titulo)
+        assertEquals("Recógelo en el casillero C-12.", n.mensaje)
+        assertEquals("LISTO", n.tipo)
+    }
+
+    @Test
+    fun un_pedido_nuevo_avisa_al_administrador() = runBlocking {
+        val sinLeerAntes = repo.observarNoLeidas(4).first()
+        val id = repo.crearPedido(3, listOf(LineaPedido(1, 3.5)), LocalDate.now().plusDays(1).toString(), "")
+
+        val n = repo.observarNotificaciones(4).first().first()
+        assertEquals("Nuevo pedido #" + id.toString().padStart(3, '0'), n.titulo)
+        assertEquals("Marta Quispe pidió 3.5 kg.", n.mensaje)
+        assertEquals("NUEVO", n.tipo)
+        assertEquals(sinLeerAntes + 1, repo.observarNoLeidas(4).first())
+    }
+
+    @Test
+    fun si_el_estudiante_cancela_el_aviso_va_al_administrador_y_no_a_si_mismo() = runBlocking {
+        val deAnaAntes = repo.observarNotificaciones(1).first().size
+        val deAdminAntes = repo.observarNotificaciones(4).first().size
+
+        repo.cambiarEstado(8, EstadoPedido.CANCELADO, null, porAdmin = false)
+
+        assertEquals(deAnaAntes, repo.observarNotificaciones(1).first().size)
+        val delAdmin = repo.observarNotificaciones(4).first()
+        assertEquals(deAdminAntes + 1, delAdmin.size)
+        assertEquals("Ana García canceló su pedido.", delAdmin.first().mensaje)
+    }
+
+    @Test
+    fun registrar_el_pago_avisa_y_se_pueden_marcar_leidas_y_borrar() = runBlocking {
+        repo.marcarPagado(8, true)
+        val n = repo.observarNotificaciones(1).first().first()
+        assertEquals("Pago registrado", n.titulo)
+
+        repo.marcarNotificacionLeida(n.id)
+        assertTrue(repo.observarNotificaciones(1).first().first { it.id == n.id }.leida)
+
+        repo.marcarNotificacionesLeidas(1)
+        assertEquals(0, repo.observarNoLeidas(1).first())
+
+        repo.borrarNotificaciones(1)
+        assertTrue(repo.observarNotificaciones(1).first().isEmpty())
+    }
 }

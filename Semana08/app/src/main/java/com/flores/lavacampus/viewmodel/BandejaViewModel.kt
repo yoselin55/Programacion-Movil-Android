@@ -1,5 +1,6 @@
 package com.flores.lavacampus.viewmodel
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flores.lavacampus.data.local.relation.PedidoConDetalle
@@ -14,6 +15,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+
+// Un grupo de la bandeja (titulo, color del grupo y sus pedidos)
+data class SeccionBandeja(val titulo: String, val color: Color, val pedidos: List<PedidoConDetalle>)
 
 // Bandeja del administrador: todos los pedidos con filtro por estado y buscador
 class BandejaViewModel(private val repo: LavaRepository) : ViewModel() {
@@ -44,6 +48,26 @@ class BandejaViewModel(private val repo: LavaRepository) : ViewModel() {
     val atrasados: StateFlow<Set<Int>> = repo.observarPedidosAtrasados(LocalDate.now().toString())
         .map { it.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
+    // Los pedidos ordenados por urgencia y agrupados: primero lo que hay que atender ya.
+    // Dentro de cada grupo, el que se debe entregar antes va arriba
+    val secciones: StateFlow<List<SeccionBandeja>?> = combine(pedidos, atrasados) { lista, atrasados ->
+        lista?.let { armarSecciones(it, atrasados) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    private fun armarSecciones(lista: List<PedidoConDetalle>, atrasados: Set<Int>): List<SeccionBandeja> {
+        fun estado(p: PedidoConDetalle) = EstadoPedido.valueOf(p.pedido.estado)
+        val porEntrega = compareBy<PedidoConDetalle>({ it.pedido.fechaEntrega }, { it.pedido.id })
+        val terminados = setOf(EstadoPedido.ENTREGADO, EstadoPedido.CANCELADO)
+        val (tarde, alDia) = lista.partition { it.pedido.id in atrasados }
+        return listOf(
+            SeccionBandeja("Atrasados", EstadoPedido.CANCELADO.color, tarde.sortedWith(porEntrega)),
+            SeccionBandeja("Por iniciar", EstadoPedido.RECIBIDO.color, alDia.filter { estado(it) == EstadoPedido.RECIBIDO }.sortedWith(porEntrega)),
+            SeccionBandeja("En proceso", EstadoPedido.EN_PROCESO.color, alDia.filter { estado(it) == EstadoPedido.EN_PROCESO }.sortedWith(porEntrega)),
+            SeccionBandeja("Listos para recoger", EstadoPedido.LISTO.color, alDia.filter { estado(it) == EstadoPedido.LISTO }.sortedWith(porEntrega)),
+            SeccionBandeja("Terminados", EstadoPedido.ENTREGADO.color, alDia.filter { estado(it) in terminados }.sortedByDescending { it.pedido.id })
+        ).filter { it.pedidos.isNotEmpty() }
+    }
 
     fun elegirFiltro(estado: EstadoPedido?) {
         _filtro.value = estado

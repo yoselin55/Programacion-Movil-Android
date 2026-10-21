@@ -17,9 +17,12 @@ object Rutas {
     const val AJUSTES = "ajustes"
     const val GESTION = "gestion/{id}"
     const val SERVICIO = "servicio/{id}"
+    const val CLIENTE = "cliente/{id}"
+    const val NOTIFICACIONES = "notificaciones"
 
     fun nuevoPedido(repetir: Int = 0) = "nuevoPedido?repetir=$repetir"
     fun detalle(id: Int) = "detalle/$id"
     fun gestion(id: Int) = "gestion/$id"
     fun servicio(id: Int) = "servicio/$id"
+    fun cliente(id: Int) = "cliente/$id"
 }

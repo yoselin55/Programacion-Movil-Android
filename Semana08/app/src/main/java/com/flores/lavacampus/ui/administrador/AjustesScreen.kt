@@ -2,6 +2,10 @@ package com.flores.lavacampus.ui.administrador
 
 import com.flores.lavacampus.ui.components.rememberSelectorFoto
 import com.flores.lavacampus.ui.components.PieLogo
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Inbox
+import androidx.compose.material.icons.outlined.Notifications
 import com.flores.lavacampus.ui.components.BannerPantalla
 import com.flores.lavacampus.R
 import com.flores.lavacampus.ui.components.DialogoCambiarPerfil
@@ -61,19 +65,18 @@ fun AjustesScreen(
                 .padding(horizontal = 20.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            BannerPantalla(R.drawable.foto_lavanderia, "Ajustes", "Cuenta y preferencias del administrador", alto = 120.dp)
             CabeceraPerfil(usuario?.nombre ?: "", usuario?.correo ?: "", "Perfil activo", foto, elegirFoto, sesion::quitarFoto)
             errorFoto?.let { Text(it, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold, fontSize = 13.sp) }
 
             BotonCambiarPerfil("Inicia sesión como Estudiante") { sesion.limpiarErrorCambio(); cambiando = true }
 
-            Text("Preferencias", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Text("Preferencias", fontWeight = FontWeight.Bold, fontSize = 17.sp)
             GrupoPreferencias {
-                FilaSwitch("Modo oscuro", "Cambia el tema de la app", oscuro, sesion::cambiarModoOscuro)
+                FilaSwitch("Modo oscuro", "Cambia el tema de la app", oscuro, sesion::cambiarModoOscuro, Icons.Outlined.DarkMode)
                 HorizontalDivider(Modifier.padding(horizontal = 16.dp))
-                FilaSwitch("Notificaciones", "Avisar pedidos nuevos", notificaciones, sesion::cambiarNotificaciones)
+                FilaSwitch("Notificaciones", "Avisar pedidos nuevos", notificaciones, sesion::cambiarNotificaciones, Icons.Outlined.Notifications)
                 HorizontalDivider(Modifier.padding(horizontal = 16.dp))
-                FilaSwitch("Recibir pedidos", "Abrir o cerrar la recepción", recibir, sesion::cambiarRecibirPedidos)
+                FilaSwitch("Recibir pedidos", "Abrir o cerrar la recepción", recibir, sesion::cambiarRecibirPedidos, Icons.Outlined.Inbox)
             }
 
             NotaDataStore()

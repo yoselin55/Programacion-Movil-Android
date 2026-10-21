@@ -10,8 +10,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import com.flores.lavacampus.model.Rol
 
-// Letras un 15 % mas grandes en toda la app (se suma al tamano de letra del sistema)
-private const val ESCALA_LETRA = 1.15f
+// Letras un 12 % mas grandes en toda la app (se suma al tamano de letra del sistema).
+// Poppins ya es una letra ancha y alta, por eso la escala es menor que con la letra del sistema
+private const val ESCALA_LETRA = 1.12f
 
 // ---------- Estudiante: paleta azul ----------
 // #021024  #052659  #5483B3  #7DA0CA  #C1E8FF
@@ -71,22 +72,24 @@ private val AdminClaro = lightColorScheme(
     outlineVariant = Color(0xFFEBD3D8)
 )
 
+// Modo oscuro moderno: fondo casi negro con un toque vino, tarjetas un escalon mas claras,
+// bordes sutiles y el rosa solo como acento
 private val AdminOscuro = darkColorScheme(
-    primary = Color(0xFFE07A94),
-    onPrimary = Color(0xFF4B0F1E),
-    primaryContainer = Color(0xFF8E2B44),
-    onPrimaryContainer = Color(0xFFF7D6DC),
-    secondary = Color(0xFFCC5671),
-    onSecondary = Color(0xFF4B0F1E),
-    secondaryContainer = Color(0xFF6D1D32),
-    onSecondaryContainer = Color(0xFFF7D6DC),
-    tertiary = Color(0xFFB23C59),
-    background = Color(0xFF2A0912),
-    onBackground = Color(0xFFF7D6DC),
-    surface = Color(0xFF3F1220),
-    onSurface = Color(0xFFF7D6DC),
-    surfaceVariant = Color(0xFF5A1A2D),
-    outlineVariant = Color(0xFF7A2F45)
+    primary = Color(0xFFF08CA4),
+    onPrimary = Color(0xFF3A0A19),
+    primaryContainer = Color(0xFF7A1F3A),
+    onPrimaryContainer = Color(0xFFFFE1E7),
+    secondary = Color(0xFFE0728E),
+    onSecondary = Color(0xFF3A0A19),
+    secondaryContainer = Color(0xFF3D1623),
+    onSecondaryContainer = Color(0xFFFFD9E0),
+    tertiary = Color(0xFFCC5671),
+    background = Color(0xFF130B0E),
+    onBackground = Color(0xFFF6E9EC),
+    surface = Color(0xFF1E1217),
+    onSurface = Color(0xFFF6E9EC),
+    surfaceVariant = Color(0xFF2C1B22),
+    outlineVariant = Color(0xFF3F2A33)
 )
 
 // En las pantallas se usa MaterialTheme.colorScheme.primary, nunca un color fijo

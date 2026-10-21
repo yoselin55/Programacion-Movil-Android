@@ -192,7 +192,7 @@ class SesionViewModel(
 
     fun registrar(
         nombre: String, codigo: String, correo: String, clave: String, confirmacion: String,
-        onExito: (Rol) -> Unit
+        onExito: (String) -> Unit // recibe el correo con el que quedo registrado
     ) {
         // Los espacios de mas se eliminan antes de validar ("carla   mendoza " -> "carla mendoza")
         val nombre = nombre.trim().replace(Regex("""\s+"""), " ")
@@ -220,8 +220,8 @@ class SesionViewModel(
                 _erroresRegistro.value = repetidos
                 return@launch
             }
-            // 3) Se crea el estudiante y se inicia sesion con el
-            val nuevo = repo.registrarUsuario(
+            // 3) Se crea el estudiante. No se abre sesion: la pantalla lo lleva al Login
+            repo.registrarUsuario(
                 Usuario(
                     nombre = nombre.trim().split(" ").filter { it.isNotEmpty() }
                         .joinToString(" ") { it.lowercase().replaceFirstChar { c -> c.uppercase() } },
@@ -232,10 +232,7 @@ class SesionViewModel(
                 )
             )
             _erroresRegistro.value = emptyMap()
-            prefs.guardarSesion(nuevo.rol, nuevo.id)
-            _usuarioActual.value = nuevo
-            _bienvenida.value = "¡Te damos la bienvenida, ${nuevo.nombre.substringBefore(" ")}!"
-            onExito(Rol.CLIENTE)
+            onExito(correoLimpio)
         }
     }
 }

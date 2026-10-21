@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,6 +56,7 @@ import com.flores.lavacampus.viewmodel.SesionViewModel
 fun LoginScreen(vm: SesionViewModel, onLoginExitoso: (Rol) -> Unit) {
     var rol by remember { mutableStateOf(Rol.CLIENTE) }
     var registrando by remember { mutableStateOf(false) }
+    var cuentaCreada by remember { mutableStateOf(false) } // muestra "Cuenta creada" tras registrarse
     var correo by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
     // Campos solo del registro
@@ -119,7 +121,7 @@ fun LoginScreen(vm: SesionViewModel, onLoginExitoso: (Rol) -> Unit) {
                         SelectorPestanas(
                             opciones = listOf("Iniciar sesión", "Registrarse"),
                             seleccionada = if (registrando) 1 else 0,
-                            onElegir = { registrando = it == 1; vm.limpiarError(); vm.limpiarErroresRegistro() }
+                            onElegir = { registrando = it == 1; cuentaCreada = false; vm.limpiarError(); vm.limpiarErroresRegistro() }
                         )
                     }
 
@@ -143,15 +145,18 @@ fun LoginScreen(vm: SesionViewModel, onLoginExitoso: (Rol) -> Unit) {
                         error = if (modoRegistro) errores["correo"] else null,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    LavaTextField(
-                        value = clave,
-                        onValueChange = { clave = it; vm.limpiarErrorCampo("clave") },
-                        etiqueta = "Contraseña",
-                        icono = Icons.Outlined.Lock,
-                        esClave = true,
-                        error = if (modoRegistro) errores["clave"] else null,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    // key: al cambiar de modo el campo se crea de nuevo y la clave vuelve a estar oculta
+                    key(modoRegistro) {
+                        LavaTextField(
+                            value = clave,
+                            onValueChange = { clave = it; vm.limpiarErrorCampo("clave") },
+                            etiqueta = "Contraseña",
+                            icono = Icons.Outlined.Lock,
+                            esClave = true,
+                            error = if (modoRegistro) errores["clave"] else null,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                     if (modoRegistro) {
                         LavaTextField(
                             confirmacion, { confirmacion = it; vm.limpiarErrorCampo("confirmacion") }, "Repite la contraseña", Modifier.fillMaxWidth(),
@@ -160,32 +165,34 @@ fun LoginScreen(vm: SesionViewModel, onLoginExitoso: (Rol) -> Unit) {
                     }
 
                     if (!modoRegistro) {
+                        if (cuentaCreada) {
+                            Text(
+                                "Cuenta creada. Ahora inicia sesión",
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
                         error?.let { Text(it, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold) }
                     }
 
                     LavaButton(
                         texto = if (modoRegistro) "Crear cuenta" else "Ingresar",
                         onClick = {
-                            if (modoRegistro) vm.registrar(nombre, codigo, correo, clave, confirmacion, onLoginExitoso)
-                            else vm.login(correo, clave, rol, onLoginExitoso)
+                            if (modoRegistro) {
+                                vm.registrar(nombre, codigo, correo, clave, confirmacion) { correoNuevo ->
+                                    // Cuenta creada: vuelve a Iniciar sesion con el correo ya escrito
+                                    registrando = false
+                                    correo = correoNuevo
+                                    clave = ""; nombre = ""; codigo = ""; confirmacion = ""
+                                    cuentaCreada = true
+                                }
+                            } else {
+                                cuentaCreada = false
+                                vm.login(correo, clave, rol, onLoginExitoso)
+                            }
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
-
-                    // Enlace para cambiar de modo (solo estudiantes)
-                    if (rol == Rol.CLIENTE) {
-                        Text(
-                            if (modoRegistro) "¿Ya tienes cuenta? Inicia sesión" else "¿No tienes cuenta? Regístrate",
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { registrando = !registrando; vm.limpiarError(); vm.limpiarErroresRegistro() }
-                                .padding(vertical = 6.dp)
-                        )
-                    }
                 }
             }
         }

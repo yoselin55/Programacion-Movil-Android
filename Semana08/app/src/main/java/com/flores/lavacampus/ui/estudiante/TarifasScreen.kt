@@ -134,7 +134,7 @@ private fun Horario() {
     ) {
         Box(Modifier.fillMaxWidth().height(110.dp)) {
             Image(
-                painter = painterResource(R.drawable.foto_canasta),
+                painter = painterResource(R.drawable.foto_toallas_colores),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()

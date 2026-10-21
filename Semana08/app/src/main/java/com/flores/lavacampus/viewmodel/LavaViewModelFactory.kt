@@ -14,7 +14,8 @@ class LavaViewModelFactory(
     private val usuario: Usuario? = null, // para los ViewModels que dependen del estudiante
     private val pedidoId: Int = 0,        // para el detalle de un pedido
     private val repetirId: Int = 0,       // pedido que se repite en Nuevo pedido (0 = ninguno)
-    private val fotos: FotoPerfilStore? = null // solo lo necesita SesionViewModel
+    private val fotos: FotoPerfilStore? = null, // solo lo necesita SesionViewModel
+    private val clienteId: Int = 0        // para la ficha de un cliente (administrador)
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
@@ -29,6 +30,8 @@ class LavaViewModelFactory(
         modelClass.isAssignableFrom(GestionPedidoViewModel::class.java) -> GestionPedidoViewModel(repo, pedidoId) as T
         modelClass.isAssignableFrom(ServiciosViewModel::class.java) -> ServiciosViewModel(repo) as T
         modelClass.isAssignableFrom(ClientesViewModel::class.java) -> ClientesViewModel(repo) as T
+        modelClass.isAssignableFrom(NotificacionesViewModel::class.java) -> NotificacionesViewModel(repo, usuario!!) as T
+        modelClass.isAssignableFrom(ClienteDetalleViewModel::class.java) -> ClienteDetalleViewModel(repo, clienteId) as T
         modelClass.isAssignableFrom(PerfilViewModel::class.java) -> PerfilViewModel(repo, usuario!!) as T
         else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     }

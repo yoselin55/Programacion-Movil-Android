@@ -1,5 +1,6 @@
 package com.flores.lavacampus.data.repository
 
+import com.flores.lavacampus.data.local.entity.Notificacion
 import com.flores.lavacampus.data.local.entity.Servicio
 import com.flores.lavacampus.data.local.entity.Usuario
 import com.flores.lavacampus.data.local.relation.PedidoConDetalle
@@ -40,10 +41,18 @@ interface LavaRepository {
     fun observarPedidosDeUsuario(usuarioId: Int): Flow<List<PedidoConDetalle>>
     fun observarPedidos(): Flow<List<PedidoConDetalle>>
     fun observarPedido(id: Int): Flow<PedidoConDetalle?>
-    suspend fun cambiarEstado(id: Int, estado: EstadoPedido, casillero: String?)
+    // porAdmin = false cuando el estudiante cancela su propio pedido (el aviso va al administrador)
+    suspend fun cambiarEstado(id: Int, estado: EstadoPedido, casillero: String?, porAdmin: Boolean = true)
     suspend fun marcarPagado(id: Int, pagado: Boolean)
     fun observarCasillerosOcupados(): Flow<List<String>>
     fun observarPedidosAtrasados(hoy: String): Flow<List<Int>>
+
+    // Notificaciones: el Repository las registra junto con cada cambio de un pedido
+    fun observarNotificaciones(usuarioId: Int): Flow<List<Notificacion>>
+    fun observarNoLeidas(usuarioId: Int): Flow<Int>
+    suspend fun marcarNotificacionLeida(id: Int)
+    suspend fun marcarNotificacionesLeidas(usuarioId: Int)
+    suspend fun borrarNotificaciones(usuarioId: Int)
 
     // Panel
     fun observarPedidosDeFecha(fecha: String): Flow<Int>

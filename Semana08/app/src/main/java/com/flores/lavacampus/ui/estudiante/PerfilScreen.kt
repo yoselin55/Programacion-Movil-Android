@@ -29,6 +29,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.flores.lavacampus.model.Rol
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Autorenew
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Inbox
+import androidx.compose.material.icons.outlined.LocalLaundryService
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.flores.lavacampus.ui.components.AppTopBar
 import com.flores.lavacampus.ui.components.BotonCambiarPerfil
 import com.flores.lavacampus.ui.components.BotonCerrarSesion
@@ -75,23 +86,24 @@ fun PerfilScreen(
 
             // Contadores
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Contador(activos.toString(), "Pedidos activos", Modifier.weight(1f))
-                Contador(totales.toString(), "Pedidos totales", Modifier.weight(1f))
+                Contador(activos.toString(), "Activos", Icons.Outlined.Autorenew, Modifier.weight(1f))
+                Contador(totales.toString(), "Pedidos", Icons.Outlined.Inbox, Modifier.weight(1f))
                 Contador(
                     // 42.0 se muestra "42 kg" y 7.5 se muestra "7.5 kg"
                     (if (kilos % 1.0 == 0.0) kilos.toInt().toString() else String.format(Locale.US, "%.1f", kilos)) + " kg",
                     "Lavados",
+                    Icons.Outlined.LocalLaundryService,
                     Modifier.weight(1f)
                 )
             }
 
             BotonCambiarPerfil("Inicia sesión como Administrador") { sesion.limpiarErrorCambio(); cambiando = true }
 
-            Text("Preferencias", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Text("Preferencias", fontWeight = FontWeight.Bold, fontSize = 17.sp)
             GrupoPreferencias {
-                FilaSwitch("Modo oscuro", "Cambia el tema de la app", oscuro, sesion::cambiarModoOscuro)
+                FilaSwitch("Modo oscuro", "Cambia el tema de la app", oscuro, sesion::cambiarModoOscuro, Icons.Outlined.DarkMode)
                 HorizontalDivider(Modifier.padding(horizontal = 16.dp))
-                FilaSwitch("Avisos de pedido listo", "Notificar cuando puedas recoger", avisos, sesion::cambiarNotificaciones)
+                FilaSwitch("Avisos de pedido listo", "Notificar cuando puedas recoger", avisos, sesion::cambiarNotificaciones, Icons.Outlined.Notifications)
             }
 
             NotaDataStore()
@@ -111,15 +123,20 @@ fun PerfilScreen(
 }
 
 @Composable
-private fun Contador(valor: String, titulo: String, modifier: Modifier) {
+private fun Contador(valor: String, titulo: String, icono: ImageVector, modifier: Modifier) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(vertical = 14.dp, horizontal = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(vertical = 16.dp, horizontal = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Text(valor, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-        Text(titulo, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Box(
+            Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center
+        ) { Icon(icono, null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(22.dp)) }
+        Text(valor, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Text(titulo, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
     }
 }

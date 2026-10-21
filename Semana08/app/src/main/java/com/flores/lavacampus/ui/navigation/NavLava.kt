@@ -13,9 +13,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.background
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.AnimatedVisibility
@@ -26,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Person
@@ -76,6 +80,38 @@ import com.flores.lavacampus.ui.estudiante.TarifasScreen
 import com.flores.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.flores.lavacampus.ui.estudiante.SplashScreen
 import com.flores.lavacampus.viewmodel.BandejaViewModel
+import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.DryCleaning
+import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.Inbox
+import androidx.compose.material.icons.outlined.LocalLaundryService
+import androidx.compose.material.icons.rounded.Dashboard
+import androidx.compose.material.icons.rounded.DryCleaning
+import androidx.compose.material.icons.rounded.Groups
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Inbox
+import androidx.compose.material.icons.rounded.LocalLaundryService
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Sell
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.runtime.key
+import com.flores.lavacampus.ui.components.BarraFlotante
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import com.flores.lavacampus.ui.components.ItemMenu
+import com.flores.lavacampus.ui.components.MenuLateral
+import com.flores.lavacampus.ui.components.MenuLateralVacio
+import com.flores.lavacampus.ui.components.ItemBarra
+import com.flores.lavacampus.ui.notificaciones.AvisoEmergente
+import com.flores.lavacampus.ui.notificaciones.NotificacionesScreen
+import com.flores.lavacampus.viewmodel.NotificacionesViewModel
+import com.flores.lavacampus.viewmodel.ClienteDetalleViewModel
+import com.flores.lavacampus.ui.administrador.ClienteDetalleScreen
 import com.flores.lavacampus.viewmodel.DetallePedidoViewModel
 import com.flores.lavacampus.viewmodel.GestionPedidoViewModel
 import com.flores.lavacampus.viewmodel.InicioViewModel
@@ -88,23 +124,24 @@ import com.flores.lavacampus.viewmodel.SesionViewModel
 
 private fun destinoDe(rol: Rol) = if (rol == Rol.ADMIN) Rutas.PANEL else Rutas.INICIO
 
-// Pestanas de la barra inferior del estudiante
-private class Pestana(val ruta: String, val texto: String, val icono: ImageVector)
+// Pestanas de la barra inferior: icono de contorno y, cuando esta activa, el mismo icono relleno
+private class Pestana(val ruta: String, val texto: String, val icono: ImageVector, val iconoActivo: ImageVector)
 
 private val pestanasEstudiante = listOf(
-    Pestana(Rutas.INICIO, "Inicio", Icons.Outlined.Home),
-    Pestana(Rutas.PEDIDOS, "Pedidos", Icons.Outlined.Menu),
-    Pestana(Rutas.TARIFAS, "Tarifas", Icons.Outlined.Sell),
-    Pestana(Rutas.PERFIL, "Perfil", Icons.Outlined.Person)
+    Pestana(Rutas.INICIO, "Inicio", Icons.Outlined.Home, Icons.Rounded.Home),
+    Pestana(Rutas.PEDIDOS, "Pedidos", Icons.Outlined.LocalLaundryService, Icons.Rounded.LocalLaundryService),
+    Pestana(Rutas.PERFIL, "Perfil", Icons.Outlined.Person, Icons.Rounded.Person)
 )
 
 private val pestanasAdmin = listOf(
-    Pestana(Rutas.PANEL, "Panel", Icons.Outlined.BarChart),
-    Pestana(Rutas.BANDEJA, "Pedidos", Icons.Outlined.Menu),
-    Pestana(Rutas.SERVICIOS, "Servicios", Icons.Outlined.Sell),
-    Pestana(Rutas.CLIENTES, "Clientes", Icons.Outlined.Person),
-    Pestana(Rutas.AJUSTES, "Ajustes", Icons.Outlined.Settings)
+    Pestana(Rutas.PANEL, "Panel", Icons.Outlined.Dashboard, Icons.Rounded.Dashboard),
+    Pestana(Rutas.BANDEJA, "Pedidos", Icons.Outlined.Inbox, Icons.Rounded.Inbox),
+    Pestana(Rutas.CLIENTES, "Clientes", Icons.Outlined.Groups, Icons.Rounded.Groups)
 )
+
+// Pantallas que se abren desde el menu lateral (no estan en la barra de abajo, pero la barra se ve en ellas)
+private val rutasDelMenuEstudiante = listOf(Rutas.TARIFAS)
+private val rutasDelMenuAdmin = listOf(Rutas.SERVICIOS, Rutas.AJUSTES)
 
 // Grafo de navegacion. Splash -> Login (o directo a Inicio/Panel si ya hay perfil)
 @Composable
@@ -121,6 +158,7 @@ fun NavLava(
 
     // Mensaje de bienvenida al iniciar sesion o registrarse: se ve en la pantalla unos segundos
     val bienvenida by sesion.bienvenida.collectAsState()
+    val avisosActivados by sesion.notificaciones.collectAsState()
     var textoBienvenida by remember { mutableStateOf("") }
     LaunchedEffect(bienvenida) {
         bienvenida?.let {
@@ -139,39 +177,90 @@ fun NavLava(
         nav.navigate(Rutas.LOGIN) { popUpTo(nav.graph.id) { inclusive = true } }
     }
 
+    // Menu lateral: se abre con el boton de tres rayas (o deslizando desde el borde) en las pantallas principales
+    val estadoMenu = rememberDrawerState(DrawerValue.Closed)
+    val ambito = rememberCoroutineScope()
+    val esAdminActual = usuario?.rol == Rol.ADMIN.name
+    val pestanasActuales = if (esAdminActual) pestanasAdmin else pestanasEstudiante
+    val rutasDelMenu = if (esAdminActual) rutasDelMenuAdmin else rutasDelMenuEstudiante
+    val enPrincipal = usuario != null && (pestanasActuales.any { it.ruta == rutaActual } || rutaActual in rutasDelMenu)
+    val sinLeerMenu = usuario?.let { u ->
+        val vmMenu: NotificacionesViewModel = viewModel(key = "notiMenu${u.id}", factory = LavaViewModelFactory(repo, prefs, u))
+        vmMenu.noLeidas.collectAsState().value
+    } ?: 0
+    val abrirMenu: () -> Unit = { ambito.launch { estadoMenu.open() } }
+
+    ModalNavigationDrawer(
+        drawerState = estadoMenu,
+        gesturesEnabled = enPrincipal,
+        scrimColor = Color.Black.copy(alpha = 0.3f),
+        drawerContent = {
+            if (usuario == null) MenuLateralVacio()
+            usuario?.let { u ->
+                val esAdmin = u.rol == Rol.ADMIN.name
+                val base = if (esAdmin) Rutas.PANEL else Rutas.INICIO
+                // El menu no repite la barra de abajo: aqui van las demas secciones
+                val items = if (esAdmin) listOf(
+                    ItemMenu("Notificaciones", Icons.Outlined.Notifications, Rutas.NOTIFICACIONES, sinLeerMenu),
+                    ItemMenu("Servicios", Icons.Outlined.DryCleaning, Rutas.SERVICIOS),
+                    ItemMenu("Ajustes", Icons.Outlined.Settings, Rutas.AJUSTES)
+                ) else listOf(
+                    ItemMenu("Notificaciones", Icons.Outlined.Notifications, Rutas.NOTIFICACIONES, sinLeerMenu),
+                    ItemMenu("Tarifas", Icons.Outlined.Sell, Rutas.TARIFAS),
+                    ItemMenu("Nuevo pedido", Icons.Outlined.AddCircleOutline, Rutas.nuevoPedido())
+                )
+                MenuLateral(
+                    nombre = u.nombre,
+                    correo = u.correo,
+                    etiqueta = if (esAdmin) Rol.ADMIN.texto else Rol.CLIENTE.texto,
+                    foto = foto,
+                    items = items,
+                    rutaActual = rutaActual,
+                    onElegir = { ruta ->
+                        ambito.launch { estadoMenu.close() }
+                        when {
+                            ruta == base -> nav.popBackStack(base, inclusive = false)
+                            ruta == Rutas.nuevoPedido() -> nav.navigate(ruta)
+                            else -> nav.navigate(ruta) {
+                                popUpTo(base) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    },
+                    onCerrarSesion = {
+                        ambito.launch { estadoMenu.close() }
+                        sesion.cerrarSesion(::irAlLogin)
+                    }
+                )
+            }
+        }
+    ) {
     Scaffold(
         bottomBar = {
             // La barra solo se ve en las pantallas principales de cada perfil
-            val pestanas = listOf(pestanasEstudiante, pestanasAdmin)
-                .firstOrNull { grupo -> grupo.any { it.ruta == rutaActual } }
-            if (pestanas != null) {
+            if (enPrincipal) {
+                val pestanas = pestanasActuales
                 val base = pestanas.first().ruta // Inicio o Panel: base de la pila
-                NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                    pestanas.forEach { p ->
-                        NavigationBarItem(
-                            selected = rutaActual == p.ruta,
-                            onClick = {
-                                if (p.ruta == base) {
-                                    // La base de la pila: se vuelve a ella sin restaurar nada
-                                    nav.popBackStack(base, inclusive = false)
-                                } else {
-                                    nav.navigate(p.ruta) {
-                                        popUpTo(base) { saveState = true }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                }
-                            },
-                            icon = { Icon(p.icono, contentDescription = p.texto) },
-                            label = { Text(p.texto) },
-                            colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = Color.Transparent,
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary
-                            )
-                        )
+                BarraFlotante(
+                    items = pestanas.map {
+                        ItemBarra(it.texto, it.icono, it.iconoActivo)
+                    },
+                    seleccionada = pestanas.indexOfFirst { it.ruta == rutaActual },
+                    onElegir = { i ->
+                        val p = pestanas[i]
+                        if (p.ruta == base) {
+                            // La base de la pila: se vuelve a ella sin restaurar nada
+                            nav.popBackStack(base, inclusive = false)
+                        } else {
+                            nav.navigate(p.ruta) {
+                                popUpTo(base) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
                     }
-                }
+                )
             }
         },
         contentWindowInsets = WindowInsets(0)
@@ -210,7 +299,8 @@ fun NavLava(
                         onVerPedido = { nav.navigate(Rutas.detalle(it)) },
                         onMisPedidos = { nav.navigate(Rutas.PEDIDOS) },
                         onTarifas = { nav.navigate(Rutas.TARIFAS) },
-                        foto = foto
+                        foto = foto,
+                        onMenu = abrirMenu
                     )
                 }
             }
@@ -287,7 +377,30 @@ fun NavLava(
             }
             composable(Rutas.PANEL) {
                 val vm: PanelViewModel = viewModel(factory = LavaViewModelFactory(repo, prefs))
-                PanelScreen(vm = vm, onVerListos = { nav.navigate(Rutas.BANDEJA) }, foto = foto)
+                usuario?.let { u ->
+                    PanelScreen(
+                        vm = vm,
+                        onVerListos = { nav.navigate(Rutas.BANDEJA) },
+                        foto = foto,
+                        onMenu = abrirMenu
+                    )
+                }
+            }
+            composable(Rutas.NOTIFICACIONES) {
+                usuario?.let { u ->
+                    val vm: NotificacionesViewModel = viewModel(
+                        key = "notis${u.id}",
+                        factory = LavaViewModelFactory(repo, prefs, u)
+                    )
+                    NotificacionesScreen(
+                        vm = vm,
+                        onVolver = { nav.popBackStack() },
+                        // El estudiante abre el detalle de su pedido; el administrador, su gestion
+                        onAbrirPedido = { id ->
+                            nav.navigate(if (u.rol == Rol.ADMIN.name) Rutas.gestion(id) else Rutas.detalle(id))
+                        }
+                    )
+                }
             }
             composable(Rutas.BANDEJA) {
                 val vm: BandejaViewModel = viewModel(factory = LavaViewModelFactory(repo, prefs))
@@ -330,7 +443,26 @@ fun NavLava(
             }
             composable(Rutas.CLIENTES) {
                 val vm: ClientesViewModel = viewModel(factory = LavaViewModelFactory(repo, prefs))
-                ClientesScreen(vm = vm, onVolver = { nav.popBackStack(Rutas.PANEL, inclusive = false) })
+                ClientesScreen(
+                    vm = vm,
+                    onVolver = { nav.popBackStack(Rutas.PANEL, inclusive = false) },
+                    onAbrir = { nav.navigate(Rutas.cliente(it)) }
+                )
+            }
+            composable(
+                Rutas.CLIENTE,
+                arguments = listOf(navArgument("id") { type = NavType.IntType })
+            ) { entrada ->
+                val id = entrada.arguments?.getInt("id") ?: 0
+                val vm: ClienteDetalleViewModel = viewModel(
+                    key = "cliente$id",
+                    factory = LavaViewModelFactory(repo, prefs, clienteId = id)
+                )
+                ClienteDetalleScreen(
+                    vm = vm,
+                    onVolver = { nav.popBackStack() },
+                    onAbrirPedido = { nav.navigate(Rutas.gestion(it)) }
+                )
             }
             composable(Rutas.AJUSTES) {
                 AjustesScreen(
@@ -342,39 +474,51 @@ fun NavLava(
             }
         }
 
-        // Aviso de bienvenida (arriba, con el logo)
+        // Aviso emergente: llega una notificacion nueva mientras se usa la app (tiempo real)
+        usuario?.let { u ->
+            key(u.id) {
+                val vmAviso: NotificacionesViewModel = viewModel(
+                    key = "notiAviso${u.id}",
+                    factory = LavaViewModelFactory(repo, prefs, u)
+                )
+                AvisoEmergente(
+                    vm = vmAviso,
+                    habilitado = avisosActivados && rutaActual != Rutas.NOTIFICACIONES && rutaActual != Rutas.LOGIN,
+                    onAbrir = { nav.navigate(Rutas.NOTIFICACIONES) },
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
+            }
+        }
+
+        // Aviso de bienvenida (en el centro de la pantalla, con el logo)
         AnimatedVisibility(
             visible = bienvenida != null,
-            enter = slideInVertically { -it } + fadeIn(),
-            exit = slideOutVertically { -it } + fadeOut(),
-            modifier = Modifier.align(Alignment.TopCenter)
+            enter = scaleIn(initialScale = 0.8f) + fadeIn(),
+            exit = scaleOut(targetScale = 0.8f) + fadeOut(),
+            modifier = Modifier.align(Alignment.Center)
         ) {
-            Row(
+            Column(
                 modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                    .padding(horizontal = 32.dp)
                     .fillMaxWidth()
-                    .shadow(8.dp, RoundedCornerShape(18.dp))
-                    .clip(RoundedCornerShape(18.dp))
+                    .shadow(16.dp, RoundedCornerShape(28.dp))
+                    .clip(RoundedCornerShape(28.dp))
                     .background(MaterialTheme.colorScheme.primary)
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 24.dp, vertical = 28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                LogoLavaCampus(44.dp)
+                LogoLavaCampus(88.dp)
                 Text(
                     textoBienvenida,
                     color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = 17.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 14.dp)
+                    textAlign = TextAlign.Center
                 )
             }
         }
         }
     }
-}
-
-@Composable
-private fun Provisional(texto: String) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(texto) }
+    }
 }

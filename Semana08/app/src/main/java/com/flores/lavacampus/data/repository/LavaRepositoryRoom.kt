@@ -3,6 +3,7 @@ package com.flores.lavacampus.data.repository
 import androidx.room.withTransaction
 import com.flores.lavacampus.data.local.LavaDatabase
 import com.flores.lavacampus.data.local.entity.DetallePedido
+import com.flores.lavacampus.data.local.entity.Notificacion
 import com.flores.lavacampus.data.local.entity.Pedido
 import com.flores.lavacampus.data.local.entity.Servicio
 import com.flores.lavacampus.data.local.entity.Usuario
@@ -12,6 +13,8 @@ import com.flores.lavacampus.model.Descuento
 import com.flores.lavacampus.model.EstadoPedido
 import com.flores.lavacampus.model.IngresoServicio
 import com.flores.lavacampus.model.LineaPedido
+import com.flores.lavacampus.model.Rol
+import com.flores.lavacampus.model.TextosNotificacion
 import com.flores.lavacampus.model.Unidad
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -23,6 +26,7 @@ class LavaRepositoryRoom(private val db: LavaDatabase) : LavaRepository {
     private val usuarioDao = db.usuarioDao()
     private val pedidoDao = db.pedidoDao()
     private val detalleDao = db.detalleDao()
+    private val notificacionDao = db.notificacionDao()
 
     // Usuarios
     override suspend fun login(correo: String, clave: String): Usuario? =
@@ -101,6 +105,19 @@ class LavaRepositoryRoom(private val db: LavaDatabase) : LavaRepository {
             )
         )
         detalleDao.insertarTodos(detalles.map { it.third.copy(pedidoId = pedidoId.toInt()) })
+
+        // Aviso para el administrador: llego un pedido nuevo
+        val admin = usuarioDao.primeroPorRol(Rol.ADMIN.name)
+        val estudiante = usuarioDao.obtener(usuarioId)
+        if (admin != null && estudiante != null) {
+            val kilos = lavado.sumOf { it.second }
+            val prendas = detalles.filter { it.first.unidad != Unidad.KG.name }.sumOf { it.second }.toInt()
+            val resumen = listOfNotNull(
+                if (kilos > 0) String.format(java.util.Locale.US, "%.1f kg", kilos) else null,
+                if (prendas > 0) "$prendas ${if (prendas == 1) "prenda" else "prendas"}" else null
+            ).joinToString(" y ")
+            avisar(admin.id, pedidoId.toInt(), TextosNotificacion.pedidoNuevo(pedidoId.toInt(), estudiante.nombre, resumen))
+        }
         pedidoId
     }
 
@@ -113,11 +130,53 @@ class LavaRepositoryRoom(private val db: LavaDatabase) : LavaRepository {
     override fun observarPedido(id: Int): Flow<PedidoConDetalle?> = pedidoDao.observarUno(id)
 
     // No valida reglas: eso lo hace el ViewModel
-    override suspend fun cambiarEstado(id: Int, estado: EstadoPedido, casillero: String?) =
-        pedidoDao.actualizarEstado(id, estado.name, casillero)
+    // El cambio y su aviso se guardan juntos: si uno falla, no queda el otro
+    override suspend fun cambiarEstado(id: Int, estado: EstadoPedido, casillero: String?, porAdmin: Boolean) {
+        db.withTransaction {
+            pedidoDao.actualizarEstado(id, estado.name, casillero)
+            val pedido = pedidoDao.obtener(id) ?: return@withTransaction
+            if (porAdmin) {
+                // El estudiante se entera de que su pedido avanzo
+                TextosNotificacion.alEstudiante(estado, id, casillero)?.let { avisar(pedido.usuarioId, id, it) }
+            } else if (estado == EstadoPedido.CANCELADO) {
+                // El estudiante cancelo: se entera el administrador
+                val admin = usuarioDao.primeroPorRol(Rol.ADMIN.name)
+                val estudiante = usuarioDao.obtener(pedido.usuarioId)
+                if (admin != null && estudiante != null) {
+                    avisar(admin.id, id, TextosNotificacion.canceladoPorEstudiante(id, estudiante.nombre))
+                }
+            }
+        }
+    }
 
-    override suspend fun marcarPagado(id: Int, pagado: Boolean) =
-        pedidoDao.actualizarPagado(id, pagado)
+    override suspend fun marcarPagado(id: Int, pagado: Boolean) {
+        db.withTransaction {
+            pedidoDao.actualizarPagado(id, pagado)
+            val pedido = pedidoDao.obtener(id) ?: return@withTransaction
+            if (pagado) {
+                val total = "S/ " + String.format(java.util.Locale.US, "%,.2f", pedido.total)
+                avisar(pedido.usuarioId, id, TextosNotificacion.pagoRegistrado(id, total))
+            }
+        }
+    }
+
+    private suspend fun avisar(usuarioId: Int, pedidoId: Int, texto: TextosNotificacion.Texto) {
+        notificacionDao.insertar(
+            Notificacion(
+                usuarioId = usuarioId, pedidoId = pedidoId,
+                titulo = texto.titulo, mensaje = texto.mensaje, tipo = texto.tipo.name
+            )
+        )
+    }
+
+    // Notificaciones
+    override fun observarNotificaciones(usuarioId: Int): Flow<List<Notificacion>> =
+        notificacionDao.observarDeUsuario(usuarioId)
+
+    override fun observarNoLeidas(usuarioId: Int): Flow<Int> = notificacionDao.observarNoLeidas(usuarioId)
+    override suspend fun marcarNotificacionLeida(id: Int) = notificacionDao.marcarLeida(id)
+    override suspend fun marcarNotificacionesLeidas(usuarioId: Int) = notificacionDao.marcarTodasLeidas(usuarioId)
+    override suspend fun borrarNotificaciones(usuarioId: Int) = notificacionDao.borrarDeUsuario(usuarioId)
 
     override fun observarCasillerosOcupados(): Flow<List<String>> =
         pedidoDao.observarCasillerosOcupados()

@@ -4,6 +4,7 @@ import com.flores.lavacampus.ui.components.EstadoVacio
 import com.flores.lavacampus.ui.components.BannerPantalla
 import com.flores.lavacampus.R
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -59,6 +60,7 @@ import com.flores.lavacampus.viewmodel.BandejaViewModel
 @Composable
 fun BandejaScreen(vm: BandejaViewModel, onVolver: () -> Unit, onAbrir: (Int) -> Unit) {
     val pedidos by vm.pedidos.collectAsState()
+    val secciones by vm.secciones.collectAsState()
     val filtro by vm.filtro.collectAsState()
     val busqueda by vm.busqueda.collectAsState()
     val atrasados by vm.atrasados.collectAsState()
@@ -76,7 +78,7 @@ fun BandejaScreen(vm: BandejaViewModel, onVolver: () -> Unit, onAbrir: (Int) -> 
             BannerPantalla(
                 R.drawable.foto_lavanderia,
                 "Bandeja de pedidos",
-                if (atrasados.isEmpty()) "${pedidos?.size ?: 0} pedidos" else "${pedidos?.size ?: 0} pedidos · ${atrasados.size} ${if (atrasados.size == 1) "atrasado" else "atrasados"}",
+                "${pedidos?.size ?: 0} pedidos · ordenados por urgencia",
                 alto = 150.dp
             )
 
@@ -108,18 +110,45 @@ fun BandejaScreen(vm: BandejaViewModel, onVolver: () -> Unit, onAbrir: (Int) -> 
                 Filtro("Listo", filtro == EstadoPedido.LISTO) { vm.elegirFiltro(EstadoPedido.LISTO) }
             }
 
-            if (pedidos?.isEmpty() == true) {
+            if (secciones?.isEmpty() == true) {
                 EstadoVacio("No hay pedidos para mostrar", "Prueba con otro filtro o busca otro nombre")
             }
-            (pedidos ?: emptyList()).forEach { p ->
-                TarjetaBandeja(
-                    p,
-                    atrasado = p.pedido.id in atrasados,
-                    onClick = { onAbrir(p.pedido.id) },
-                    onIniciar = { vm.iniciar(p) }
-                )
+            // Ordenados por urgencia: atrasados, por iniciar, en proceso, listos y terminados
+            (secciones ?: emptyList()).forEach { seccion ->
+                CabeceraSeccion(seccion.titulo, seccion.color, seccion.pedidos.size)
+                seccion.pedidos.forEach { p ->
+                    TarjetaBandeja(
+                        p,
+                        atrasado = p.pedido.id in atrasados,
+                        onClick = { onAbrir(p.pedido.id) },
+                        onIniciar = { vm.iniciar(p) }
+                    )
+                }
             }
         }
+    }
+}
+
+// Titulo de cada grupo: punto de color, nombre y cuantos pedidos hay
+@Composable
+private fun CabeceraSeccion(titulo: String, color: Color, cantidad: Int) {
+    Row(
+        Modifier.fillMaxWidth().padding(top = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Box(Modifier.size(10.dp).clip(CircleShape).background(color))
+        Text(titulo, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.weight(1f))
+        Text(
+            cantidad.toString(),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = color,
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(color.copy(alpha = 0.16f))
+                .padding(horizontal = 10.dp, vertical = 3.dp)
+        )
     }
 }
 

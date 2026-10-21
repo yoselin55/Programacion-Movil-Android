@@ -29,7 +29,7 @@ class DetallePedidoViewModel(
         // Se vuelve a validar aqui: no se confia solo en el boton de la pantalla
         if (!puedeCancelar.value) return
         viewModelScope.launch {
-            repo.cambiarEstado(pedidoId, EstadoPedido.CANCELADO, null)
+            repo.cambiarEstado(pedidoId, EstadoPedido.CANCELADO, null, porAdmin = false)
         }
     }
 }

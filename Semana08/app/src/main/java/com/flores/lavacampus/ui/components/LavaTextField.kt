@@ -2,7 +2,15 @@ package com.flores.lavacampus.ui.components
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -30,11 +38,24 @@ fun LavaTextField(
     mayusculas: Boolean = false, // el teclado escribe en mayusculas (codigo de estudiante)
     error: String? = null // si no es nulo, el campo se marca en rojo y se muestra el mensaje debajo
 ) {
+    // En los campos de clave, el ojito alterna entre ocultar y mostrar lo escrito
+    var visible by remember { mutableStateOf(false) }
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(etiqueta) },
         leadingIcon = icono?.let { { Icon(it, contentDescription = null) } },
+        trailingIcon = if (esClave) {
+            {
+                IconButton(onClick = { visible = !visible }) {
+                    Icon(
+                        if (visible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                        contentDescription = if (visible) "Ocultar contraseña" else "Mostrar contraseña",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        } else null,
         singleLine = true,
         isError = error != null,
         supportingText = error?.let { { Text(it) } },
@@ -46,7 +67,7 @@ fun LavaTextField(
             unfocusedLeadingIconColor = MaterialTheme.colorScheme.primary,
             focusedLabelColor = MaterialTheme.colorScheme.primary
         ),
-        visualTransformation = if (esClave) PasswordVisualTransformation() else VisualTransformation.None,
+        visualTransformation = if (esClave && !visible) PasswordVisualTransformation() else VisualTransformation.None,
         keyboardOptions = KeyboardOptions(
             keyboardType = if (esClave) KeyboardType.Password else teclado,
             capitalization = if (mayusculas) KeyboardCapitalization.Characters else KeyboardCapitalization.None

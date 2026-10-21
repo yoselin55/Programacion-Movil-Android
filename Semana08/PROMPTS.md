@@ -57,7 +57,7 @@ Todas las mejoras respetan MVVM + Repository: la View no usa DAO ni Repository, 
 > La View no usa DAO ni Repository, el ViewModel solo conoce la interface LavaRepository, y si agregas funciones al Repository, las declaras primero en la interface. No uses librerías externas. Muéstrame solo los archivos que cambian.
 
 **Qué generó la IA:**
-- **Paletas y modo oscuro:** las paletas clara y oscura de cada perfil en `Theme.kt`, con colores de superficie y de borde propios (`surfaceVariant` y `outlineVariant`). Los colores claros fijos de las pantallas se reemplazaron por colores del tema, y la capa de color sobre las fotos y los contadores del Panel se ajustan al modo oscuro. Las letras son un 15 % más grandes en toda la app.
+- **Paletas y modo oscuro:** las paletas clara y oscura de cada perfil en `Theme.kt`, con colores de superficie y de borde propios (`surfaceVariant` y `outlineVariant`). Los colores claros fijos de las pantallas se reemplazaron por colores del tema, y la capa de color sobre las fotos y los contadores del Panel se ajustan al modo oscuro. Las letras son un 25 % más grandes en toda la app. En el modo oscuro del administrador se usa un fondo casi negro con un toque vino, tarjetas un escalón más claras y el rosa solo como acento.
 - **Logo e imágenes:** el logo recortado con esquinas transparentes, el ícono adaptativo de la app y los íconos clásicos en todas las densidades. Cinco fotos libres (lavadoras, plancha, tintorería, toallas y canasta) de menos de 200 KB cada una, y los componentes `FotoConDegradado`, `FotoServicio`, `AvatarUsuario`, `EstadoVacio` y `PieLogo`.
 - **Foto de perfil:** `FotoPerfilStore` guarda la foto de cada usuario en el almacenamiento interno de la app, reducida, con la rotación corregida y recortada cuadrada. Se elige con el selector de fotos del sistema, que no pide permisos.
 - **Cambio de perfil seguro:** el cuadro "Cambiar de perfil" pide correo y clave del otro perfil, y `SesionViewModel.cambiarPerfil(correo, clave)` rechaza claves incorrectas y cuentas del mismo rol.
@@ -90,9 +90,13 @@ Fotos tomadas de Wikimedia Commons con licencia libre:
 | Planchado | Philips steam iron model HD 1256 A | Peter Häll | CC0 |
 | Lavado en seco | Dry Cleaners - interior, West Miami, Florida, July 2022 | Phillip Pessar | CC BY 2.0 |
 | Panel del administrador | Towels on shelves 01 | Ата | CC0 |
-| Pantallas vacías | Plastic laundry basket | Dodger67 | CC0 |
+| Oferta del Inicio y pantallas vacías | Stack of men's ironed casual shirts | Kotivalo | CC BY-SA 4.0 |
+| Consejo 1 del Inicio y horario de Tarifas | Towels on shelves 02 | Ата | CC0 |
+| Clientes (administrador) | Otteri wash & dry, lavandería con clientes doblando ropa | PattayaPatrol (Flickr) | CC BY-SA 4.0 |
+| Video del Inicio del estudiante (recorte de 7 s en 480p, sin sonido, en bucle) | The washing machine that is being operated | Fitrah 9131 | CC BY-SA 3.0 |
+| Tipografía de toda la app | Poppins (Regular, Medium, SemiBold y Bold) | Indian Type Foundry (Google Fonts) | SIL OFL 1.1 |
 
-El logo de LavaCampus es el entregado por la autora del proyecto.
+El logo de LavaCampus y la foto de atención en el mostrador (tarjeta "Tu ropa, en las mejores manos" del Inicio) son los entregados por la autora del proyecto.
 
 ## Reflexión
 

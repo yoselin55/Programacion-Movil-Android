@@ -43,10 +43,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.flores.lavacampus.model.EstadoPedido
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.flores.lavacampus.R
 
 // Piezas que comparten Perfil (estudiante) y Ajustes (administrador)
 
@@ -59,76 +68,94 @@ fun CabeceraPerfil(
     onCambiarFoto: (() -> Unit)? = null,
     onQuitarFoto: (() -> Unit)? = null
 ) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        // Cabecera con la foto de la lavanderia, la foto de perfil al centro y los datos debajo
+        FotoConDegradado(
+            R.drawable.foto_lavanderia,
+            Modifier.fillMaxWidth().height(285.dp).clip(RoundedCornerShape(28.dp)),
+            intensidad = 0.9f
         ) {
-            // Foto de perfil: al tocarla se abre la galeria
-            Box(contentAlignment = Alignment.BottomEnd) {
-                AvatarUsuario(
-                    nombre, foto, 84.dp,
-                    Modifier.then(if (onCambiarFoto != null) Modifier.clickable { onCambiarFoto() } else Modifier)
-                )
-                if (onCambiarFoto != null) {
-                    Box(
-                        Modifier
-                            .size(30.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
-                            .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
-                            .clickable { onCambiarFoto() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Filled.CameraAlt, "Cambiar foto",
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(16.dp)
+            Column(
+                Modifier.fillMaxSize().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                // Foto de perfil: al tocarla se abre la galeria
+                Box(contentAlignment = Alignment.BottomEnd) {
+                    Box(Modifier.size(108.dp).clip(CircleShape).background(Color.White).padding(4.dp)) {
+                        AvatarUsuario(
+                            nombre, foto, 100.dp,
+                            Modifier.then(if (onCambiarFoto != null) Modifier.clickable { onCambiarFoto() } else Modifier)
                         )
                     }
-                }
-            }
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(nombre, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(correo, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                Text(
-                    etiqueta,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .padding(horizontal = 10.dp, vertical = 3.dp)
-                )
-                if (onCambiarFoto != null) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                        Text(
-                            if (foto == null) "Agregar foto" else "Cambiar foto",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.clickable { onCambiarFoto() }
-                        )
-                        if (foto != null && onQuitarFoto != null) {
-                            Text(
-                                "Quitar",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = EstadoPedido.CANCELADO.color,
-                                modifier = Modifier.clickable { onQuitarFoto() }
+                    if (onCambiarFoto != null) {
+                        Box(
+                            Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                                .border(2.dp, Color.White, CircleShape)
+                                .clickable { onCambiarFoto() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Filled.CameraAlt, "Cambiar foto",
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                     }
                 }
+                Spacer(Modifier.height(10.dp))
+                Text(nombre, fontWeight = FontWeight.Bold, fontSize = 24.sp, color = Color.White)
+                Text(correo, fontSize = 13.sp, color = Color.White.copy(alpha = 0.88f))
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    etiqueta,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.White.copy(alpha = 0.22f))
+                        .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(50))
+                        .padding(horizontal = 14.dp, vertical = 4.dp)
+                )
             }
         }
+        if (onCambiarFoto != null) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
+            ) {
+                AccionFoto(
+                    if (foto == null) "Agregar foto" else "Cambiar foto",
+                    Icons.Filled.CameraAlt,
+                    MaterialTheme.colorScheme.primary,
+                    onCambiarFoto
+                )
+                if (foto != null && onQuitarFoto != null) {
+                    AccionFoto("Quitar", Icons.Outlined.Delete, EstadoPedido.CANCELADO.color, onQuitarFoto)
+                }
+            }
+        }
+    }
+}
+
+// Boton en forma de pildora bajo la cabecera (agregar, cambiar o quitar la foto)
+@Composable
+private fun AccionFoto(texto: String, icono: ImageVector, color: Color, onClick: () -> Unit) {
+    Row(
+        Modifier
+            .clip(RoundedCornerShape(50))
+            .background(color.copy(alpha = 0.12f))
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(icono, null, tint = color, modifier = Modifier.size(18.dp))
+        Text(texto, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = color)
     }
 }
 
@@ -179,13 +206,16 @@ fun DialogoCambiarPerfil(
 // Tarjeta de color: modo practica para saltar al otro perfil
 @Composable
 fun BotonCambiarPerfil(subtitulo: String, onClick: () -> Unit) {
+    // En modo oscuro el primario es un rosa muy claro: se usa el contenedor, mas sobrio
+    val oscuro = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val fondo = if (oscuro) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primary
     Card(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
+        colors = CardDefaults.cardColors(containerColor = fondo),
         modifier = Modifier.fillMaxWidth()
     ) {
-        val sobre = MaterialTheme.colorScheme.onPrimary
+        val sobre = if (oscuro) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onPrimary
         Row(
             Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -212,14 +242,21 @@ fun GrupoPreferencias(contenido: @Composable () -> Unit) {
 }
 
 @Composable
-fun FilaSwitch(titulo: String, detalle: String, activo: Boolean, onCambio: (Boolean) -> Unit) {
+fun FilaSwitch(titulo: String, detalle: String, activo: Boolean, onCambio: (Boolean) -> Unit, icono: ImageVector? = null) {
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
+        if (icono != null) {
+            Box(
+                Modifier.size(42.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) { Icon(icono, null, tint = MaterialTheme.colorScheme.onPrimaryContainer) }
+        }
         Column(Modifier.weight(1f)) {
-            Text(titulo, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-            Text(detalle, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+            Text(titulo, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+            Text(detalle, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f))
         }
         Switch(checked = activo, onCheckedChange = onCambio)
     }
@@ -227,19 +264,21 @@ fun FilaSwitch(titulo: String, detalle: String, activo: Boolean, onCambio: (Bool
 
 @Composable
 fun NotaDataStore() {
-    Column(
+    Row(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
-            .padding(14.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        Icon(Icons.Outlined.Info, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
         Text(
-            "Se guardan en el dispositivo",
-            fontSize = 11.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            "Tus preferencias se guardan en el dispositivo con DataStore",
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
-        Text("con DataStore", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
     }
 }
 
@@ -251,8 +290,11 @@ fun BotonCerrarSesion(onClick: () -> Unit) {
         shape = RoundedCornerShape(14.dp),
         border = BorderStroke(1.5.dp, rojo),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = rojo),
-        modifier = Modifier.fillMaxWidth()
-    ) { Text("Cerrar sesión", fontWeight = FontWeight.SemiBold) }
+        modifier = Modifier.fillMaxWidth().height(52.dp)
+    ) {
+        Icon(Icons.AutoMirrored.Outlined.Logout, null, modifier = Modifier.size(20.dp))
+        Text("Cerrar sesión", fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 8.dp))
+    }
 }
 
 // Opcion tipo pastilla (Kilo/Prenda/Unidad, 24/48/72 h)

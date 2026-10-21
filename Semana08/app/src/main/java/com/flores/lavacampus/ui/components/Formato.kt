@@ -42,6 +42,24 @@ fun Long.fechaHora(): String =
         .format(formatoFechaHora)
         .replace(".", "")
 
+private val formatoHora = DateTimeFormatter.ofPattern("HH:mm")
+
+// En que momento se guardo una notificacion:
+// "Ahora mismo", "Hace 12 min · 18:03", "Hoy 15:30", "Ayer 09:10" o "28 oct 10:30"
+fun Long.momento(): String {
+    val minutos = (System.currentTimeMillis() - this) / 60_000
+    val fecha = java.time.Instant.ofEpochMilli(this).atZone(java.time.ZoneId.systemDefault())
+    val hora = fecha.format(formatoHora)
+    val hoy = LocalDate.now()
+    return when {
+        minutos < 1 -> "Ahora mismo"
+        minutos < 60 -> "Hace $minutos min · $hora"
+        fecha.toLocalDate() == hoy -> "Hoy $hora"
+        fecha.toLocalDate() == hoy.minusDays(1) -> "Ayer $hora"
+        else -> fechaHora()
+    }
+}
+
 // "Luis Rojas" -> "Luis R."
 fun String.nombreCorto(): String {
     val partes = trim().split(" ").filter { it.isNotEmpty() }
