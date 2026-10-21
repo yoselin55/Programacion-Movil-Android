@@ -26,7 +26,8 @@ class BandejaViewModel(private val repo: LavaRepository) : ViewModel() {
     val busqueda: StateFlow<String> = _busqueda.asStateFlow()
 
     // Se combinan los pedidos, el chip elegido y el texto del buscador
-    val pedidos: StateFlow<List<PedidoConDetalle>> = combine(
+    // null = todavia cargando (no se muestra "no hay pedidos" hasta saber si de verdad no hay)
+    val pedidos: StateFlow<List<PedidoConDetalle>?> = combine(
         repo.observarPedidos(), _filtro, _busqueda
     ) { lista, filtro, texto ->
         val q = texto.trim().removePrefix("#").lowercase()
@@ -37,7 +38,7 @@ class BandejaViewModel(private val repo: LavaRepository) : ViewModel() {
                     p.pedido.id.toString().padStart(3, '0').contains(q) ||
                     p.pedido.id.toString() == q)
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     // Ids de los pedidos atrasados: la tarjeta se marca en rojo
     val atrasados: StateFlow<Set<Int>> = repo.observarPedidosAtrasados(LocalDate.now().toString())

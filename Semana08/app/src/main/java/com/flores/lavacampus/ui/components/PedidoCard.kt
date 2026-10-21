@@ -60,7 +60,7 @@ fun PedidoCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(
             if (resaltar) 1.5.dp else 1.dp,
-            if (resaltar) EstadoPedido.LISTO.color else Color(0xFFE2E8F0)
+            if (resaltar) EstadoPedido.LISTO.color else MaterialTheme.colorScheme.outlineVariant
         )
     ) {
         Row(
@@ -80,7 +80,7 @@ fun PedidoCard(
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text("Pedido ${p.id.codigoPedido()}", fontWeight = FontWeight.Bold)
                 Text(
-                    "${pedido.resumenCantidad()} · ${p.fechaRegistro.fechaCorta().replaceFirstChar { it.uppercase() }}",
+                    "${pedido.resumenCantidad()} · ${p.fechaRegistro.fechaCorta().substringAfter(" ")}",
                     fontSize = 12.sp,
                     color = gris
                 )

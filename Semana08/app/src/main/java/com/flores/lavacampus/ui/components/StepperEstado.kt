@@ -90,6 +90,7 @@ fun StepperEstadoVertical(
     colorActivo: Color,
     colorInactivo: Color,
     colorTexto: Color,
+    colorFondo: Color = Color.White, // fondo de los circulos pendientes (la superficie de la tarjeta)
     textoDerecha: (EstadoPedido) -> String,
     modifier: Modifier = Modifier
 ) {
@@ -119,7 +120,7 @@ fun StepperEstadoVertical(
                         drawLine(Color.White, Offset(cx - 4.dp.toPx(), cy), Offset(cx - 1.dp.toPx(), cy + 3.dp.toPx()), g, StrokeCap.Round)
                         drawLine(Color.White, Offset(cx - 1.dp.toPx(), cy + 3.dp.toPx()), Offset(cx + 4.dp.toPx(), cy - 3.dp.toPx()), g, StrokeCap.Round)
                     } else {
-                        drawCircle(Color.White, radio, c)
+                        drawCircle(colorFondo, radio, c)
                         drawCircle(colorInactivo, radio, c, style = Stroke(2.dp.toPx()))
                     }
                 }

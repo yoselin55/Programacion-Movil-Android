@@ -1,5 +1,10 @@
 package com.flores.lavacampus.ui.estudiante
 
+import com.flores.lavacampus.ui.components.FotoConDegradado
+import com.flores.lavacampus.ui.components.EstadoVacio
+import com.flores.lavacampus.ui.components.AvatarUsuario
+import com.flores.lavacampus.data.prefs.FotoPerfil
+import com.flores.lavacampus.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -52,10 +57,14 @@ fun InicioScreen(
     onNuevoPedido: () -> Unit,
     onVerPedido: (Int) -> Unit,
     onMisPedidos: () -> Unit,
-    onTarifas: () -> Unit
+    onTarifas: () -> Unit,
+    foto: FotoPerfil? = null
 ) {
-    val activo by vm.pedidoActivo.collectAsState()
-    val recientes by vm.recientes.collectAsState()
+    // null = todavia cargando: no se muestran pantallas vacias hasta saber si hay pedidos
+    val ui by vm.ui.collectAsState()
+    val cargado = ui != null
+    val activo = ui?.activo
+    val recientes = ui?.recientes ?: emptyList()
     val usuario = vm.usuario
     val gris = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
 
@@ -67,18 +76,29 @@ fun InicioScreen(
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Saludo y campana
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    "Hola, ${usuario.nombre.substringBefore(" ")}",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text("${usuario.codigo} · Tecsup", fontSize = 13.sp, color = gris)
+        // Banner con la foto de la lavanderia, el saludo y la foto de perfil
+        FotoConDegradado(
+            R.drawable.foto_lavanderia,
+            Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(22.dp))
+        ) {
+            Row(Modifier.fillMaxSize().padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
+                AvatarUsuario(usuario.nombre, foto, 68.dp)
+                Column(Modifier.weight(1f).padding(start = 14.dp)) {
+                    Text(
+                        "Hola, ${usuario.nombre.substringBefore(" ")}",
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text("${usuario.codigo} · Tecsup", fontSize = 13.sp, color = Color.White.copy(alpha = 0.85f))
+                }
+                Icon(Icons.Outlined.Notifications, "Avisos", tint = Color.White)
             }
-            Icon(Icons.Outlined.Notifications, "Avisos", tint = MaterialTheme.colorScheme.onSurface)
         }
+
+        // Hasta que Room entrega los pedidos solo se ve el banner (no depende de ellos).
+        // Asi nunca aparece una pantalla intermedia: el resto entra completo de una vez
+        if (!cargado) return@Column
 
         // Tarjeta turquesa del pedido activo
         Card(
@@ -170,7 +190,7 @@ fun InicioScreen(
                 modifier = Modifier.clickable { onMisPedidos() }
             )
         }
-        if (recientes.isEmpty()) Text("Aún no tienes pedidos", color = gris)
+        if (cargado && recientes.isEmpty()) EstadoVacio("Aún no tienes pedidos", "Cuando hagas uno, aparecerá aquí")
         recientes.forEach { PedidoCard(it, onClick = { onVerPedido(it.pedido.id) }) }
         Spacer(Modifier.height(8.dp))
     }
@@ -189,7 +209,7 @@ private fun Acceso(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
             Modifier.padding(12.dp),

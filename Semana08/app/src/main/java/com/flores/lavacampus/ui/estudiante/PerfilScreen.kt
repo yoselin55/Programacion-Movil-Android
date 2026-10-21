@@ -1,5 +1,11 @@
 package com.flores.lavacampus.ui.estudiante
 
+import com.flores.lavacampus.ui.components.rememberSelectorFoto
+import com.flores.lavacampus.ui.components.PieLogo
+import com.flores.lavacampus.ui.components.DialogoCambiarPerfil
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,6 +55,11 @@ fun PerfilScreen(
     val oscuro by sesion.modoOscuro.collectAsState()
     val avisos by sesion.notificaciones.collectAsState()
     val u = vm.usuario
+    val foto by sesion.foto.collectAsState()
+    val errorFoto by sesion.mensajeFoto.collectAsState()
+    val errorCambio by sesion.errorCambio.collectAsState()
+    val elegirFoto = rememberSelectorFoto(sesion::cambiarFoto)
+    var cambiando by remember { mutableStateOf(false) }
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar("Perfil", onVolver)
@@ -59,7 +70,8 @@ fun PerfilScreen(
                 .padding(horizontal = 20.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            CabeceraPerfil(u.nombre, u.correo, Rol.CLIENTE.texto)
+            CabeceraPerfil(u.nombre, u.correo, Rol.CLIENTE.texto, foto, elegirFoto, sesion::quitarFoto)
+            errorFoto?.let { Text(it, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold, fontSize = 13.sp) }
 
             // Contadores
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -73,7 +85,7 @@ fun PerfilScreen(
                 )
             }
 
-            BotonCambiarPerfil("Modo práctica: ir a vista Administrador") { sesion.cambiarPerfil(onCambiarPerfil) }
+            BotonCambiarPerfil("Inicia sesión como Administrador") { sesion.limpiarErrorCambio(); cambiando = true }
 
             Text("Preferencias", fontWeight = FontWeight.Bold, fontSize = 14.sp)
             GrupoPreferencias {
@@ -84,7 +96,17 @@ fun PerfilScreen(
 
             NotaDataStore()
             BotonCerrarSesion { sesion.cerrarSesion(onCerrarSesion) }
+            PieLogo()
         }
+    }
+
+    if (cambiando) {
+        DialogoCambiarPerfil(
+            destino = "Administrador",
+            error = errorCambio,
+            onConfirmar = { correo, clave -> sesion.cambiarPerfil(correo, clave, onCambiarPerfil) },
+            onCerrar = { cambiando = false }
+        )
     }
 }
 

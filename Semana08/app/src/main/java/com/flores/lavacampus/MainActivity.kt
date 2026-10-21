@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
 
     private val sesionVm: SesionViewModel by viewModels {
         val app = application as LavaApp
-        LavaViewModelFactory(app.repository, app.prefs)
+        LavaViewModelFactory(app.repository, app.prefs, fotos = app.fotos)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

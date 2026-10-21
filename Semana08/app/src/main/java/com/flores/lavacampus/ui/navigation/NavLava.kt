@@ -1,5 +1,24 @@
 package com.flores.lavacampus.ui.navigation
 
+import kotlinx.coroutines.delay
+import com.flores.lavacampus.ui.components.LogoLavaCampus
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.background
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +36,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.remember
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -96,7 +116,19 @@ fun NavLava(
 ) {
     val cargando by sesion.cargando.collectAsState()
     val usuario by sesion.usuarioActual.collectAsState()
+    val foto by sesion.foto.collectAsState()
     val rutaActual = nav.currentBackStackEntryAsState().value?.destination?.route
+
+    // Mensaje de bienvenida al iniciar sesion o registrarse: se ve en la pantalla unos segundos
+    val bienvenida by sesion.bienvenida.collectAsState()
+    var textoBienvenida by remember { mutableStateOf("") }
+    LaunchedEffect(bienvenida) {
+        bienvenida?.let {
+            textoBienvenida = it
+            delay(5000) // dura 5 segundos
+            sesion.limpiarBienvenida()
+        }
+    }
 
     // Cambiar de perfil: navega al grafo del otro rol y limpia la pila
     fun irAlPerfil(rol: Rol) {
@@ -144,6 +176,7 @@ fun NavLava(
         },
         contentWindowInsets = WindowInsets(0)
     ) { relleno ->
+        Box(Modifier.fillMaxSize()) {
         NavHost(
             navController = nav,
             startDestination = Rutas.SPLASH,
@@ -176,7 +209,8 @@ fun NavLava(
                         onNuevoPedido = { nav.navigate(Rutas.nuevoPedido()) },
                         onVerPedido = { nav.navigate(Rutas.detalle(it)) },
                         onMisPedidos = { nav.navigate(Rutas.PEDIDOS) },
-                        onTarifas = { nav.navigate(Rutas.TARIFAS) }
+                        onTarifas = { nav.navigate(Rutas.TARIFAS) },
+                        foto = foto
                     )
                 }
             }
@@ -253,7 +287,7 @@ fun NavLava(
             }
             composable(Rutas.PANEL) {
                 val vm: PanelViewModel = viewModel(factory = LavaViewModelFactory(repo, prefs))
-                PanelScreen(vm = vm, onVerListos = { nav.navigate(Rutas.BANDEJA) })
+                PanelScreen(vm = vm, onVerListos = { nav.navigate(Rutas.BANDEJA) }, foto = foto)
             }
             composable(Rutas.BANDEJA) {
                 val vm: BandejaViewModel = viewModel(factory = LavaViewModelFactory(repo, prefs))
@@ -306,6 +340,36 @@ fun NavLava(
                     onCerrarSesion = ::irAlLogin
                 )
             }
+        }
+
+        // Aviso de bienvenida (arriba, con el logo)
+        AnimatedVisibility(
+            visible = bienvenida != null,
+            enter = slideInVertically { -it } + fadeIn(),
+            exit = slideOutVertically { -it } + fadeOut(),
+            modifier = Modifier.align(Alignment.TopCenter)
+        ) {
+            Row(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                    .fillMaxWidth()
+                    .shadow(8.dp, RoundedCornerShape(18.dp))
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(MaterialTheme.colorScheme.primary)
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                LogoLavaCampus(44.dp)
+                Text(
+                    textoBienvenida,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 14.dp)
+                )
+            }
+        }
         }
     }
 }

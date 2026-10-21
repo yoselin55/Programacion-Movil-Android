@@ -35,6 +35,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.flores.lavacampus.ui.components.AppTopBar
+import com.flores.lavacampus.ui.components.BannerPantalla
+import com.flores.lavacampus.R
+import androidx.compose.foundation.layout.height
 import com.flores.lavacampus.ui.components.iniciales
 import com.flores.lavacampus.ui.components.soles
 import com.flores.lavacampus.viewmodel.ClientesViewModel
@@ -56,6 +59,13 @@ fun ClientesScreen(vm: ClientesViewModel, onVolver: () -> Unit) {
                 .padding(horizontal = 20.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            BannerPantalla(
+                R.drawable.foto_canasta,
+                "Tus clientes",
+                "${clientes?.size ?: 0} estudiantes",
+                alto = 130.dp
+            )
+
             OutlinedTextField(
                 value = busqueda,
                 onValueChange = vm::buscar,
@@ -65,21 +75,21 @@ fun ClientesScreen(vm: ClientesViewModel, onVolver: () -> Unit) {
                 shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = primario,
-                    unfocusedBorderColor = Color(0xFFE2E8F0),
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
 
-            if (clientes.isEmpty()) {
+            if (clientes?.isEmpty() == true) {
                 Text("No hay estudiantes para mostrar", color = gris, modifier = Modifier.padding(vertical = 24.dp))
             }
-            clientes.forEach { c ->
+            (clientes ?: emptyList()).forEach { c ->
                 Card(
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -89,7 +99,7 @@ fun ClientesScreen(vm: ClientesViewModel, onVolver: () -> Unit) {
                     ) {
                         Box(
                             contentAlignment = Alignment.Center,
-                            modifier = Modifier.size(46.dp).clip(CircleShape)
+                            modifier = Modifier.size(54.dp).clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.primaryContainer)
                         ) { Text(c.nombre.iniciales(), color = primario, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {

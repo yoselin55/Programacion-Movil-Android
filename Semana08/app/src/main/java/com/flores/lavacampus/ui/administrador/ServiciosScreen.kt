@@ -1,6 +1,5 @@
 package com.flores.lavacampus.ui.administrador
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,16 +8,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,13 +28,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.flores.lavacampus.R
 import com.flores.lavacampus.ui.components.AppTopBar
-import com.flores.lavacampus.ui.components.IconoServicio
+import com.flores.lavacampus.ui.components.BannerPantalla
+import com.flores.lavacampus.ui.components.FotoConDegradado
+import com.flores.lavacampus.ui.components.fotoDeServicio
 import com.flores.lavacampus.ui.components.textoPrecio
 import com.flores.lavacampus.viewmodel.ServiciosViewModel
 
@@ -58,42 +61,62 @@ fun ServiciosScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 20.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                BannerPantalla(
+                    R.drawable.foto_toallas,
+                    "Tus servicios",
+                    "${servicios.size} servicios · ${servicios.count { it.activo }} activos",
+                    alto = 130.dp
+                )
+
                 servicios.forEach { s ->
-                    Card(
-                        shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
-                        modifier = Modifier.fillMaxWidth()
+                    // Un servicio desactivado se ve apagado
+                    FotoConDegradado(
+                        fotoDeServicio(s.icono),
+                        Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .clip(RoundedCornerShape(22.dp))
+                            .alpha(if (s.activo) 1f else 0.55f),
+                        intensidad = 0.9f
                     ) {
                         Row(
-                            Modifier.padding(12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            Modifier.fillMaxWidth().padding(14.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Top
                         ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
+                            Text(
+                                "Entrega en ${s.horasEntrega} h",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1E293B),
                                 modifier = Modifier
-                                    .size(46.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.primaryContainer)
-                            ) { IconoServicio(s.icono, if (s.activo) primario else Color(0xFF94A3B8), 28.dp) }
-                            Column(Modifier.weight(1f)) {
-                                Text(s.nombre, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Text(
-                                    "${s.textoPrecio()} · ${s.horasEntrega} h",
-                                    fontSize = 11.sp,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                )
-                            }
-                            Switch(checked = s.activo, onCheckedChange = { vm.alternar(s) })
-                            Icon(
-                                Icons.Outlined.Edit,
-                                contentDescription = "Editar",
-                                tint = primario,
-                                modifier = Modifier.clickable { onEditar(s.id) }.padding(4.dp)
+                                    .clip(RoundedCornerShape(50))
+                                    .background(Color.White.copy(alpha = 0.92f))
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
                             )
+                            Box(
+                                Modifier
+                                    .size(44.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White)
+                                    .clickable { onEditar(s.id) },
+                                contentAlignment = Alignment.Center
+                            ) { Icon(Icons.Outlined.Edit, "Editar", tint = primario) }
+                        }
+                        Row(
+                            Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(start = 18.dp, end = 12.dp, bottom = 14.dp),
+                            verticalAlignment = Alignment.Bottom
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(s.nombre, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                Text(s.textoPrecio(), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Switch(checked = s.activo, onCheckedChange = { vm.alternar(s) })
+                                Text(if (s.activo) "Activo" else "Inactivo", fontSize = 11.sp, color = Color.White)
+                            }
                         }
                     }
                 }

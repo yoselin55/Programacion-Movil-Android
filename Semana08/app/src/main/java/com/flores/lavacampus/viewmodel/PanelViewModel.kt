@@ -66,7 +66,7 @@ class PanelViewModel(repo: LavaRepository) : ViewModel() {
                 DatoGrafico(
                     etiquetaCorta(ingreso.nombre),
                     ingreso.total.toFloat(),
-                    if (i == 0) Color(0xFF6D28D9) else Color(0xFFC4B5FD)
+                    if (i == 0) Color(0xFFB23C59) else Color(0xFFE07A94)
                 )
             }
         }

@@ -3,6 +3,7 @@ package com.flores.lavacampus.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.flores.lavacampus.data.local.entity.Usuario
+import com.flores.lavacampus.data.prefs.FotoPerfilStore
 import com.flores.lavacampus.data.prefs.PreferenciasStore
 import com.flores.lavacampus.data.repository.LavaRepository
 
@@ -12,11 +13,12 @@ class LavaViewModelFactory(
     private val prefs: PreferenciasStore,
     private val usuario: Usuario? = null, // para los ViewModels que dependen del estudiante
     private val pedidoId: Int = 0,        // para el detalle de un pedido
-    private val repetirId: Int = 0        // pedido que se repite en Nuevo pedido (0 = ninguno)
+    private val repetirId: Int = 0,       // pedido que se repite en Nuevo pedido (0 = ninguno)
+    private val fotos: FotoPerfilStore? = null // solo lo necesita SesionViewModel
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
-        modelClass.isAssignableFrom(SesionViewModel::class.java) -> SesionViewModel(repo, prefs) as T
+        modelClass.isAssignableFrom(SesionViewModel::class.java) -> SesionViewModel(repo, prefs, fotos!!) as T
         modelClass.isAssignableFrom(InicioViewModel::class.java) -> InicioViewModel(repo, usuario!!) as T
         modelClass.isAssignableFrom(NuevoPedidoViewModel::class.java) -> NuevoPedidoViewModel(repo, usuario!!, prefs, repetirId) as T
         modelClass.isAssignableFrom(DetallePedidoViewModel::class.java) -> DetallePedidoViewModel(repo, pedidoId) as T

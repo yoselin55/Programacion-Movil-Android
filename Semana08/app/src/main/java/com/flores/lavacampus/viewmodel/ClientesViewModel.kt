@@ -17,11 +17,12 @@ class ClientesViewModel(repo: LavaRepository) : ViewModel() {
     private val _busqueda = MutableStateFlow("")
     val busqueda: StateFlow<String> = _busqueda.asStateFlow()
 
-    val clientes: StateFlow<List<ClienteResumen>> = combine(repo.observarClientes(), _busqueda) { lista, texto ->
+    // null = todavia cargando
+    val clientes: StateFlow<List<ClienteResumen>?> = combine(repo.observarClientes(), _busqueda) { lista, texto ->
         val q = texto.trim().lowercase()
         if (q.isEmpty()) lista
         else lista.filter { it.nombre.lowercase().contains(q) || it.codigo.lowercase().contains(q) }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun buscar(texto: String) {
         _busqueda.value = texto

@@ -1,5 +1,9 @@
 package com.flores.lavacampus.ui.administrador
 
+import com.flores.lavacampus.ui.components.EstadoVacio
+import com.flores.lavacampus.ui.components.BannerPantalla
+import com.flores.lavacampus.R
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,6 +73,13 @@ fun BandejaScreen(vm: BandejaViewModel, onVolver: () -> Unit, onAbrir: (Int) -> 
                 .padding(horizontal = 20.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            BannerPantalla(
+                R.drawable.foto_lavanderia,
+                "Bandeja de pedidos",
+                if (atrasados.isEmpty()) "${pedidos?.size ?: 0} pedidos" else "${pedidos?.size ?: 0} pedidos · ${atrasados.size} ${if (atrasados.size == 1) "atrasado" else "atrasados"}",
+                alto = 150.dp
+            )
+
             // Buscador por nombre del estudiante o numero de pedido
             OutlinedTextField(
                 value = busqueda,
@@ -79,29 +90,28 @@ fun BandejaScreen(vm: BandejaViewModel, onVolver: () -> Unit, onAbrir: (Int) -> 
                 shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = primario,
-                    unfocusedBorderColor = Color(0xFFE2E8F0),
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
 
             // Chips de filtro
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState())
+            ) {
                 Filtro("Todos", filtro == null) { vm.elegirFiltro(null) }
                 Filtro("Recibido", filtro == EstadoPedido.RECIBIDO) { vm.elegirFiltro(EstadoPedido.RECIBIDO) }
                 Filtro("En proceso", filtro == EstadoPedido.EN_PROCESO) { vm.elegirFiltro(EstadoPedido.EN_PROCESO) }
                 Filtro("Listo", filtro == EstadoPedido.LISTO) { vm.elegirFiltro(EstadoPedido.LISTO) }
             }
 
-            if (pedidos.isEmpty()) {
-                Text(
-                    "No hay pedidos para mostrar",
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier.padding(vertical = 24.dp)
-                )
+            if (pedidos?.isEmpty() == true) {
+                EstadoVacio("No hay pedidos para mostrar", "Prueba con otro filtro o busca otro nombre")
             }
-            pedidos.forEach { p ->
+            (pedidos ?: emptyList()).forEach { p ->
                 TarjetaBandeja(
                     p,
                     atrasado = p.pedido.id in atrasados,
@@ -119,8 +129,8 @@ private fun Filtro(texto: String, seleccionado: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
-            .background(if (seleccionado) primario else Color.White)
-            .border(1.dp, if (seleccionado) primario else Color(0xFFE2E8F0), RoundedCornerShape(50))
+            .background(if (seleccionado) primario else MaterialTheme.colorScheme.surface)
+            .border(1.dp, if (seleccionado) primario else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(50))
             .clickable { onClick() }
             .padding(horizontal = 14.dp, vertical = 8.dp)
     ) {
@@ -128,7 +138,7 @@ private fun Filtro(texto: String, seleccionado: Boolean, onClick: () -> Unit) {
             texto,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
-            color = if (seleccionado) MaterialTheme.colorScheme.onPrimary else Color(0xFF475569)
+            color = if (seleccionado) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
         )
     }
 }
@@ -158,17 +168,17 @@ private fun TarjetaBandeja(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         // Atrasado: borde y fondo rojos
-        border = BorderStroke(if (atrasado) 1.5.dp else 1.dp, if (atrasado) EstadoPedido.CANCELADO.color else Color(0xFFE2E8F0)),
+        border = BorderStroke(if (atrasado) 1.5.dp else 1.dp, if (atrasado) EstadoPedido.CANCELADO.color else MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            Modifier.padding(12.dp).height(IntrinsicSize.Min),
+            Modifier.padding(14.dp).height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(46.dp)
+                    .size(52.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(estado.color.copy(alpha = 0.12f))
             ) { Icon(Icons.Outlined.LocalLaundryService, null, tint = estado.color) }

@@ -1,5 +1,6 @@
 package com.flores.lavacampus.ui.estudiante
 
+import com.flores.lavacampus.ui.components.FotoServicio
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -241,22 +242,14 @@ private fun FilaServicio(servicio: Servicio, cantidad: Double, onMenos: () -> Un
         ),
         border = BorderStroke(
             if (elegido) 1.5.dp else 1.dp,
-            if (elegido) primario else Color(0xFFE2E8F0)
+            if (elegido) primario else MaterialTheme.colorScheme.outlineVariant
         ),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                // Icono: turquesa si esta elegido, gris si no
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (elegido) MaterialTheme.colorScheme.primaryContainer else Color(0xFFF1F5F9))
-                ) {
-                    IconoServicio(servicio.icono, if (elegido) primario else Color(0xFF64748B), 28.dp)
-                }
+                // Foto del servicio con su icono dibujado con Canvas
+                FotoServicio(servicio.icono, 60.dp)
                 Column {
                     Text(servicio.nombre, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     Text(

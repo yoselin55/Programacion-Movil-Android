@@ -1,5 +1,19 @@
 package com.flores.lavacampus.ui.components
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.flores.lavacampus.data.prefs.FotoPerfil
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,7 +29,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -38,25 +51,51 @@ import com.flores.lavacampus.model.EstadoPedido
 // Piezas que comparten Perfil (estudiante) y Ajustes (administrador)
 
 @Composable
-fun CabeceraPerfil(nombre: String, correo: String, etiqueta: String) {
+fun CabeceraPerfil(
+    nombre: String,
+    correo: String,
+    etiqueta: String,
+    foto: FotoPerfil? = null,
+    onCambiarFoto: (() -> Unit)? = null,
+    onQuitarFoto: (() -> Unit)? = null
+) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.size(60.dp).clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-            ) { Icon(Icons.Outlined.Person, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(30.dp)) }
-            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                Text(nombre, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            // Foto de perfil: al tocarla se abre la galeria
+            Box(contentAlignment = Alignment.BottomEnd) {
+                AvatarUsuario(
+                    nombre, foto, 84.dp,
+                    Modifier.then(if (onCambiarFoto != null) Modifier.clickable { onCambiarFoto() } else Modifier)
+                )
+                if (onCambiarFoto != null) {
+                    Box(
+                        Modifier
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                            .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
+                            .clickable { onCambiarFoto() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Filled.CameraAlt, "Cambiar foto",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(nombre, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Text(correo, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                 Text(
                     etiqueta,
@@ -68,9 +107,73 @@ fun CabeceraPerfil(nombre: String, correo: String, etiqueta: String) {
                         .background(MaterialTheme.colorScheme.primaryContainer)
                         .padding(horizontal = 10.dp, vertical = 3.dp)
                 )
+                if (onCambiarFoto != null) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Text(
+                            if (foto == null) "Agregar foto" else "Cambiar foto",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.clickable { onCambiarFoto() }
+                        )
+                        if (foto != null && onQuitarFoto != null) {
+                            Text(
+                                "Quitar",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = EstadoPedido.CANCELADO.color,
+                                modifier = Modifier.clickable { onQuitarFoto() }
+                            )
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+// Abre la galeria del telefono (selector de fotos del sistema, sin pedir permisos)
+@Composable
+fun rememberSelectorFoto(onElegida: (Uri) -> Unit): () -> Unit {
+    val lanzador = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) onElegida(uri)
+    }
+    return { lanzador.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
+}
+
+// Cambiar de perfil pide las credenciales del otro perfil: no es un salto libre
+@Composable
+fun DialogoCambiarPerfil(
+    destino: String,
+    error: String?,
+    onConfirmar: (correo: String, clave: String) -> Unit,
+    onCerrar: () -> Unit
+) {
+    var correo by remember { mutableStateOf("") }
+    var clave by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onCerrar,
+        title = { Text("Cambiar a $destino", fontWeight = FontWeight.Bold) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    "Por seguridad, inicia sesión con una cuenta de $destino.",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                LavaTextField(correo, { correo = it }, "Correo", Modifier.fillMaxWidth(), icono = Icons.Outlined.Email)
+                LavaTextField(
+                    clave, { clave = it }, "Contraseña", Modifier.fillMaxWidth(),
+                    icono = Icons.Outlined.Lock, esClave = true
+                )
+                if (error != null) {
+                    Text(error, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = { onConfirmar(correo, clave) }) { Text("Cambiar", fontWeight = FontWeight.Bold) } },
+        dismissButton = { TextButton(onClick = onCerrar) { Text("Cancelar") } }
+    )
 }
 
 // Tarjeta de color: modo practica para saltar al otro perfil
@@ -103,7 +206,7 @@ fun GrupoPreferencias(contenido: @Composable () -> Unit) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.fillMaxWidth()
     ) { Column { contenido() } }
 }
@@ -160,8 +263,8 @@ fun OpcionPildora(texto: String, seleccionada: Boolean, onClick: () -> Unit, mod
         contentAlignment = Alignment.Center,
         modifier = modifier
             .clip(RoundedCornerShape(50))
-            .background(if (seleccionada) primario else Color.White)
-            .border(1.dp, if (seleccionada) primario else Color(0xFFE2E8F0), RoundedCornerShape(50))
+            .background(if (seleccionada) primario else MaterialTheme.colorScheme.surface)
+            .border(1.dp, if (seleccionada) primario else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(50))
             .clickable { onClick() }
             .padding(vertical = 11.dp)
     ) {
@@ -169,7 +272,7 @@ fun OpcionPildora(texto: String, seleccionada: Boolean, onClick: () -> Unit, mod
             texto,
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color = if (seleccionada) MaterialTheme.colorScheme.onPrimary else Color(0xFF475569)
+            color = if (seleccionada) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
         )
     }
 }

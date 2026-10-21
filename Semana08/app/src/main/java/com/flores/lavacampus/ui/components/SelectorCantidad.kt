@@ -61,8 +61,8 @@ private fun BotonCircular(icono: ImageVector, descripcion: String, enabled: Bool
         colors = IconButtonDefaults.iconButtonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = Color.White,
-            disabledContainerColor = Color(0xFFE2E8F0),
-            disabledContentColor = Color(0xFF94A3B8)
+            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
         )
     ) {
         Icon(icono, contentDescription = descripcion, modifier = Modifier.size(16.dp))

@@ -41,6 +41,14 @@ import com.flores.lavacampus.data.local.entity.Servicio
 import com.flores.lavacampus.model.EstadoPedido
 import com.flores.lavacampus.model.Unidad
 import com.flores.lavacampus.ui.components.AppTopBar
+import com.flores.lavacampus.ui.components.BannerPantalla
+import com.flores.lavacampus.ui.components.fotoDeServicio
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import com.flores.lavacampus.ui.components.IconoServicio
 import com.flores.lavacampus.ui.components.LavaButton
 import com.flores.lavacampus.ui.components.LavaTextField
@@ -79,6 +87,14 @@ fun FormularioServicioScreen(vm: ServiciosViewModel, servicioId: Int, onVolver: 
                 .padding(horizontal = 20.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            // Vista previa en vivo: la foto cambia con el icono y muestra el nombre y el precio
+            BannerPantalla(
+                fotoDeServicio(icono),
+                nombre.ifBlank { "Nuevo servicio" },
+                "S/ ${precio.ifBlank { "0.00" }} por ${Unidad.de(unidad).texto} · $horas h",
+                alto = 160.dp
+            )
+
             LavaTextField(nombre, { nombre = it }, "Nombre del servicio", Modifier.fillMaxWidth())
 
             Text("Se cobra por", fontWeight = FontWeight.Bold, fontSize = 14.sp)
@@ -106,20 +122,31 @@ fun FormularioServicioScreen(vm: ServiciosViewModel, servicioId: Int, onVolver: 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf("wash", "iron", "shirt").forEach { nombreIcono ->
                     val elegido = icono == nombreIcono
+                    // Cada opcion muestra su foto con el icono encima
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .weight(1f)
-                            .height(58.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(if (elegido) MaterialTheme.colorScheme.primaryContainer else Color.White)
+                            .height(90.dp)
+                            .clip(RoundedCornerShape(16.dp))
                             .border(
-                                if (elegido) 1.5.dp else 1.dp,
-                                if (elegido) primario else Color(0xFFE2E8F0),
-                                RoundedCornerShape(14.dp)
+                                if (elegido) 3.dp else 1.dp,
+                                if (elegido) primario else MaterialTheme.colorScheme.outlineVariant,
+                                RoundedCornerShape(16.dp)
                             )
                             .clickable { icono = nombreIcono }
-                    ) { IconoServicio(nombreIcono, if (elegido) primario else Color(0xFF64748B), 30.dp) }
+                    ) {
+                        Image(
+                            painter = painterResource(fotoDeServicio(nombreIcono)),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize().alpha(if (elegido) 1f else 0.6f)
+                        )
+                        Box(
+                            Modifier.size(42.dp).clip(CircleShape).background(Color.White),
+                            contentAlignment = Alignment.Center
+                        ) { IconoServicio(nombreIcono, primario, 26.dp) }
+                    }
                 }
             }
 
@@ -128,8 +155,8 @@ fun FormularioServicioScreen(vm: ServiciosViewModel, servicioId: Int, onVolver: 
                 Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color.White)
-                    .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(14.dp))
                     .padding(horizontal = 14.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {

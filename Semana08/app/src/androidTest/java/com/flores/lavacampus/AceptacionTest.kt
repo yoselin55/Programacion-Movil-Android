@@ -10,6 +10,10 @@ import com.flores.lavacampus.data.repository.LavaRepositoryRoom
 import com.flores.lavacampus.model.EstadoPedido
 import com.flores.lavacampus.model.LineaPedido
 import com.flores.lavacampus.data.prefs.PreferenciasStore
+import com.flores.lavacampus.data.prefs.FotoPerfilStore
+import com.flores.lavacampus.model.Rol
+import com.flores.lavacampus.model.ValidacionRegistro
+import com.flores.lavacampus.viewmodel.SesionViewModel
 import com.flores.lavacampus.viewmodel.GestionPedidoViewModel
 import com.flores.lavacampus.viewmodel.NuevoPedidoViewModel
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +26,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -196,6 +201,100 @@ class AceptacionTest {
         delay(800)
         assertTrue(ajeno.cantidades.value.isEmpty())
         assertEquals("No se encontró el pedido que quieres repetir", ajeno.aviso.value)
+    }
+
+    @Test
+    fun cambiar_de_perfil_exige_las_credenciales_del_otro_perfil() = runBlocking {
+        val contexto = InstrumentationRegistry.getInstrumentation().targetContext
+        val prefs = PreferenciasStore(contexto)
+        val vm = SesionViewModel(repo, prefs, FotoPerfilStore(contexto))
+        val jobs = listOf(launch(Dispatchers.IO) { vm.usuarioActual.collect { } }, launch(Dispatchers.IO) { vm.errorCambio.collect { } })
+        // Se inicia sesion como estudiante (Ana)
+        var rolFinal: Rol? = null
+        vm.login("ana@correo.test", "1234", Rol.CLIENTE) { rolFinal = it }
+        delay(800)
+        assertEquals(Rol.CLIENTE, rolFinal)
+
+        // Clave incorrecta del administrador: no cambia y avisa
+        var cambio: Rol? = null
+        vm.cambiarPerfil("admin@lavacampus.test", "mala") { cambio = it }
+        delay(600)
+        assertNull(cambio)
+        assertEquals("Correo o contraseña incorrectos", vm.errorCambio.value)
+
+        // Una cuenta de estudiante no sirve para cambiar a administrador
+        vm.cambiarPerfil("luis@correo.test", "1234") { cambio = it }
+        delay(600)
+        assertNull(cambio)
+        assertEquals("Ese usuario no es Administrador", vm.errorCambio.value)
+
+        // Credenciales correctas del administrador: cambia
+        vm.cambiarPerfil("admin@lavacampus.test", "admin") { cambio = it }
+        delay(800)
+        assertEquals(Rol.ADMIN, cambio)
+        assertEquals("ADMIN", vm.usuarioActual.value!!.rol)
+        jobs.forEach { it.cancel() }
+    }
+
+    @Test
+    fun las_validaciones_del_registro_rechazan_datos_invalidos() {
+        assertNotNull(ValidacionRegistro.nombre(""))
+        assertNotNull(ValidacionRegistro.nombre("Carla"))            // falta el apellido
+        assertNotNull(ValidacionRegistro.nombre("Carla 123"))
+        assertNull(ValidacionRegistro.nombre("Carla Mendoza"))
+        assertNotNull(ValidacionRegistro.codigo("202312345"))        // falta la U
+        assertNotNull(ValidacionRegistro.codigo("U2023123"))         // faltan numeros
+        assertNull(ValidacionRegistro.codigo("u202312345"))          // minuscula: se acepta y se pasa a mayuscula
+        assertNotNull(ValidacionRegistro.correo("carla@correo"))
+        assertNotNull(ValidacionRegistro.correo("carla correo.test"))
+        assertNull(ValidacionRegistro.correo("carla@correo.test"))
+        assertNotNull(ValidacionRegistro.clave("123"))               // minimo 4
+        assertNotNull(ValidacionRegistro.clave("12 34"))             // sin espacios
+        assertNull(ValidacionRegistro.clave("1234"))
+        assertNotNull(ValidacionRegistro.confirmacion("1234", "1235"))
+        assertNull(ValidacionRegistro.confirmacion("1234", "1234"))
+    }
+
+    @Test
+    fun registrar_crea_un_estudiante_nuevo_y_no_permite_correos_ni_codigos_repetidos() = runBlocking {
+        val contexto = InstrumentationRegistry.getInstrumentation().targetContext
+        val vm = SesionViewModel(repo, PreferenciasStore(contexto), FotoPerfilStore(contexto))
+        val jobs = listOf(
+            launch(Dispatchers.IO) { vm.erroresRegistro.collect { } },
+            launch(Dispatchers.IO) { vm.usuarioActual.collect { } }
+        )
+        var rol: Rol? = null
+
+        // Datos vacios: un error por cada campo
+        vm.registrar("", "", "", "", "") { rol = it }
+        delay(300)
+        assertEquals(setOf("nombre", "codigo", "correo", "clave", "confirmacion"), vm.erroresRegistro.value.keys)
+        assertNull(rol)
+
+        // Correo que ya existe (sin importar mayusculas)
+        vm.registrar("Carla Mendoza", "U202312345", "ANA@correo.test", "abcd", "abcd") { rol = it }
+        delay(600)
+        assertEquals("Ese correo ya está registrado", vm.erroresRegistro.value["correo"])
+        assertNull(rol)
+
+        // Codigo que ya existe
+        vm.registrar("Carla Mendoza", "U202310234", "carla@correo.test", "abcd", "abcd") { rol = it }
+        delay(600)
+        assertEquals("Ese código ya está registrado", vm.erroresRegistro.value["codigo"])
+        assertNull(rol)
+
+        // Datos validos: se crea como estudiante, con el nombre bien escrito, y se inicia sesion
+        vm.registrar("carla  mendoza", "u202312345", "Carla@Correo.test", "abcd", "abcd") { rol = it }
+        delay(900)
+        assertEquals(Rol.CLIENTE, rol)
+        val creado = vm.usuarioActual.value!!
+        assertEquals("Carla Mendoza", creado.nombre)
+        assertEquals("U202312345", creado.codigo)
+        assertEquals("carla@correo.test", creado.correo)
+        assertEquals("CLIENTE", creado.rol)
+        // Ya puede iniciar sesion con su cuenta (el correo no distingue mayusculas)
+        assertEquals(creado.id, repo.login("CARLA@correo.test", "abcd")!!.id)
+        jobs.forEach { it.cancel() }
     }
 
     @Test

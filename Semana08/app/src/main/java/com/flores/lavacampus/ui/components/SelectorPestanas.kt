@@ -30,7 +30,7 @@ fun SelectorPestanas(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xFFF1F5F9))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(4.dp)
     ) {
         opciones.forEachIndexed { i, texto ->
@@ -48,7 +48,7 @@ fun SelectorPestanas(
                     texto,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = if (activa) MaterialTheme.colorScheme.onPrimary else Color(0xFF64748B)
+                    color = if (activa) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
         }

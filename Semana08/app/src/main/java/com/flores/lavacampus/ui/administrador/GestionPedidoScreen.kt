@@ -40,6 +40,10 @@ import androidx.compose.ui.unit.sp
 import com.flores.lavacampus.model.Casilleros
 import com.flores.lavacampus.model.EstadoPedido
 import com.flores.lavacampus.ui.components.AppTopBar
+import com.flores.lavacampus.ui.components.BannerPantalla
+import com.flores.lavacampus.ui.components.resumenCantidad
+import com.flores.lavacampus.R
+import androidx.compose.foundation.layout.height
 import com.flores.lavacampus.ui.components.EstadoPedidoChip
 import com.flores.lavacampus.ui.components.StepperEstadoVertical
 import com.flores.lavacampus.ui.components.codigoPedido
@@ -75,6 +79,13 @@ fun GestionPedidoScreen(vm: GestionPedidoViewModel, onVolver: () -> Unit) {
                 .padding(horizontal = 20.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            BannerPantalla(
+                R.drawable.foto_lavado_seco,
+                "Pedido ${p.id.codigoPedido()}",
+                "${d.resumenCantidad()} · ${p.total.soles()}",
+                alto = 150.dp
+            )
+
             // Datos del estudiante
             Tarjeta {
                 Row(
@@ -101,8 +112,9 @@ fun GestionPedidoScreen(vm: GestionPedidoViewModel, onVolver: () -> Unit) {
                     StepperEstadoVertical(
                         estado = estado,
                         colorActivo = primario,
-                        colorInactivo = Color(0xFFCBD5E1),
-                        colorTexto = Color(0xFF1E293B),
+                        colorInactivo = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                        colorTexto = MaterialTheme.colorScheme.onSurface,
+                        colorFondo = MaterialTheme.colorScheme.surface,
                         textoDerecha = { etapa ->
                             val alcanzada = estado != EstadoPedido.CANCELADO && etapa.ordinal <= estado.ordinal
                             when {
@@ -134,13 +146,13 @@ fun GestionPedidoScreen(vm: GestionPedidoViewModel, onVolver: () -> Unit) {
                                 .background(
                                     when {
                                         activo -> primario
-                                        ocupado -> Color(0xFFF1F5F9)
-                                        else -> Color.White
+                                        ocupado -> MaterialTheme.colorScheme.surfaceVariant
+                                        else -> MaterialTheme.colorScheme.surface
                                     }
                                 )
                                 .border(
                                     1.dp,
-                                    if (activo) primario else Color(0xFFE2E8F0),
+                                    if (activo) primario else MaterialTheme.colorScheme.outlineVariant,
                                     RoundedCornerShape(50)
                                 )
                                 // Los ocupados no responden al toque
@@ -153,8 +165,8 @@ fun GestionPedidoScreen(vm: GestionPedidoViewModel, onVolver: () -> Unit) {
                                 fontWeight = FontWeight.SemiBold,
                                 color = when {
                                     activo -> MaterialTheme.colorScheme.onPrimary
-                                    ocupado -> Color(0xFF94A3B8)
-                                    else -> Color(0xFF1E293B)
+                                    ocupado -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                    else -> MaterialTheme.colorScheme.onSurface
                                 }
                             )
                         }
@@ -216,7 +228,7 @@ fun GestionPedidoScreen(vm: GestionPedidoViewModel, onVolver: () -> Unit) {
                 Button(
                     onClick = vm::avanzar,
                     shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp).height(52.dp)
                 ) { Text("Marcar como ${siguiente.texto}", fontWeight = FontWeight.SemiBold) }
             }
             if (estado == EstadoPedido.RECIBIDO || estado == EstadoPedido.EN_PROCESO) {
@@ -225,7 +237,7 @@ fun GestionPedidoScreen(vm: GestionPedidoViewModel, onVolver: () -> Unit) {
                     shape = RoundedCornerShape(14.dp),
                     border = BorderStroke(1.5.dp, rojo),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = rojo),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().height(52.dp)
                 ) { Text("Cancelar pedido", fontWeight = FontWeight.SemiBold) }
             }
         }
@@ -237,7 +249,7 @@ private fun Tarjeta(contenido: @Composable () -> Unit) {
     Card(
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.fillMaxWidth()
     ) { contenido() }
 }

@@ -11,6 +11,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
+// Todo lo que muestra Inicio llega junto. Mientras Room no responde el estado es null ("cargando"),
+// asi la pantalla no dice "no tienes pedidos" por un instante antes de mostrar los reales
+data class InicioUi(
+    val activo: PedidoConDetalle?,
+    val recientes: List<PedidoConDetalle>
+)
+
 // Datos de la pantalla Inicio del estudiante
 class InicioViewModel(
     repo: LavaRepository,
@@ -27,6 +34,19 @@ class InicioViewModel(
                 EstadoPedido.valueOf(it.pedido.estado) in
                     listOf(EstadoPedido.RECIBIDO, EstadoPedido.EN_PROCESO, EstadoPedido.LISTO)
             }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    // Estado unico de la pantalla (null = cargando)
+    val ui: StateFlow<InicioUi?> = pedidos
+        .map { lista ->
+            InicioUi(
+                activo = lista.firstOrNull {
+                    EstadoPedido.valueOf(it.pedido.estado) in
+                        listOf(EstadoPedido.RECIBIDO, EstadoPedido.EN_PROCESO, EstadoPedido.LISTO)
+                },
+                recientes = lista.take(2)
+            )
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 

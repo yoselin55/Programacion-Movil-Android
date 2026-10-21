@@ -106,8 +106,9 @@ fun DetallePedidoScreen(vm: DetallePedidoViewModel, onVolver: () -> Unit, onRepe
                     StepperEstadoVertical(
                         estado = estado,
                         colorActivo = primario,
-                        colorInactivo = Color(0xFFCBD5E1),
-                        colorTexto = Color(0xFF1E293B),
+                        colorInactivo = MaterialTheme.colorScheme.outlineVariant,
+                        colorTexto = MaterialTheme.colorScheme.onSurface,
+                        colorFondo = MaterialTheme.colorScheme.surface,
                         // Solo se guarda la hora de registro; de las demas etapas no hay marca de tiempo
                         textoDerecha = { etapa ->
                             val alcanzada = estado != EstadoPedido.CANCELADO && etapa.ordinal <= estado.ordinal
@@ -211,7 +212,7 @@ private fun Tarjeta(contenido: @Composable () -> Unit) {
     Card(
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.fillMaxWidth()
     ) { contenido() }
 }

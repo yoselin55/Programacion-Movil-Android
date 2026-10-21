@@ -12,6 +12,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+// Lo que muestra Mis pedidos. Mientras Room no responde el estado es null ("cargando")
+data class MisPedidosUi(
+    val activos: List<PedidoConDetalle>,
+    val historial: List<PedidoConDetalle>,
+    val listoParaRecoger: PedidoConDetalle?
+)
+
 // Lista de pedidos del estudiante dividida en Activos e Historial
 class MisPedidosViewModel(
     private val repo: LavaRepository,
@@ -19,6 +26,18 @@ class MisPedidosViewModel(
 ) : ViewModel() {
 
     private val pedidos = repo.observarPedidosDeUsuario(usuario.id)
+
+    // Estado unico de la pantalla (null = cargando)
+    val ui: StateFlow<MisPedidosUi?> = pedidos
+        .map { lista ->
+            val activos = lista.filter { estadoDe(it) in ACTIVOS }
+            MisPedidosUi(
+                activos = activos,
+                historial = lista.filter { estadoDe(it) !in ACTIVOS },
+                listoParaRecoger = activos.firstOrNull { estadoDe(it) == EstadoPedido.LISTO }
+            )
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     // Activos = RECIBIDO, EN_PROCESO y LISTO
     val activos: StateFlow<List<PedidoConDetalle>> = pedidos

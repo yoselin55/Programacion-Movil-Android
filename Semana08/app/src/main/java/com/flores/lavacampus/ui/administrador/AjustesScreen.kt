@@ -1,5 +1,14 @@
 package com.flores.lavacampus.ui.administrador
 
+import com.flores.lavacampus.ui.components.rememberSelectorFoto
+import com.flores.lavacampus.ui.components.PieLogo
+import com.flores.lavacampus.ui.components.BannerPantalla
+import com.flores.lavacampus.R
+import com.flores.lavacampus.ui.components.DialogoCambiarPerfil
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,6 +46,11 @@ fun AjustesScreen(
     val oscuro by sesion.modoOscuro.collectAsState()
     val notificaciones by sesion.notificaciones.collectAsState()
     val recibir by sesion.recibirPedidos.collectAsState()
+    val foto by sesion.foto.collectAsState()
+    val errorFoto by sesion.mensajeFoto.collectAsState()
+    val errorCambio by sesion.errorCambio.collectAsState()
+    val elegirFoto = rememberSelectorFoto(sesion::cambiarFoto)
+    var cambiando by remember { mutableStateOf(false) }
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar("Ajustes", onVolver)
@@ -47,9 +61,11 @@ fun AjustesScreen(
                 .padding(horizontal = 20.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            CabeceraPerfil(usuario?.nombre ?: "", usuario?.correo ?: "", "Perfil activo")
+            BannerPantalla(R.drawable.foto_lavanderia, "Ajustes", "Cuenta y preferencias del administrador", alto = 120.dp)
+            CabeceraPerfil(usuario?.nombre ?: "", usuario?.correo ?: "", "Perfil activo", foto, elegirFoto, sesion::quitarFoto)
+            errorFoto?.let { Text(it, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold, fontSize = 13.sp) }
 
-            BotonCambiarPerfil("Modo práctica: ir a vista Estudiante") { sesion.cambiarPerfil(onCambiarPerfil) }
+            BotonCambiarPerfil("Inicia sesión como Estudiante") { sesion.limpiarErrorCambio(); cambiando = true }
 
             Text("Preferencias", fontWeight = FontWeight.Bold, fontSize = 14.sp)
             GrupoPreferencias {
@@ -62,6 +78,16 @@ fun AjustesScreen(
 
             NotaDataStore()
             BotonCerrarSesion { sesion.cerrarSesion(onCerrarSesion) }
+            PieLogo()
         }
+    }
+
+    if (cambiando) {
+        DialogoCambiarPerfil(
+            destino = "Estudiante",
+            error = errorCambio,
+            onConfirmar = { correo, clave -> sesion.cambiarPerfil(correo, clave, onCambiarPerfil) },
+            onCerrar = { cambiando = false }
+        )
     }
 }

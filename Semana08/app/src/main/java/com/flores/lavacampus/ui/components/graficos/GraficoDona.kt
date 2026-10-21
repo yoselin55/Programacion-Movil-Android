@@ -27,6 +27,7 @@ fun GraficoDona(
     tamano: Dp = 130.dp,
     textoCentro: String = "pedidos"
 ) {
+    val anilloVacio = MaterialTheme.colorScheme.outlineVariant
     val total = datos.sumOf { it.valor.toDouble() }.toFloat()
 
     Box(modifier = modifier.size(tamano), contentAlignment = Alignment.Center) {
@@ -37,7 +38,7 @@ fun GraficoDona(
             val esquina = Offset(grosor / 2, grosor / 2)
             if (total <= 0f) {
                 // Sin datos: anillo gris
-                drawArc(Color(0xFFE2E8F0), 0f, 360f, false, esquina, arco, style = Stroke(grosor))
+                drawArc(anilloVacio, 0f, 360f, false, esquina, arco, style = Stroke(grosor))
             } else {
                 var inicio = -90f
                 datos.filter { it.valor > 0 }.forEach { d ->

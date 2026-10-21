@@ -1,5 +1,6 @@
 package com.flores.lavacampus.ui.estudiante
 
+import com.flores.lavacampus.ui.components.EstadoVacio
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,9 +48,10 @@ fun MisPedidosScreen(
     onNuevoPedido: () -> Unit,
     onRepetir: (Int) -> Unit
 ) {
-    val activos by vm.activos.collectAsState()
-    val historial by vm.historial.collectAsState()
-    val listo by vm.listoParaRecoger.collectAsState()
+    val ui by vm.ui.collectAsState() // null = todavia cargando
+    val activos = ui?.activos ?: emptyList()
+    val historial = ui?.historial ?: emptyList()
+    val listo = ui?.listoParaRecoger
     var pestana by remember { mutableIntStateOf(0) }
     var porCancelar by remember { mutableStateOf<PedidoConDetalle?>(null) }
 
@@ -66,11 +68,10 @@ fun MisPedidosScreen(
                 SelectorPestanas(listOf("Activos", "Historial"), pestana, { pestana = it })
 
                 val lista = if (pestana == 0) activos else historial
-                if (lista.isEmpty()) {
-                    Text(
+                if (ui != null && lista.isEmpty()) {
+                    EstadoVacio(
                         if (pestana == 0) "No tienes pedidos activos" else "Aún no tienes historial",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        modifier = Modifier.padding(vertical = 24.dp)
+                        "Toca el botón + para pedir lavado"
                     )
                 }
                 lista.forEach { pedido ->

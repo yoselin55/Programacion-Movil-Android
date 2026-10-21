@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UsuarioDao {
-    @Query("SELECT * FROM usuarios WHERE correo = :correo AND clave = :clave LIMIT 1")
+    @Query("SELECT * FROM usuarios WHERE correo = :correo COLLATE NOCASE AND clave = :clave LIMIT 1")
     suspend fun login(correo: String, clave: String): Usuario?
 
     // Para recuperar la sesion guardada en DataStore (solo se guarda el id)
@@ -19,6 +19,16 @@ interface UsuarioDao {
     // Para el cambio de perfil (modo practica): primer usuario de un rol
     @Query("SELECT * FROM usuarios WHERE rol = :rol ORDER BY id LIMIT 1")
     suspend fun primeroPorRol(rol: String): Usuario?
+
+    // Registro: el correo y el codigo no pueden repetirse
+    @Query("SELECT COUNT(*) FROM usuarios WHERE correo = :correo COLLATE NOCASE")
+    suspend fun contarPorCorreo(correo: String): Int
+
+    @Query("SELECT COUNT(*) FROM usuarios WHERE codigo = :codigo COLLATE NOCASE AND codigo <> ''")
+    suspend fun contarPorCodigo(codigo: String): Int
+
+    @Insert
+    suspend fun insertar(u: Usuario): Long
 
     @Insert
     suspend fun insertarTodos(lista: List<Usuario>)
