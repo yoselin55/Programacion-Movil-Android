@@ -1,36 +1,32 @@
 package com.flores.mycar.data.repository
 
+import com.flores.mycar.data.local.ItemDao
 import com.flores.mycar.data.remote.ApiService
 import com.flores.mycar.domain.model.Item
 import com.flores.mycar.mapper.aDetalle
+import com.flores.mycar.mapper.aEntity
 import com.flores.mycar.mapper.aItem
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 
 /**
- * Implementacion del catalogo. En este hito guarda los datos en memoria;
- * mas adelante se cambia a Room como fuente de verdad.
+ * Implementacion del catalogo. Room es la fuente unica de verdad:
+ * la lista que ve la persona sale siempre de Room y Retrofit solo la actualiza.
  */
 class ItemRepositoryImpl(
-    private val api: ApiService
+    private val api: ApiService,
+    private val dao: ItemDao
 ) : ItemRepository {
 
-    private val lista = MutableStateFlow<List<Item>>(emptyList())
-
-    override val items: Flow<List<Item>> = lista.asStateFlow()
-    override val favoritos: Flow<List<Item>> = lista.map { todos -> todos.filter { it.esFavorito } }
+    override val items: Flow<List<Item>> = dao.todos().map { lista -> lista.map { it.aItem() } }
+    override val favoritos: Flow<List<Item>> = dao.favoritos().map { lista -> lista.map { it.aItem() } }
 
     override suspend fun refrescar(): Result<Int> = try {
-        // Los favoritos no se pierden al sincronizar: se leen antes y se reaplican.
-        val ids = lista.value.filter { it.esFavorito }.map { it.id }.toSet()
-        val nuevos = api.listar().resultados
-            .map { it.aItem(esFavorito = it.id in ids) }
-            .sortedBy { it.titulo }
-        lista.value = nuevos
+        // Si se insertara sin cuidado, se perderian los favoritos. Se leen antes y se reaplican.
+        val favoritos = dao.idsFavoritos().toSet()
+        val nuevos = api.listar().resultados.map { it.aEntity(esFavorito = it.id in favoritos) }
+        dao.guardarTodos(nuevos)
         Result.success(nuevos.size)
     } catch (e: CancellationException) {
         throw e
@@ -38,21 +34,18 @@ class ItemRepositoryImpl(
         Result.failure(e)
     }
 
-    /** Segundo endpoint: modelos de la marca. Conserva el favorito si la marca ya estaba en la lista. */
+    /** Segundo endpoint: modelos de la marca. Conserva el favorito de la marca guardada en Room. */
     override suspend fun obtenerDetalle(id: Int): Result<Item> = try {
         val respuesta = api.detalle(id)
-        Result.success(respuesta.aDetalle(id, lista.value.firstOrNull { it.id == id }))
+        Result.success(respuesta.aDetalle(id, dao.porId(id)?.aItem()))
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
         Result.failure(e)
     }
 
-    override suspend fun alternarFavorito(id: Int) {
-        lista.update { todos -> todos.map { if (it.id == id) it.copy(esFavorito = !it.esFavorito) else it } }
-    }
-
-    override suspend fun cantidadGuardada(): Int = lista.value.size
-    override suspend fun cantidadFavoritos(): Int = lista.value.count { it.esFavorito }
-    override suspend fun limpiarCache() { lista.value = emptyList() }
+    override suspend fun alternarFavorito(id: Int) = dao.alternarFavorito(id)
+    override suspend fun cantidadGuardada(): Int = dao.contar()
+    override suspend fun cantidadFavoritos(): Int = dao.contarFavoritos()
+    override suspend fun limpiarCache() = dao.borrarTodo()
 }

@@ -1,15 +1,27 @@
 package com.flores.mycar.mapper
 
+import com.flores.mycar.data.local.ItemEntity
 import com.flores.mycar.data.remote.dto.ItemDto
 import com.flores.mycar.data.remote.dto.ModelosResponseDto
 import com.flores.mycar.domain.model.Item
 
-/** Convierte lo que responde la API (ItemDto) al modelo que usa la UI (Item). */
-fun ItemDto.aItem(esFavorito: Boolean = false): Item = Item(
+// Tres modelos distintos: ItemDto (API) -> ItemEntity (Room) -> Item (UI).
+
+/** API -> Room. El favorito se conserva al sincronizar. */
+fun ItemDto.aEntity(esFavorito: Boolean = false): ItemEntity = ItemEntity(
     id = id,
     titulo = nombre.aTitulo(),
     subtitulo = if (tipo == "Passenger Car") "Auto de pasajeros" else (tipo ?: "Auto"),
     imagenUrl = null,
+    esFavorito = esFavorito
+)
+
+/** Room -> UI. */
+fun ItemEntity.aItem(): Item = Item(
+    id = id,
+    titulo = titulo,
+    subtitulo = subtitulo,
+    imagenUrl = imagenUrl,
     esFavorito = esFavorito
 )
 
