@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -25,6 +24,7 @@ import com.flores.mycar.domain.model.Item
 import com.flores.mycar.ui.UiState
 import com.flores.mycar.ui.components.Cargando
 import com.flores.mycar.ui.components.ErrorView
+import com.flores.mycar.ui.components.ItemCard
 
 /** Pantalla de lista: solo observa el estado y llama funciones del ViewModel. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,6 +32,7 @@ import com.flores.mycar.ui.components.ErrorView
 fun ListaScreen(
     viewModel: ListaViewModel,
     onItemClick: (Int) -> Unit,
+    bottomBar: @Composable () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
@@ -39,7 +40,8 @@ fun ListaScreen(
 
     Scaffold(
         modifier = modifier,
-        topBar = { TopAppBar(title = { Text("Mycar") }) }
+        topBar = { TopAppBar(title = { Text("Mycar") }) },
+        bottomBar = bottomBar
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             aviso?.let {
@@ -54,29 +56,30 @@ fun ListaScreen(
                 is UiState.Cargando -> Cargando()
                 is UiState.Error -> ErrorView(e.mensaje, onReintentar = viewModel::refrescar)
                 is UiState.Exito ->
-                    if (e.datos.isEmpty()) Vacio() else ListaItems(e.datos, onItemClick)
+                    if (e.datos.isEmpty()) Vacio()
+                    else ListaItems(e.datos, onItemClick, onFavorito = viewModel::alternarFavorito)
             }
         }
     }
 }
 
 @Composable
-private fun ListaItems(items: List<Item>, onItemClick: (Int) -> Unit) {
+private fun ListaItems(
+    items: List<Item>,
+    onItemClick: (Int) -> Unit,
+    onFavorito: (Int) -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(items, key = { it.id }) { item -> ItemCard(item, onClick = { onItemClick(item.id) }) }
-    }
-}
-
-@Composable
-private fun ItemCard(item: Item, onClick: () -> Unit) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp)) {
-            Text(item.titulo, style = MaterialTheme.typography.titleMedium)
-            Text(item.subtitulo, style = MaterialTheme.typography.bodyMedium)
+        items(items, key = { it.id }) { item ->
+            ItemCard(
+                item = item,
+                onClick = { onItemClick(item.id) },
+                onFavorito = { onFavorito(item.id) }
+            )
         }
     }
 }

@@ -24,6 +24,17 @@ class DetalleViewModel(
         cargar()
     }
 
+    /** Marca o desmarca la marca como favorita y refleja el cambio en pantalla. */
+    fun alternarFavorito() {
+        viewModelScope.launch {
+            repo.alternarFavorito(id)
+            val actual = _estado.value
+            if (actual is UiState.Exito) {
+                _estado.value = UiState.Exito(actual.datos.copy(esFavorito = !actual.datos.esFavorito))
+            }
+        }
+    }
+
     fun cargar() {
         viewModelScope.launch {
             _estado.value = UiState.Cargando

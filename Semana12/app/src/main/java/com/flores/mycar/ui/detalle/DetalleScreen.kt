@@ -45,6 +45,16 @@ fun DetalleScreen(
                 title = { Text(titulo) },
                 navigationIcon = {
                     TextButton(onClick = onVolver) { Text("Volver") }
+                },
+                actions = {
+                    (estado as? UiState.Exito)?.let { exito ->
+                        TextButton(onClick = viewModel::alternarFavorito) {
+                            Text(
+                                text = if (exito.datos.esFavorito) "★" else "☆",
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                        }
+                    }
                 }
             )
         }
