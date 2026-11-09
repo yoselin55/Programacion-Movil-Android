@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.flores.mycar.AppContainer
+import com.flores.mycar.ui.admin.AdminViewModel
 import com.flores.mycar.ui.detalle.DetalleViewModel
 import com.flores.mycar.ui.favoritos.FavoritosViewModel
 import com.flores.mycar.ui.lista.ListaViewModel
@@ -24,6 +25,9 @@ class MycarViewModelFactory(private val container: AppContainer) : ViewModelProv
 
         modelClass.isAssignableFrom(ListaViewModel::class.java) ->
             ListaViewModel(container.itemRepository) as T
+
+        modelClass.isAssignableFrom(AdminViewModel::class.java) ->
+            AdminViewModel(container.itemRepository) as T
 
         modelClass.isAssignableFrom(FavoritosViewModel::class.java) ->
             FavoritosViewModel(container.itemRepository) as T

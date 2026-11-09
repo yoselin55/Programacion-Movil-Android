@@ -11,8 +11,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.flores.mycar.domain.model.Rol
+import com.flores.mycar.domain.model.Sesion
 import com.flores.mycar.ui.AppViewModel
 import com.flores.mycar.ui.UiState
+import com.flores.mycar.ui.admin.AdminScreen
+import com.flores.mycar.ui.admin.AdminViewModel
 import com.flores.mycar.ui.components.BarraInferior
 import com.flores.mycar.ui.components.Cargando
 import com.flores.mycar.ui.detalle.DetalleScreen
@@ -26,6 +30,7 @@ import com.flores.mycar.ui.login.LoginViewModel
 
 private const val RUTA_LISTA = "lista"
 private const val RUTA_FAVORITOS = "favoritos"
+private const val RUTA_ADMIN = "admin"
 private const val RUTA_DETALLE = "detalle/{id}"
 
 /**
@@ -39,23 +44,30 @@ fun AppNav(factory: ViewModelProvider.Factory) {
 
     when (val e = estado) {
         is UiState.Cargando, is UiState.Error -> Cargando()
-        is UiState.Exito ->
-            if (e.datos == null) {
+        is UiState.Exito -> {
+            val sesion = e.datos
+            if (sesion == null) {
                 val loginVm: LoginViewModel = viewModel(factory = factory)
                 LoginScreen(viewModel = loginVm, onSesionIniciada = appVm::sesionIniciada)
             } else {
-                NavegacionPrincipal(factory, onCerrarSesion = appVm::cerrarSesion)
+                NavegacionPrincipal(factory, sesion, onCerrarSesion = appVm::cerrarSesion)
             }
+        }
     }
 }
 
-/** Pestañas Marcas y Favoritos, y el Detalle de una marca. */
+/**
+ * Pestañas Marcas y Favoritos, y el Detalle de una marca.
+ * El rol decide que pantallas existen: la ruta Admin solo se registra para el rol admin.
+ */
 @Composable
 private fun NavegacionPrincipal(
     factory: ViewModelProvider.Factory,
+    sesion: Sesion,
     onCerrarSesion: () -> Unit
 ) {
     val nav = rememberNavController()
+    val esAdmin = sesion.rol == Rol.ADMIN
 
     NavHost(navController = nav, startDestination = RUTA_LISTA) {
         composable(RUTA_LISTA) {
@@ -64,7 +76,7 @@ private fun NavegacionPrincipal(
                 viewModel = vm,
                 onItemClick = { id -> nav.navigate("detalle/$id") },
                 onCerrarSesion = onCerrarSesion,
-                bottomBar = { Barra(nav, RUTA_LISTA) }
+                bottomBar = { Barra(nav, RUTA_LISTA, esAdmin) }
             )
         }
         composable(RUTA_FAVORITOS) {
@@ -72,8 +84,18 @@ private fun NavegacionPrincipal(
             FavoritosScreen(
                 viewModel = vm,
                 onItemClick = { id -> nav.navigate("detalle/$id") },
-                bottomBar = { Barra(nav, RUTA_FAVORITOS) }
+                bottomBar = { Barra(nav, RUTA_FAVORITOS, esAdmin) }
             )
+        }
+        if (esAdmin) {
+            composable(RUTA_ADMIN) {
+                val vm: AdminViewModel = viewModel(factory = factory)
+                AdminScreen(
+                    viewModel = vm,
+                    correo = sesion.correo,
+                    bottomBar = { Barra(nav, RUTA_ADMIN, esAdmin) }
+                )
+            }
         }
         composable(
             route = RUTA_DETALLE,
@@ -86,11 +108,12 @@ private fun NavegacionPrincipal(
 }
 
 @Composable
-private fun Barra(nav: NavHostController, rutaActual: String) {
+private fun Barra(nav: NavHostController, rutaActual: String, esAdmin: Boolean) {
     BarraInferior(
         rutaActual = rutaActual,
         rutaMarcas = RUTA_LISTA,
         rutaFavoritos = RUTA_FAVORITOS,
+        rutaAdmin = if (esAdmin) RUTA_ADMIN else null,
         onIr = { ruta ->
             if (ruta != rutaActual) {
                 nav.navigate(ruta) {
