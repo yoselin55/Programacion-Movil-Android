@@ -5,12 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.flores.mycar.data.repository.ItemRepository
 import com.flores.mycar.domain.model.Item
 import com.flores.mycar.ui.UiState
-import java.io.IOException
+import com.flores.mycar.ui.mensajeDe
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 
 /** ViewModel de la lista: depende de la interface ItemRepository, nunca de la clase concreta. */
 class ListaViewModel(
@@ -54,11 +53,5 @@ class ListaViewModel(
 
     fun alternarFavorito(id: Int) {
         viewModelScope.launch { repo.alternarFavorito(id) }
-    }
-
-    private fun mensajeDe(e: Throwable) = when (e) {
-        is IOException -> "No hay conexión a internet"
-        is HttpException -> "El servidor respondió con error ${e.code()}"
-        else -> "Ocurrió un error inesperado"
     }
 }

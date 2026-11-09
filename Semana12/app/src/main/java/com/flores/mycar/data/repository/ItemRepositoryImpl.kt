@@ -2,6 +2,7 @@ package com.flores.mycar.data.repository
 
 import com.flores.mycar.data.remote.ApiService
 import com.flores.mycar.domain.model.Item
+import com.flores.mycar.mapper.aDetalle
 import com.flores.mycar.mapper.aItem
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
@@ -37,8 +38,15 @@ class ItemRepositoryImpl(
         Result.failure(e)
     }
 
-    override suspend fun obtenerDetalle(id: Int): Result<Item> =
-        Result.failure(UnsupportedOperationException("El detalle se implementa en el siguiente hito"))
+    /** Segundo endpoint: modelos de la marca. Conserva el favorito si la marca ya estaba en la lista. */
+    override suspend fun obtenerDetalle(id: Int): Result<Item> = try {
+        val respuesta = api.detalle(id)
+        Result.success(respuesta.aDetalle(id, lista.value.firstOrNull { it.id == id }))
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 
     override suspend fun alternarFavorito(id: Int) {
         lista.update { todos -> todos.map { if (it.id == id) it.copy(esFavorito = !it.esFavorito) else it } }

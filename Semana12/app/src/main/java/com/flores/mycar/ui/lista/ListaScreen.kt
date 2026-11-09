@@ -31,6 +31,7 @@ import com.flores.mycar.ui.components.ErrorView
 @Composable
 fun ListaScreen(
     viewModel: ListaViewModel,
+    onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
@@ -53,26 +54,26 @@ fun ListaScreen(
                 is UiState.Cargando -> Cargando()
                 is UiState.Error -> ErrorView(e.mensaje, onReintentar = viewModel::refrescar)
                 is UiState.Exito ->
-                    if (e.datos.isEmpty()) Vacio() else ListaItems(e.datos)
+                    if (e.datos.isEmpty()) Vacio() else ListaItems(e.datos, onItemClick)
             }
         }
     }
 }
 
 @Composable
-private fun ListaItems(items: List<Item>) {
+private fun ListaItems(items: List<Item>, onItemClick: (Int) -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(items, key = { it.id }) { item -> ItemCard(item) }
+        items(items, key = { it.id }) { item -> ItemCard(item, onClick = { onItemClick(item.id) }) }
     }
 }
 
 @Composable
-private fun ItemCard(item: Item) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+private fun ItemCard(item: Item, onClick: () -> Unit) {
+    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp)) {
             Text(item.titulo, style = MaterialTheme.typography.titleMedium)
             Text(item.subtitulo, style = MaterialTheme.typography.bodyMedium)
