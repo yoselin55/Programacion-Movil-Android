@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "189161077388",
+    "project_id": "firabase-4d95f",
+    "storage_bucket": "firabase-4d95f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:189161077388:android:4748e5211691679e9f19a9",
+        "android_client_info": {
+          "package_name": "com.flores.firabase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0Ub9R84epAJEcODElugP1AD7QAIan4zs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
