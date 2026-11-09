@@ -1,0 +1,19 @@
+// Reglas de seguridad de Cloud Firestore para Mycar.
+// Se pegan en Firebase Console -> Firestore Database -> Reglas -> Publicar.
+//
+// Estructura esperada:
+//   usuarios/{uid}  ->  { rol: "admin" | "usuario", nombre: "..." }
+//   (el ID del documento es el UID del usuario en Authentication)
+//
+// Cada persona solo puede leer SU propio documento y nadie puede escribir desde la app.
+// El rol se crea a mano en la consola. Validar el rol en la app solo cambia lo que se muestra;
+// lo que protege los datos de verdad son estas reglas.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /usuarios/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+  }
+}
