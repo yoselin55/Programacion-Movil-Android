@@ -7,6 +7,8 @@ import com.flores.mycar.data.local.AppDatabase
 import com.flores.mycar.data.remote.RetrofitClient
 import com.flores.mycar.data.repository.ItemRepository
 import com.flores.mycar.data.repository.ItemRepositoryImpl
+import com.flores.mycar.notification.Notificador
+import com.flores.mycar.notification.NotificadorAndroid
 
 /** Crea la API, la base de datos y los repositorios. Los ViewModel lo reciben por su Factory. */
 class AppContainer(context: Context) {
@@ -18,4 +20,6 @@ class AppContainer(context: Context) {
     }
 
     val authRepository: AuthRepository by lazy { FirebaseAuthRepository() }
+
+    val notificador: Notificador by lazy { NotificadorAndroid(context) }
 }

@@ -3,6 +3,7 @@ package com.flores.mycar.ui.admin
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flores.mycar.data.repository.ItemRepository
+import com.flores.mycar.notification.Notificador
 import com.flores.mycar.ui.mensajeDe
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,8 @@ data class AdminEstado(
 
 /** ViewModel del panel Admin: totales, sincronizar y limpiar cache. */
 class AdminViewModel(
-    private val repo: ItemRepository
+    private val repo: ItemRepository,
+    private val notificador: Notificador
 ) : ViewModel() {
 
     private val _estado = MutableStateFlow(AdminEstado())
@@ -41,7 +43,10 @@ class AdminViewModel(
         viewModelScope.launch {
             _estado.update { it.copy(sincronizando = true, mensaje = null) }
             repo.refrescar()
-                .onSuccess { n -> _estado.update { it.copy(mensaje = "Sincronizado: $n marcas guardadas") } }
+                .onSuccess { n ->
+                    _estado.update { it.copy(mensaje = "Sincronizado: $n marcas guardadas") }
+                    notificador.mostrar("Datos actualizados", "Se guardaron $n elementos")
+                }
                 .onFailure { e -> _estado.update { it.copy(mensaje = mensajeDe(e)) } }
             _estado.update { it.copy(sincronizando = false) }
         }

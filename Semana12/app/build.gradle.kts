@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.fragment.ktx)   // evita el Fragment 1.1.0 antiguo que llega de Firebase
 
     // Firebase
     implementation(platform(libs.firebase.bom))

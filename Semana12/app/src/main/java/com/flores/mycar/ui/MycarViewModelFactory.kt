@@ -24,10 +24,10 @@ class MycarViewModelFactory(private val container: AppContainer) : ViewModelProv
             LoginViewModel(container.authRepository) as T
 
         modelClass.isAssignableFrom(ListaViewModel::class.java) ->
-            ListaViewModel(container.itemRepository) as T
+            ListaViewModel(container.itemRepository, container.notificador) as T
 
         modelClass.isAssignableFrom(AdminViewModel::class.java) ->
-            AdminViewModel(container.itemRepository) as T
+            AdminViewModel(container.itemRepository, container.notificador) as T
 
         modelClass.isAssignableFrom(FavoritosViewModel::class.java) ->
             FavoritosViewModel(container.itemRepository) as T
