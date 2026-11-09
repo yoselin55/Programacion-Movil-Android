@@ -13,6 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,7 +41,15 @@ fun ListaScreen(
 
     Scaffold(
         modifier = modifier,
-        topBar = { TopAppBar(title = { Text("Mycar") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Mycar") },
+                actions = {
+                    // Permite volver a intentar la sincronizacion cuando regresa la conexion.
+                    TextButton(onClick = viewModel::refrescar) { Text("Actualizar") }
+                }
+            )
+        },
         bottomBar = bottomBar
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
