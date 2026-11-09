@@ -1,40 +1,64 @@
 package com.flores.mycar.ui.lista
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.flores.mycar.data.repository.ItemRepository
 import com.flores.mycar.domain.model.Item
 import com.flores.mycar.ui.UiState
+import java.io.IOException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
-/**
- * ViewModel de la lista. En este hito usa datos de prueba;
- * mas adelante se conecta al Repository (Retrofit + Room).
- */
-class ListaViewModel : ViewModel() {
-
-    // Debe declararse ANTES del bloque init: Kotlin inicializa en orden.
-    private val datosDePrueba = listOf(
-        Item(1, "Toyota", "Marca japonesa", null),
-        Item(2, "Honda", "Marca japonesa", null),
-        Item(3, "Nissan", "Marca japonesa", null),
-        Item(4, "Ford", "Marca estadounidense", null),
-        Item(5, "Chevrolet", "Marca estadounidense", null),
-        Item(6, "Hyundai", "Marca surcoreana", null),
-        Item(7, "Kia", "Marca surcoreana", null),
-        Item(8, "BMW", "Marca alemana", null)
-    )
+/** ViewModel de la lista: depende de la interface ItemRepository, nunca de la clase concreta. */
+class ListaViewModel(
+    private val repo: ItemRepository
+) : ViewModel() {
 
     private val _estado = MutableStateFlow<UiState<List<Item>>>(UiState.Cargando)
     val estado: StateFlow<UiState<List<Item>>> = _estado.asStateFlow()
 
+    private val _aviso = MutableStateFlow<String?>(null)
+    val aviso: StateFlow<String?> = _aviso.asStateFlow()
+
+    private var refrescoTerminado = false
+
     init {
-        cargar()
+        viewModelScope.launch {
+            repo.items.collect { lista ->
+                // Mientras no termine el primer refresco, una lista vacia no se muestra (sigue Cargando).
+                if (lista.isNotEmpty() || refrescoTerminado) _estado.value = UiState.Exito(lista)
+            }
+        }
+        refrescar()
     }
 
-    fun refrescar() = cargar()
+    fun refrescar() {
+        viewModelScope.launch {
+            if (_estado.value is UiState.Error) _estado.value = UiState.Cargando
+            val resultado = repo.refrescar()
+            refrescoTerminado = true
+            resultado
+                .onSuccess {
+                    if (_estado.value is UiState.Cargando) _estado.value = UiState.Exito(emptyList())
+                    _aviso.value = null
+                }
+                .onFailure { e ->
+                    if (repo.cantidadGuardada() == 0) _estado.value = UiState.Error(mensajeDe(e))
+                    else _aviso.value = "Sin conexión: mostrando datos guardados"
+                }
+        }
+    }
 
-    private fun cargar() {
-        _estado.value = UiState.Exito(datosDePrueba)
+    fun alternarFavorito(id: Int) {
+        viewModelScope.launch { repo.alternarFavorito(id) }
+    }
+
+    private fun mensajeDe(e: Throwable) = when (e) {
+        is IOException -> "No hay conexión a internet"
+        is HttpException -> "El servidor respondió con error ${e.code()}"
+        else -> "Ocurrió un error inesperado"
     }
 }

@@ -3,6 +3,7 @@ package com.flores.mycar.ui.lista
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flores.mycar.domain.model.Item
 import com.flores.mycar.ui.UiState
 import com.flores.mycar.ui.components.Cargando
@@ -30,16 +30,25 @@ import com.flores.mycar.ui.components.ErrorView
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListaScreen(
-    modifier: Modifier = Modifier,
-    viewModel: ListaViewModel = viewModel()
+    viewModel: ListaViewModel,
+    modifier: Modifier = Modifier
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
+    val aviso by viewModel.aviso.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier,
         topBar = { TopAppBar(title = { Text("Mycar") }) }
     ) { padding ->
-        Box(Modifier.padding(padding).fillMaxSize()) {
+        Column(Modifier.padding(padding).fillMaxSize()) {
+            aviso?.let {
+                Text(
+                    text = it,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
             when (val e = estado) {
                 is UiState.Cargando -> Cargando()
                 is UiState.Error -> ErrorView(e.mensaje, onReintentar = viewModel::refrescar)
@@ -54,7 +63,7 @@ fun ListaScreen(
 private fun ListaItems(items: List<Item>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+        contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(items, key = { it.id }) { item -> ItemCard(item) }
