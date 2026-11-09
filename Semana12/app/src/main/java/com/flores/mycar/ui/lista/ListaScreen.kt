@@ -33,6 +33,7 @@ import com.flores.mycar.ui.components.ItemCard
 fun ListaScreen(
     viewModel: ListaViewModel,
     onItemClick: (Int) -> Unit,
+    onCerrarSesion: () -> Unit,
     bottomBar: @Composable () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -47,6 +48,7 @@ fun ListaScreen(
                 actions = {
                     // Permite volver a intentar la sincronizacion cuando regresa la conexion.
                     TextButton(onClick = viewModel::refrescar) { Text("Actualizar") }
+                    TextButton(onClick = onCerrarSesion) { Text("Cerrar sesión") }
                 }
             )
         },

@@ -8,3 +8,6 @@ interface AuthRepository {
     suspend fun sesionActual(): Sesion?   // null si no hay sesion
     fun cerrarSesion()
 }
+
+/** El correo o la contraseña no son correctos. Lo lanza el repositorio para que el ViewModel no conozca Firebase. */
+class CredencialesInvalidasException : Exception("Correo o contraseña incorrectos")

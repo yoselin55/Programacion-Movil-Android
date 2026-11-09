@@ -9,12 +9,19 @@ import com.flores.mycar.AppContainer
 import com.flores.mycar.ui.detalle.DetalleViewModel
 import com.flores.mycar.ui.favoritos.FavoritosViewModel
 import com.flores.mycar.ui.lista.ListaViewModel
+import com.flores.mycar.ui.login.LoginViewModel
 
 /** Crea los ViewModel inyectandoles lo que necesitan desde el AppContainer. */
 class MycarViewModelFactory(private val container: AppContainer) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T = when {
+        modelClass.isAssignableFrom(AppViewModel::class.java) ->
+            AppViewModel(container.authRepository) as T
+
+        modelClass.isAssignableFrom(LoginViewModel::class.java) ->
+            LoginViewModel(container.authRepository) as T
+
         modelClass.isAssignableFrom(ListaViewModel::class.java) ->
             ListaViewModel(container.itemRepository) as T
 

@@ -1,6 +1,8 @@
 package com.flores.mycar
 
 import android.content.Context
+import com.flores.mycar.data.auth.AuthRepository
+import com.flores.mycar.data.auth.FirebaseAuthRepository
 import com.flores.mycar.data.local.AppDatabase
 import com.flores.mycar.data.remote.RetrofitClient
 import com.flores.mycar.data.repository.ItemRepository
@@ -14,4 +16,6 @@ class AppContainer(context: Context) {
     val itemRepository: ItemRepository by lazy {
         ItemRepositoryImpl(RetrofitClient.api, database.itemDao())
     }
+
+    val authRepository: AuthRepository by lazy { FirebaseAuthRepository() }
 }
