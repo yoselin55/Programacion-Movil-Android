@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Las fotos de los autos y los logos se cargan por nombre (getIdentifier), no por referencia directa. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/auto_*,@drawable/logo_*" />
