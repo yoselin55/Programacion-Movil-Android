@@ -1,5 +1,6 @@
 package com.flores.mycar.data.repository
 
+import com.flores.mycar.data.autos.nombresDeAutos
 import com.flores.mycar.data.local.ItemDao
 import com.flores.mycar.data.remote.ApiService
 import com.flores.mycar.domain.model.Item
@@ -38,6 +39,14 @@ class ItemRepositoryImpl(
     override suspend fun obtenerDetalle(id: Int): Result<Item> = try {
         val respuesta = api.detalle(id)
         Result.success(respuesta.aDetalle(id, dao.porId(id)?.aItem()))
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    override suspend fun modelosDelAnio(idMarca: Int, anio: Int): Result<List<String>> = try {
+        Result.success(nombresDeAutos(api.modelosDelAnio(idMarca, anio).resultados.map { it.nombre }))
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {

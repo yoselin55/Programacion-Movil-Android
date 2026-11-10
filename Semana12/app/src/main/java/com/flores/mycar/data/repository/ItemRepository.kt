@@ -10,6 +10,9 @@ interface ItemRepository {
     suspend fun refrescar(): Result<Int>  // Retrofit -> Room; devuelve cuantos guardo
     suspend fun obtenerDetalle(id: Int): Result<Item>
     suspend fun alternarFavorito(id: Int)
+
+    /** Nombres de los autos de una marca en un año (segundo servicio de la API). */
+    suspend fun modelosDelAnio(idMarca: Int, anio: Int): Result<List<String>> = Result.success(emptyList())
     suspend fun cantidadGuardada(): Int
     suspend fun cantidadFavoritos(): Int
     suspend fun limpiarCache()

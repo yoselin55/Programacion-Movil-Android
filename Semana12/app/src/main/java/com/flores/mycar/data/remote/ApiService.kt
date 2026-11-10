@@ -12,6 +12,10 @@ interface ApiService {
     @GET("vehicles/GetMakesForVehicleType/car?format=json")
     suspend fun listar(): ItemsResponseDto
 
+    /** Autos de una marca de un año concreto (se usa para el catalogo en venta). */
+    @GET("vehicles/GetModelsForMakeIdYear/makeId/{id}/modelyear/{anio}?format=json")
+    suspend fun modelosDelAnio(@Path("id") id: Int, @Path("anio") anio: Int): ModelosResponseDto
+
     /** Detalle: modelos de una marca. */
     @GET("vehicles/GetModelsForMakeId/{id}?format=json")
     suspend fun detalle(@Path("id") id: Int): ModelosResponseDto
