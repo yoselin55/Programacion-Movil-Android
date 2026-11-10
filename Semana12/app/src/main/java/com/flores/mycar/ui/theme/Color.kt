@@ -2,10 +2,13 @@ package com.flores.mycar.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Paleta de Mycar (4 colores).
+// Modo oscuro: Smoky Black y Olive Drab. Modo claro: Bone y Floral White.
+val SmokyBlack = Color(0xFF11120D)
+val OliveDrab = Color(0xFF565449)
+val Bone = Color(0xFFD8CFBC)
+val FloralWhite = Color(0xFFFFFBF4)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Rojo del logo: solo para errores y avisos de alerta.
+val RojoAlerta = Color(0xFFB3261E)
+val RojoAlertaClaro = Color(0xFFF2B8B5)
