@@ -18,6 +18,10 @@ class AppViewModel(
     private val _sesion = MutableStateFlow<UiState<Sesion?>>(UiState.Cargando)
     val sesion: StateFlow<UiState<Sesion?>> = _sesion.asStateFlow()
 
+    // Mensaje de bienvenida: solo aparece justo despues de iniciar sesion o registrarse.
+    private val _bienvenida = MutableStateFlow<String?>(null)
+    val bienvenida: StateFlow<String?> = _bienvenida.asStateFlow()
+
     init {
         viewModelScope.launch {
             _sesion.value = UiState.Exito(auth.sesionActual())
@@ -25,11 +29,18 @@ class AppViewModel(
     }
 
     fun sesionIniciada(sesion: Sesion) {
+        val nombre = sesion.nombre.ifBlank { sesion.correo.substringBefore("@") }
+        _bienvenida.value = "Bienvenido, $nombre"
         _sesion.value = UiState.Exito(sesion)
+    }
+
+    fun bienvenidaMostrada() {
+        _bienvenida.value = null
     }
 
     fun cerrarSesion() {
         auth.cerrarSesion()
+        _bienvenida.value = null
         _sesion.value = UiState.Exito(null)
     }
 }

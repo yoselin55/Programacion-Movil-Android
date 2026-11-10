@@ -51,7 +51,7 @@ class NotificadorAndroid(context: Context) : Notificador {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
 
-        NotificationManagerCompat.from(context).notify(NOTIFICACION_ID, notificacion)
+        NotificationManagerCompat.from(context).notify((System.currentTimeMillis() % Int.MAX_VALUE).toInt(), notificacion)
     }
 
     private fun crearCanal() {
