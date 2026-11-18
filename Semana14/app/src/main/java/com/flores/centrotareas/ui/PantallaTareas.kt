@@ -64,7 +64,7 @@ fun ContenidoTarea(vm: TareasViewModel) {
     var toques by rememberSaveable { mutableIntStateOf(0) }
 
     Button(onClick = { toques++ }) { Text("Tócame: $toques") }
-    // Commit 2 (Paso 1): este botón congela la pantalla 4 segundos
-    Button(onClick = { vm.tareaLargaMala() }) { Text("Tarea larga (MAL)") }
+    // Commit 3 (Paso 2): ahora la tarea corre en segundo plano y el contador sigue sumando
+    Button(onClick = { vm.tareaLarga() }) { Text("Tarea larga") }
     Text(mensaje)
 }

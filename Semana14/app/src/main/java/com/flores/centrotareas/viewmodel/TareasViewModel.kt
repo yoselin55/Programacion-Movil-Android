@@ -1,12 +1,18 @@
 package com.flores.centrotareas.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.flores.centrotareas.data.TareasRepository
 import com.flores.centrotareas.model.CargaUi
 import com.flores.centrotareas.model.PrimosUi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // Commit 1: esqueleto del ViewModel; cada paso lo completa en su propio commit
 class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
@@ -15,13 +21,19 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     private val _mensaje = MutableStateFlow("Listo")
     val mensaje: StateFlow<String> = _mensaje.asStateFlow()
 
-    // Commit 2 (Paso 1): tarea larga MAL hecha, en el hilo principal (congela la pantalla)
-    fun tareaLargaMala() {
-        _mensaje.value = "Trabajando..."
-        Thread.sleep(4000)
-        _mensaje.value = "Terminó"
+    // Commit 3 (Paso 2): la misma tarea, ahora en segundo plano con una corrutina
+    fun tareaLarga() {
+        viewModelScope.launch {
+            _mensaje.value = "Trabajando..."
+            Log.d("HILO", "Antes: ${Thread.currentThread().name}")
+            withContext(Dispatchers.Default) {
+                Log.d("HILO", "Dentro: ${Thread.currentThread().name}")
+                delay(4000)
+            }
+            Log.d("HILO", "Despues: ${Thread.currentThread().name}")
+            _mensaje.value = "Terminó"
+        }
     }
-    // TODO Commit 3 (Paso 2): fun tareaLarga()
     // TODO Commit 4 (Paso 3): progreso
     // TODO Commit 5 (Paso 4): trabajo (Job), corriendo y cancelar()
 
