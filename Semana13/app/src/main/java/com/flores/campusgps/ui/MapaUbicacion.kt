@@ -35,6 +35,15 @@ fun MapaUbicacion(
         }
     }
 
+    // Commit 7: al seleccionar un lugar (desde la lista), la cámara viaja hasta él con zoom 17.
+    LaunchedEffect(seleccionado) {
+        lugares.firstOrNull { it.lugar.id == seleccionado }?.let {
+            camara.animate(
+                CameraUpdateFactory.newLatLngZoom(LatLng(it.lugar.latitud, it.lugar.longitud), 17f)
+            )
+        }
+    }
+
     GoogleMap(modifier = modifier, cameraPositionState = camara) {
         // Commit 4: marcador rojo "Estás aquí", solo cuando ya se conoce la ubicación.
         if (estado is UbicacionUi.Lista) {
@@ -50,10 +59,15 @@ fun MapaUbicacion(
         // Este composable solo dibuja la lista que recibe, no consulta ningún Repository.
         lugares.forEach { item ->
             key(item.lugar.id) {
+                val estadoMarcador = rememberUpdatedMarkerState(
+                    position = LatLng(item.lugar.latitud, item.lugar.longitud)
+                )
+                // Commit 7: si este lugar es el seleccionado, el mapa muestra su nombre.
+                LaunchedEffect(seleccionado) {
+                    if (seleccionado == item.lugar.id) estadoMarcador.showInfoWindow()
+                }
                 Marker(
-                    state = rememberUpdatedMarkerState(
-                        position = LatLng(item.lugar.latitud, item.lugar.longitud)
-                    ),
+                    state = estadoMarcador,
                     title = item.lugar.nombre,      // al tocar: nombre del lugar
                     snippet = item.lugar.categoria, // y su categoría
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)

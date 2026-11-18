@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -95,13 +96,20 @@ fun PantallaMapa(vm: MapaViewModel) {
                 when (val e = estado) {
                     UbicacionUi.Inicial -> Text("Pulsa el botón para ver tu ubicación")
                     UbicacionUi.Buscando -> Text("Buscando…")
-                    is UbicacionUi.Lista -> {
-                        Text("Latitud: ${e.posicion.latitud}")
-                        Text("Longitud: ${e.posicion.longitud}")
-                    }
+                    // Commit 7: latitud y longitud en una sola línea para dejar espacio a la lista.
+                    is UbicacionUi.Lista ->
+                        Text("Latitud: ${e.posicion.latitud}  ·  Longitud: ${e.posicion.longitud}")
                     is UbicacionUi.Error -> Text(e.mensaje, color = MaterialTheme.colorScheme.error)
                 }
             }
+
+            // Commit 7: la lista va debajo con altura fija; al tocar una tarjeta se selecciona el lugar.
+            ListaLugares(
+                lugares = lugares,
+                seleccionado = seleccionado,
+                onClick = { id -> vm.seleccionar(id) },
+                modifier = Modifier.fillMaxWidth().height(220.dp)
+            )
         }
     }
 }
