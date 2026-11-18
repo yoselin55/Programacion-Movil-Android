@@ -1,57 +1,41 @@
 package com.flores.campusgps.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+// Mejora 3: esquema de colores único (claro) con la paleta de CampusGPS.
+// Se quitaron el tema oscuro y los colores dinámicos para que la app siempre se vea igual.
+private val EsquemaCampus = lightColorScheme(
+    primary = Azul,
+    onPrimary = Tinta,
+    primaryContainer = AzulClaro,
+    onPrimaryContainer = Tinta,
+    secondary = Tinta,
+    onSecondary = Fondo,
+    secondaryContainer = AzulSuave,
+    onSecondaryContainer = Tinta,
+    tertiary = Tinta,
+    onTertiary = Fondo,
+    background = Fondo,
+    onBackground = Tinta,
+    surface = Fondo,
+    onSurface = Tinta,
+    surfaceVariant = AzulSuave,
+    onSurfaceVariant = TintaSuave,
+    outline = Azul,
+    outlineVariant = AzulClaro,
+    surfaceContainerLowest = Fondo,
+    surfaceContainerLow = AzulTenue,
+    surfaceContainer = AzulTenue,
+    surfaceContainerHigh = AzulSuave,
+    surfaceContainerHighest = AzulSuave
 )
 
 @Composable
-fun CampusGPSTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
+fun CampusGPSTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = EsquemaCampus,
         typography = Typography,
         content = content
     )

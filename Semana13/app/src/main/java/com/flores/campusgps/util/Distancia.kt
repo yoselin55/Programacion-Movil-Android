@@ -11,3 +11,10 @@ fun distanciaMetros(desde: Posicion, hasta: Lugar): Float {
     Location.distanceBetween(desde.latitud, desde.longitud, hasta.latitud, hasta.longitud, resultado)
     return resultado[0]
 }
+
+// Mejora 3: distancia entre dos posiciones; sirve para saber cuánto te moviste desde la última ruta.
+fun distanciaMetros(desde: Posicion, hasta: Posicion): Float {
+    val resultado = FloatArray(1)
+    Location.distanceBetween(desde.latitud, desde.longitud, hasta.latitud, hasta.longitud, resultado)
+    return resultado[0]
+}

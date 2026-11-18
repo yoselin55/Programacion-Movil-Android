@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Mejora 3: internet para pedir la ruta a pie por las calles. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Commit 2: permisos de ubicación (aproximada y precisa), declarados antes de <application>. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
