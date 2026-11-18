@@ -1,6 +1,7 @@
 package com.flores.campusgps.data
 
 import com.flores.campusgps.model.Posicion
+import kotlinx.coroutines.flow.Flow
 
 // Commit 1: contrato para pedir la posición; el ViewModel solo conoce esta interfaz.
 interface UbicacionRepository {
@@ -8,6 +9,10 @@ interface UbicacionRepository {
 
     // Commit 9: el ViewModel pregunta esto antes de buscar, sin necesitar un Context.
     fun playServicesDisponible(): Boolean
+
+    // Mejora 1 (seguimiento en vivo): emite una posición nueva cada vez que el usuario se mueve.
+    // El Flow se cancela cuando el ViewModel deja de escucharlo (botón Detener).
+    fun seguirPosicion(): Flow<Posicion>
 }
 
 // Commit 9: se lanza cuando no se puede determinar la ubicación (por ejemplo, con el GPS apagado).

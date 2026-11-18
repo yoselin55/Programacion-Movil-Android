@@ -2,12 +2,19 @@ package com.flores.campusgps.data
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Looper
 import com.flores.campusgps.model.Posicion
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 // Commit 1: obtiene la posición con FusedLocationProviderClient (solo aquí se usa Google).
@@ -18,6 +25,30 @@ class UbicacionRepositoryGoogle(private val context: Context) : UbicacionReposit
     // Commit 9: comprueba si el dispositivo tiene Google Play Services disponibles.
     override fun playServicesDisponible(): Boolean =
         GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
+
+    // Mejora 1: convierte requestLocationUpdates (callbacks) en un Flow con callbackFlow.
+    @SuppressLint("MissingPermission")
+    override fun seguirPosicion(): Flow<Posicion> = callbackFlow {
+        // Pide una actualización cada 3 s como máximo, y solo si te moviste al menos 3 metros.
+        val peticion = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 3000L)
+            .setMinUpdateDistanceMeters(3f)
+            .build()
+
+        val callback = object : LocationCallback() {
+            override fun onLocationResult(resultado: LocationResult) {
+                resultado.lastLocation?.let { trySend(Posicion(it.latitude, it.longitude)) }
+            }
+        }
+
+        try {
+            cliente.requestLocationUpdates(peticion, callback, Looper.getMainLooper())
+        } catch (e: SecurityException) {
+            close(e) // sin permiso: el ViewModel recibe el error y lo muestra
+        }
+
+        // Cuando el Flow se cancela (Detener), se dejan de pedir actualizaciones y se ahorra batería.
+        awaitClose { cliente.removeLocationUpdates(callback) }
+    }
 
     // El permiso se pide en la pantalla (commit 3), por eso se silencia el aviso aquí.
     @SuppressLint("MissingPermission")
