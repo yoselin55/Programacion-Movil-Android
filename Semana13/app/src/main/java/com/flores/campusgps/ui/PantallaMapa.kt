@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -26,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.flores.campusgps.model.UbicacionUi
+import com.flores.campusgps.util.formatearDistancia
 import com.flores.campusgps.viewmodel.MapaViewModel
 
 // Commit 1: pantalla simple con el botón y la latitud/longitud; solo dibuja el estado del ViewModel.
@@ -36,6 +39,8 @@ fun PantallaMapa(vm: MapaViewModel) {
     // Commit 4: la lista de lugares y el seleccionado se pasan al mapa.
     val lugares by vm.lugares.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
+    // Commit 8: el lugar más cercano viene del ViewModel (null si todavía no hay ubicación).
+    val masCercano by vm.masCercano.collectAsState()
 
     // Commit 3: el contexto se usa aquí (en la pantalla), no en el ViewModel.
     val contexto = LocalContext.current
@@ -77,6 +82,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 estado = estado,
                 lugares = lugares,
                 seleccionado = seleccionado,
+                masCercano = masCercano?.id,
                 modifier = Modifier.weight(1f).fillMaxWidth()
             )
 
@@ -86,11 +92,26 @@ fun PantallaMapa(vm: MapaViewModel) {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Button(
-                    onClick = { alPulsar() }, // Commit 3: antes llamaba directo a vm.buscar()
-                    enabled = estado !is UbicacionUi.Buscando
-                ) {
-                    Text("Obtener mi ubicación")
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = { alPulsar() }, // Commit 3: antes llamaba directo a vm.buscar()
+                        enabled = estado !is UbicacionUi.Buscando
+                    ) {
+                        Text("Obtener mi ubicación")
+                    }
+                    // Commit 8: botón con borde; deshabilitado mientras no haya lugar más cercano.
+                    OutlinedButton(
+                        onClick = { masCercano?.let { vm.seleccionar(it.id) } },
+                        enabled = masCercano != null
+                    ) {
+                        Text("Ir al más cercano")
+                    }
+                }
+
+                // Commit 8: texto con el nombre y la distancia del lugar más cercano.
+                masCercano?.let { cercano ->
+                    val metros = lugares.firstOrNull { it.lugar.id == cercano.id }?.metros
+                    Text("Más cercano: ${cercano.nombre} (${metros?.let { formatearDistancia(it) } ?: "-"})")
                 }
 
                 when (val e = estado) {

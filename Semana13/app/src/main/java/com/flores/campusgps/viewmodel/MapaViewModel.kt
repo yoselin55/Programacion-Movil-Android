@@ -5,14 +5,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flores.campusgps.data.LugaresRepository
 import com.flores.campusgps.data.UbicacionRepository
+import com.flores.campusgps.model.Lugar
 import com.flores.campusgps.model.LugarConDistancia
 import com.flores.campusgps.model.Posicion
 import com.flores.campusgps.model.UbicacionUi
 import com.flores.campusgps.util.distanciaMetros
 import com.flores.campusgps.util.formatearDistancia
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 // Commit 1: ViewModel con el estado de la ubicación; los TODO se completan en los commits 6 al 9.
@@ -62,7 +66,11 @@ class MapaViewModel(
     fun seleccionar(id: Int?) {
         _seleccionado.value = id
     }
-    // TODO Paso 7: val masCercano: StateFlow<Lugar?>
+    // Commit 8: el lugar más cercano se deriva de la lista ordenada (el primero con distancia calculada).
+    // Es null mientras todavía no hay ubicación.
+    val masCercano: StateFlow<Lugar?> = lugares
+        .map { lista -> lista.firstOrNull { it.metros != null }?.lugar }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     private fun mensajeDe(e: Throwable): String = when (e) {
         is SecurityException -> "Falta el permiso de ubicación"
