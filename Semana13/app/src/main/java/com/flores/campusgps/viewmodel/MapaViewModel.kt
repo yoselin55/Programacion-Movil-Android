@@ -1,11 +1,15 @@
 package com.flores.campusgps.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flores.campusgps.data.LugaresRepository
 import com.flores.campusgps.data.UbicacionRepository
 import com.flores.campusgps.model.LugarConDistancia
+import com.flores.campusgps.model.Posicion
 import com.flores.campusgps.model.UbicacionUi
+import com.flores.campusgps.util.distanciaMetros
+import com.flores.campusgps.util.formatearDistancia
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,7 +38,7 @@ class MapaViewModel(
             ubicacionRepo.obtenerPosicion()
                 .onSuccess {
                     _estado.value = UbicacionUi.Lista(it)
-                    // TODO Paso 5: actualizarDistancias(it)
+                    actualizarDistancias(it) // Commit 6: solo se calcula cuando la ubicación llega con éxito
                 }
                 .onFailure { _estado.value = UbicacionUi.Error(mensajeDe(it)) }
         }
@@ -42,6 +46,16 @@ class MapaViewModel(
 
     fun permisoDenegado() {
         _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás")
+    }
+
+    // Commit 6: calcula la distancia a cada lugar, ordena de menor a mayor y publica la lista.
+    // Se hace aquí en el ViewModel y no en un Composable, para respetar MVVM.
+    private fun actualizarDistancias(pos: Posicion) {
+        _lugares.value = lugaresRepo.obtenerLugares()
+            .map { LugarConDistancia(it, distanciaMetros(pos, it)) }
+            .sortedBy { it.metros }
+        // Commit 6: para comprobar el orden en Logcat (filtrar por "CampusGPS").
+        Log.d("CampusGPS", _lugares.value.joinToString { "${it.lugar.nombre}=${it.metros?.let(::formatearDistancia)}" })
     }
 
     // TODO Paso 6: fun seleccionar(id: Int?)
