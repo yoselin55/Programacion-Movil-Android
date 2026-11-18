@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
+import com.flores.centrotareas.model.CargaUi
 import com.flores.centrotareas.model.PrimosUi
 import com.flores.centrotareas.viewmodel.TareasViewModel
 
@@ -41,7 +42,7 @@ fun PantallaTareas(vm: TareasViewModel) {
         ) {
             Tarjeta("Tarea con progreso") { ContenidoTarea(vm) }
             Tarjeta("Contar números primos") { ContenidoPrimos(vm) }
-            Tarjeta("Dos cargas") { Text("Aquí irán las cargas (pasos 6 y 7)") }
+            Tarjeta("Dos cargas") { ContenidoCargas(vm) }
         }
     }
 }
@@ -135,5 +136,28 @@ fun ContenidoPrimos(vm: TareasViewModel) {
             Text("Primos encontrados: ${e.cantidad}")
             Text("Tiempo: ${e.milisegundos} ms")
         }
+    }
+}
+
+@Composable
+// Commit 7: tarjeta Dos cargas (una por una / a la vez)
+fun ContenidoCargas(vm: TareasViewModel) {
+    val estado by vm.carga.collectAsState()
+    val cargando = estado is CargaUi.Cargando
+
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedButton(onClick = { vm.cargarUnaPorUna() }, enabled = !cargando) { Text("Una por una") }
+        Button(onClick = { vm.cargarALaVez() }, enabled = !cargando) { Text("A la vez") }
+    }
+    when (val e = estado) {
+        CargaUi.Inicial -> {}
+        CargaUi.Cargando -> CircularProgressIndicator()
+        is CargaUi.Exito -> Recuadro(VerdeExito) {
+            Text("Modo: ${e.modo}")
+            Text("Perfil: ${e.perfil}")
+            Text("Pedidos: ${e.pedidos}")
+            Text("Tiempo: ${e.milisegundos} ms")
+        }
+        is CargaUi.Error -> {}
     }
 }
