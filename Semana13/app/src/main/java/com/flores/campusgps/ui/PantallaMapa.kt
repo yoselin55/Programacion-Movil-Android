@@ -1,5 +1,9 @@
 package com.flores.campusgps.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,7 +20,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.flores.campusgps.model.UbicacionUi
 import com.flores.campusgps.viewmodel.MapaViewModel
 
@@ -25,6 +31,29 @@ import com.flores.campusgps.viewmodel.MapaViewModel
 @Composable
 fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
+
+    // Commit 3: el contexto se usa aquí (en la pantalla), no en el ViewModel.
+    val contexto = LocalContext.current
+
+    // Commit 3: lanza el cuadro de permiso de Android; si acepta busca, si niega avisa y no se cierra.
+    val lanzador = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { resultado ->
+        if (resultado.values.any { it }) vm.buscar() else vm.permisoDenegado()
+    }
+
+    // Commit 3: si ya tiene permiso (FINE o COARSE) busca directo; si no, lo pide.
+    fun alPulsar() {
+        val fino = ContextCompat.checkSelfPermission(contexto, Manifest.permission.ACCESS_FINE_LOCATION)
+        val aprox = ContextCompat.checkSelfPermission(contexto, Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (fino == PackageManager.PERMISSION_GRANTED || aprox == PackageManager.PERMISSION_GRANTED) {
+            vm.buscar()
+        } else {
+            lanzador.launch(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+            )
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -43,7 +72,7 @@ fun PantallaMapa(vm: MapaViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(
-                onClick = { vm.buscar() },
+                onClick = { alPulsar() }, // Commit 3: antes llamaba directo a vm.buscar()
                 enabled = estado !is UbicacionUi.Buscando
             ) {
                 Text("Obtener mi ubicación")
