@@ -6,6 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.background
@@ -144,7 +145,14 @@ fun ContenidoPrimos(vm: TareasViewModel) {
 fun ContenidoCargas(vm: TareasViewModel) {
     val estado by vm.carga.collectAsState()
     val cargando = estado is CargaUi.Cargando
+    val simularError by vm.simularError.collectAsState()
 
+    // Commit 8 (Paso 7): interruptor para provocar el error
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Switch(checked = simularError, onCheckedChange = { vm.cambiarSimularError(it) })
+        Spacer(Modifier.width(8.dp))
+        Text("Simular error")
+    }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedButton(onClick = { vm.cargarUnaPorUna() }, enabled = !cargando) { Text("Una por una") }
         Button(onClick = { vm.cargarALaVez() }, enabled = !cargando) { Text("A la vez") }
@@ -158,6 +166,9 @@ fun ContenidoCargas(vm: TareasViewModel) {
             Text("Pedidos: ${e.pedidos}")
             Text("Tiempo: ${e.milisegundos} ms")
         }
-        is CargaUi.Error -> {}
+        is CargaUi.Error -> Recuadro(MaterialTheme.colorScheme.errorContainer) {
+            Text(e.mensaje, color = MaterialTheme.colorScheme.onErrorContainer)
+            Button(onClick = { vm.cargarALaVez() }) { Text("Reintentar") }
+        }
     }
 }
