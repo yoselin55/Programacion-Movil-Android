@@ -2,10 +2,12 @@ package com.flores.campusgps.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import com.flores.campusgps.model.LugarConDistancia
 import com.flores.campusgps.model.UbicacionUi
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -13,7 +15,7 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 
-// Commit 1: esqueleto del mapa. Commit 4: ya se dibuja y muestra tu ubicación; los lugares van en el commit 5.
+// Commit 1: esqueleto del mapa. Commit 4: muestra tu ubicación. Commit 5: agrega los marcadores de los lugares.
 @Composable
 fun MapaUbicacion(
     estado: UbicacionUi,
@@ -43,6 +45,20 @@ fun MapaUbicacion(
                 title = "Estás aquí"
             )
         }
-        // TODO 3 (Paso 4): un Marker por cada lugar
+
+        // Commit 5: un marcador azul por cada lugar; key(id) identifica a cada uno.
+        // Este composable solo dibuja la lista que recibe, no consulta ningún Repository.
+        lugares.forEach { item ->
+            key(item.lugar.id) {
+                Marker(
+                    state = rememberUpdatedMarkerState(
+                        position = LatLng(item.lugar.latitud, item.lugar.longitud)
+                    ),
+                    title = item.lugar.nombre,      // al tocar: nombre del lugar
+                    snippet = item.lugar.categoria, // y su categoría
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                )
+            }
+        }
     }
 }
