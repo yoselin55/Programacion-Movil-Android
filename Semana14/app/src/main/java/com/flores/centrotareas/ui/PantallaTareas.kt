@@ -61,12 +61,17 @@ fun Tarjeta(titulo: String, contenido: @Composable ColumnScope.() -> Unit) {
 fun ContenidoTarea(vm: TareasViewModel) {
     val mensaje by vm.mensaje.collectAsState()
     val progreso by vm.progreso.collectAsState()
+    val corriendo by vm.corriendo.collectAsState()
     // Commit 2: prueba de vida: si deja de sumar, la pantalla está congelada
     var toques by rememberSaveable { mutableIntStateOf(0) }
 
     Button(onClick = { toques++ }) { Text("Tócame: $toques") }
     // Commit 3 (Paso 2): ahora la tarea corre en segundo plano y el contador sigue sumando
-    Button(onClick = { vm.tareaLarga() }) { Text("Iniciar") }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Commit 5 (Paso 4): Iniciar se deshabilita mientras corre; Cancelar solo mientras corre
+        Button(onClick = { vm.tareaLarga() }, enabled = !corriendo) { Text("Iniciar") }
+        OutlinedButton(onClick = { vm.cancelar() }, enabled = corriendo) { Text("Cancelar") }
+    }
 
     // Commit 4 (Paso 3): barra de progreso y porcentaje
     LinearProgressIndicator(progress = { progreso }, modifier = Modifier.fillMaxWidth())
