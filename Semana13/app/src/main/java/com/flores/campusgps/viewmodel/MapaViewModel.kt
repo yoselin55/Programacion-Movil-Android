@@ -7,7 +7,9 @@ import com.flores.campusgps.data.LugaresRepository
 import com.flores.campusgps.data.UbicacionRepository
 import com.flores.campusgps.model.Lugar
 import com.flores.campusgps.model.LugarConDistancia
+import com.flores.campusgps.data.GpsApagadoException
 import com.flores.campusgps.model.Posicion
+import com.flores.campusgps.model.TipoError
 import com.flores.campusgps.model.UbicacionUi
 import com.flores.campusgps.util.distanciaMetros
 import com.flores.campusgps.util.formatearDistancia
@@ -37,6 +39,14 @@ class MapaViewModel(
     val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
 
     fun buscar() {
+        // Commit 9: antes de buscar se consulta si hay Google Play Services (sin usar Context).
+        if (!ubicacionRepo.playServicesDisponible()) {
+            _estado.value = UbicacionUi.Error(
+                "Este dispositivo no tiene Google Play Services",
+                TipoError.SIN_PLAY_SERVICES
+            )
+            return
+        }
         _estado.value = UbicacionUi.Buscando
         viewModelScope.launch {
             ubicacionRepo.obtenerPosicion()
@@ -44,12 +54,15 @@ class MapaViewModel(
                     _estado.value = UbicacionUi.Lista(it)
                     actualizarDistancias(it) // Commit 6: solo se calcula cuando la ubicación llega con éxito
                 }
-                .onFailure { _estado.value = UbicacionUi.Error(mensajeDe(it)) }
+                .onFailure { _estado.value = errorDe(it) }
         }
     }
 
     fun permisoDenegado() {
-        _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás")
+        _estado.value = UbicacionUi.Error(
+            "Sin permiso de ubicación no puedo mostrar dónde estás",
+            TipoError.SIN_PERMISO
+        )
     }
 
     // Commit 6: calcula la distancia a cada lugar, ordena de menor a mayor y publica la lista.
@@ -72,8 +85,10 @@ class MapaViewModel(
         .map { lista -> lista.firstOrNull { it.metros != null }?.lugar }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    private fun mensajeDe(e: Throwable): String = when (e) {
-        is SecurityException -> "Falta el permiso de ubicación"
-        else -> e.message ?: "No se pudo obtener la ubicación"
+    // Commit 9: convierte cada fallo en un error con su mensaje y su tipo.
+    private fun errorDe(e: Throwable): UbicacionUi.Error = when (e) {
+        is SecurityException -> UbicacionUi.Error("Falta el permiso de ubicación", TipoError.SIN_PERMISO)
+        is GpsApagadoException -> UbicacionUi.Error("Activa el GPS e intenta de nuevo", TipoError.GPS_APAGADO)
+        else -> UbicacionUi.Error(e.message ?: "No se pudo obtener la ubicación", TipoError.OTRO)
     }
 }

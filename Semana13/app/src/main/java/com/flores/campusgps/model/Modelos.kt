@@ -22,5 +22,9 @@ sealed interface UbicacionUi {
     data object Inicial : UbicacionUi
     data object Buscando : UbicacionUi
     data class Lista(val posicion: Posicion) : UbicacionUi
-    data class Error(val mensaje: String) : UbicacionUi
+    // Commit 9: el error ahora lleva un tipo para saber qué botón mostrar.
+    data class Error(val mensaje: String, val tipo: TipoError) : UbicacionUi
 }
+
+// Commit 9: tipos de problema posibles al obtener la ubicación.
+enum class TipoError { SIN_PERMISO, GPS_APAGADO, SIN_PLAY_SERVICES, OTRO }

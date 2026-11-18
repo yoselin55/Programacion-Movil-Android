@@ -120,7 +120,8 @@ fun PantallaMapa(vm: MapaViewModel) {
                     // Commit 7: latitud y longitud en una sola línea para dejar espacio a la lista.
                     is UbicacionUi.Lista ->
                         Text("Latitud: ${e.posicion.latitud}  ·  Longitud: ${e.posicion.longitud}")
-                    is UbicacionUi.Error -> Text(e.mensaje, color = MaterialTheme.colorScheme.error)
+                    // Commit 9: el error se muestra con su mensaje y su botón (Abrir ajustes o Reintentar).
+                    is UbicacionUi.Error -> MensajeError(e, onReintentar = { alPulsar() })
                 }
             }
 
