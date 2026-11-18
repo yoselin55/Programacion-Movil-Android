@@ -8,6 +8,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
+import com.flores.centrotareas.model.PrimosUi
 import com.flores.centrotareas.viewmodel.TareasViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +40,7 @@ fun PantallaTareas(vm: TareasViewModel) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Tarjeta("Tarea con progreso") { ContenidoTarea(vm) }
-            Tarjeta("Contar números primos") { Text("Aquí irá el cálculo (paso 5)") }
+            Tarjeta("Contar números primos") { ContenidoPrimos(vm) }
             Tarjeta("Dos cargas") { Text("Aquí irán las cargas (pasos 6 y 7)") }
         }
     }
@@ -77,4 +84,56 @@ fun ContenidoTarea(vm: TareasViewModel) {
     LinearProgressIndicator(progress = { progreso }, modifier = Modifier.fillMaxWidth())
     Text("${(progreso * 100).toInt()} %")
     Text(mensaje)
+}
+
+// Commit 6: recuadro de resultado con el color indicado
+@Composable
+fun Recuadro(fondo: Color, contenido: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(fondo)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        content = contenido
+    )
+}
+
+val VerdeExito = Color(0xFFDDF3DF)
+
+@Composable
+// Commit 6: tarjeta Contar números primos
+fun ContenidoPrimos(vm: TareasViewModel) {
+    val estado by vm.primos.collectAsState()
+    var texto by rememberSaveable { mutableStateOf("3000000") }
+    val calculando = estado is PrimosUi.Calculando
+
+    OutlinedTextField(
+        value = texto,
+        onValueChange = { texto = it },
+        label = { Text("Contar primos hasta") },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth()
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Button(
+            onClick = {
+                val n = texto.toIntOrNull()
+                if (n != null && n >= 2) vm.contar(n)   // ignora texto no numérico o menor que 2
+            },
+            enabled = !calculando
+        ) { Text("Contar") }
+        OutlinedButton(onClick = { vm.cancelarPrimos() }, enabled = calculando) { Text("Cancelar") }
+    }
+    when (val e = estado) {
+        PrimosUi.Inicial -> {}
+        PrimosUi.Calculando -> Text("Calculando...")
+        PrimosUi.Cancelado -> Text("Cancelado")
+        is PrimosUi.Listo -> Recuadro(VerdeExito) {
+            Text("Primos encontrados: ${e.cantidad}")
+            Text("Tiempo: ${e.milisegundos} ms")
+        }
+    }
 }
