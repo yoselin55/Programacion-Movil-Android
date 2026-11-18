@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.flores.centrotareas.viewmodel.TareasViewModel
@@ -31,7 +32,7 @@ fun PantallaTareas(vm: TareasViewModel) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Tarjeta("Tarea con progreso") { Text("Aquí irá la tarea (pasos 1 a 4)") }
+            Tarjeta("Tarea con progreso") { ContenidoTarea(vm) }
             Tarjeta("Contar números primos") { Text("Aquí irá el cálculo (paso 5)") }
             Tarjeta("Dos cargas") { Text("Aquí irán las cargas (pasos 6 y 7)") }
         }
@@ -53,4 +54,17 @@ fun Tarjeta(titulo: String, contenido: @Composable ColumnScope.() -> Unit) {
             contenido()
         }
     }
+}
+
+@Composable
+// Commit 2: tarjeta Tarea con progreso (contador y tarea larga)
+fun ContenidoTarea(vm: TareasViewModel) {
+    val mensaje by vm.mensaje.collectAsState()
+    // Commit 2: prueba de vida: si deja de sumar, la pantalla está congelada
+    var toques by rememberSaveable { mutableIntStateOf(0) }
+
+    Button(onClick = { toques++ }) { Text("Tócame: $toques") }
+    // Commit 2 (Paso 1): este botón congela la pantalla 4 segundos
+    Button(onClick = { vm.tareaLargaMala() }) { Text("Tarea larga (MAL)") }
+    Text(mensaje)
 }

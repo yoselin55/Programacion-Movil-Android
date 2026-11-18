@@ -14,7 +14,13 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     // ----- Tarea con progreso (pasos 1 a 4)
     private val _mensaje = MutableStateFlow("Listo")
     val mensaje: StateFlow<String> = _mensaje.asStateFlow()
-    // TODO Commit 2 (Paso 1): fun tareaLargaMala()
+
+    // Commit 2 (Paso 1): tarea larga MAL hecha, en el hilo principal (congela la pantalla)
+    fun tareaLargaMala() {
+        _mensaje.value = "Trabajando..."
+        Thread.sleep(4000)
+        _mensaje.value = "Terminó"
+    }
     // TODO Commit 3 (Paso 2): fun tareaLarga()
     // TODO Commit 4 (Paso 3): progreso
     // TODO Commit 5 (Paso 4): trabajo (Job), corriendo y cancelar()
