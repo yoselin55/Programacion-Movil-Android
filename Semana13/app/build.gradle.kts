@@ -1,6 +1,14 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+}
+
+// Commit 2: lee local.properties (si existe) para sacar la clave de Maps sin ponerla en el código.
+val localProps = Properties().apply {
+    val archivo = rootProject.file("local.properties")
+    if (archivo.exists()) archivo.inputStream().use { load(it) }
 }
 
 android {
@@ -16,6 +24,9 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+
+        // Commit 2: pasa MAPS_API_KEY al Manifest como ${MAPS_API_KEY}; vacío si no está definida.
+        manifestPlaceholders["MAPS_API_KEY"] = localProps.getProperty("MAPS_API_KEY", "")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -37,6 +48,7 @@ android {
 }
 
 dependencies {
+    // Compose + Material 3: el BOM fija las versiones y material3 trae Button, Scaffold, TopAppBar, etc.
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
