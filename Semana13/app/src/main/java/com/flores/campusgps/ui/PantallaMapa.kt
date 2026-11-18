@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +32,9 @@ import com.flores.campusgps.viewmodel.MapaViewModel
 @Composable
 fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
+    // Commit 4: la lista de lugares y el seleccionado se pasan al mapa.
+    val lugares by vm.lugares.collectAsState()
+    val seleccionado by vm.seleccionado.collectAsState()
 
     // Commit 3: el contexto se usa aquí (en la pantalla), no en el ViewModel.
     val contexto = LocalContext.current
@@ -66,26 +70,37 @@ fun PantallaMapa(vm: MapaViewModel) {
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(
-                onClick = { alPulsar() }, // Commit 3: antes llamaba directo a vm.buscar()
-                enabled = estado !is UbicacionUi.Buscando
-            ) {
-                Text("Obtener mi ubicación")
-            }
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            // Commit 4: el mapa ocupa todo el espacio libre de arriba (weight 1f).
+            MapaUbicacion(
+                estado = estado,
+                lugares = lugares,
+                seleccionado = seleccionado,
+                modifier = Modifier.weight(1f).fillMaxWidth()
+            )
 
-            when (val e = estado) {
-                UbicacionUi.Inicial -> Text("Pulsa el botón para ver tu ubicación")
-                UbicacionUi.Buscando -> Text("Buscando…")
-                is UbicacionUi.Lista -> {
-                    Text("Latitud: ${e.posicion.latitud}")
-                    Text("Longitud: ${e.posicion.longitud}")
+            // Commit 4: el botón y los mensajes pasan debajo del mapa.
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(
+                    onClick = { alPulsar() }, // Commit 3: antes llamaba directo a vm.buscar()
+                    enabled = estado !is UbicacionUi.Buscando
+                ) {
+                    Text("Obtener mi ubicación")
                 }
-                is UbicacionUi.Error -> Text(e.mensaje, color = MaterialTheme.colorScheme.error)
+
+                when (val e = estado) {
+                    UbicacionUi.Inicial -> Text("Pulsa el botón para ver tu ubicación")
+                    UbicacionUi.Buscando -> Text("Buscando…")
+                    is UbicacionUi.Lista -> {
+                        Text("Latitud: ${e.posicion.latitud}")
+                        Text("Longitud: ${e.posicion.longitud}")
+                    }
+                    is UbicacionUi.Error -> Text(e.mensaje, color = MaterialTheme.colorScheme.error)
+                }
             }
         }
     }

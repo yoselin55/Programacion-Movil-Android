@@ -1,15 +1,19 @@
 package com.flores.campusgps.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.flores.campusgps.model.LugarConDistancia
 import com.flores.campusgps.model.UbicacionUi
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberUpdatedMarkerState
 
-// Commit 1: esqueleto del mapa (todavía sin usar); se completa en los commits 4 y 5.
+// Commit 1: esqueleto del mapa. Commit 4: ya se dibuja y muestra tu ubicación; los lugares van en el commit 5.
 @Composable
 fun MapaUbicacion(
     estado: UbicacionUi,
@@ -21,10 +25,24 @@ fun MapaUbicacion(
         position = CameraPosition.fromLatLngZoom(LatLng(-12.0464, -77.0428), 12f)
     }
 
-    // TODO 1: LaunchedEffect(estado): si es Lista, animar la cámara (zoom 16f)
+    // Commit 4: cuando llega la ubicación (estado Lista), la cámara viaja a tu posición con zoom 16.
+    LaunchedEffect(estado) {
+        if (estado is UbicacionUi.Lista) {
+            val pos = estado.posicion
+            camara.animate(CameraUpdateFactory.newLatLngZoom(LatLng(pos.latitud, pos.longitud), 16f))
+        }
+    }
 
     GoogleMap(modifier = modifier, cameraPositionState = camara) {
-        // TODO 2: si el estado es Lista, un Marker "Estás aquí"
+        // Commit 4: marcador rojo "Estás aquí", solo cuando ya se conoce la ubicación.
+        if (estado is UbicacionUi.Lista) {
+            Marker(
+                state = rememberUpdatedMarkerState(
+                    position = LatLng(estado.posicion.latitud, estado.posicion.longitud)
+                ),
+                title = "Estás aquí"
+            )
+        }
         // TODO 3 (Paso 4): un Marker por cada lugar
     }
 }
