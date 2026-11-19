@@ -214,6 +214,7 @@ fun ContenidoTarea(vm: TareasViewModel) {
 @Composable
 fun ContenidoPrimos(vm: TareasViewModel) {
     val estado by vm.primos.collectAsState()
+    val avance by vm.primosProgreso.collectAsState()   // Commit 11 (Mejora 2)
     var texto by rememberSaveable { mutableStateOf("3000000") }
     val calculando = estado is PrimosUi.Calculando
 
@@ -241,7 +242,18 @@ fun ContenidoPrimos(vm: TareasViewModel) {
     }
     when (val e = estado) {
         PrimosUi.Inicial -> {}
-        PrimosUi.Calculando -> Text("Calculando...", style = MaterialTheme.typography.bodyLarge, color = TintaSuave)
+        // Commit 11 (Mejora 2): barra y porcentaje mientras cuenta
+        PrimosUi.Calculando -> {
+            LinearProgressIndicator(
+                progress = { avance },
+                modifier = Modifier.fillMaxWidth().height(14.dp).clip(RoundedCornerShape(50)),
+                color = Amarillo,
+                trackColor = VerdeClaro,
+                strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
+                drawStopIndicator = {}
+            )
+            Text("Calculando... ${(avance * 100).toInt()} %", style = MaterialTheme.typography.titleMedium, color = VerdeOscuro)
+        }
         PrimosUi.Cancelado -> Estado("Cancelado")
         is PrimosUi.Listo -> Recuadro(VerdeClaro) {
             Text("${e.cantidad} primos", style = MaterialTheme.typography.titleLarge, color = VerdeOscuro)

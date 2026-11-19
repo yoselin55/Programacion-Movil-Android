@@ -34,14 +34,19 @@ class TareasRepositoryLocal : TareasRepository {
     }
 
     // Commit 6 (Paso 5): cálculo pesado en Dispatchers.Default y cancelable
-    override suspend fun contarPrimos(hasta: Int): Int = withContext(Dispatchers.Default) {
-        var cantidad = 0
-        for (n in 2..hasta) {
-            ensureActive()                    // permite cancelar a mitad del cálculo
-            if (esPrimo(n)) cantidad++
+    // Commit 11 (Mejora 2): además informa el porcentaje cada 1 % del recorrido
+    override suspend fun contarPrimos(hasta: Int, alAvanzar: (Float) -> Unit): Int =
+        withContext(Dispatchers.Default) {
+            var cantidad = 0
+            val paso = maxOf(hasta / 100, 1)
+            for (n in 2..hasta) {
+                ensureActive()                    // permite cancelar a mitad del cálculo
+                if (esPrimo(n)) cantidad++
+                if (n % paso == 0) alAvanzar(n.toFloat() / hasta)
+            }
+            alAvanzar(1f)
+            cantidad
         }
-        cantidad
-    }
 
     private fun esPrimo(n: Int): Boolean {
         var d = 2

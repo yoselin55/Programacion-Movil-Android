@@ -61,13 +61,18 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     // Commit 6 (Paso 5): el cálculo vive en el Repository; aquí solo se lanza, se mide y se cancela
     private var trabajoPrimos: Job? = null
 
+    // Commit 11 (Mejora 2): avance del cálculo de 0f a 1f
+    private val _primosProgreso = MutableStateFlow(0f)
+    val primosProgreso: StateFlow<Float> = _primosProgreso.asStateFlow()
+
     fun contar(hasta: Int) {
         if (_primos.value is PrimosUi.Calculando) return
         trabajoPrimos = viewModelScope.launch {
             _primos.value = PrimosUi.Calculando
+            _primosProgreso.value = 0f          // Commit 11 (Mejora 2)
             val inicio = System.currentTimeMillis()
             try {
-                val cantidad = repo.contarPrimos(hasta)
+                val cantidad = repo.contarPrimos(hasta) { _primosProgreso.value = it }   // Commit 11 (Mejora 2)
                 _primos.value = PrimosUi.Listo(cantidad, System.currentTimeMillis() - inicio)
             } catch (e: CancellationException) {
                 _primos.value = PrimosUi.Cancelado
