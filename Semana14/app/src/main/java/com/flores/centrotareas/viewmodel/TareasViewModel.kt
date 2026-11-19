@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.flores.centrotareas.data.TareasRepository
 import com.flores.centrotareas.model.CargaUi
 import com.flores.centrotareas.model.PrimosUi
+import com.flores.centrotareas.model.Tiempos
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -13,6 +14,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 // Commit 1: esqueleto del ViewModel; cada paso lo completa en su propio commit
@@ -97,6 +99,17 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
         _simularError.value = valor
     }
 
+    // Commit 12 (Mejora 3): cada carga exitosa suma su tiempo a la tabla
+    private val _tiempos = MutableStateFlow(Tiempos())
+    val tiempos: StateFlow<Tiempos> = _tiempos.asStateFlow()
+
+    private fun registrarTiempo(modo: String, ms: Long) {
+        _tiempos.update {
+            if (modo == "Una por una") it.copy(unaPorUna = it.unaPorUna + ms)
+            else it.copy(aLaVez = it.aLaVez + ms)
+        }
+    }
+
     // Una sola función con try/catch que usan las dos cargas
     private fun cargar(modo: String, tarea: suspend () -> Pair<String, List<String>>) {
         if (_carga.value is CargaUi.Cargando) return
@@ -105,9 +118,9 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
             val inicio = System.currentTimeMillis()
             try {
                 val (perfil, pedidos) = tarea()
-                _carga.value = CargaUi.Exito(
-                    modo, perfil, pedidos.size, System.currentTimeMillis() - inicio
-                )
+                val ms = System.currentTimeMillis() - inicio
+                _carga.value = CargaUi.Exito(modo, perfil, pedidos.size, ms)
+                registrarTiempo(modo, ms)         // Commit 12 (Mejora 3)
             } catch (e: CancellationException) {
                 throw e                                    // primero dejamos pasar la cancelación
             } catch (e: Exception) {

@@ -56,3 +56,13 @@ Al tocar **Tarea larga (MAL)** la pantalla queda congelada 4 segundos: el botón
 3. **¿Por qué `Dispatchers.Default` para los primos y `Dispatchers.IO` para la red?** `Default` tiene tantos hilos como núcleos y sirve para cálculo que usa CPU. `IO` tiene un grupo grande de hilos pensado para tareas que esperan (red, disco) sin gastar CPU.
 4. **¿Qué pasa con la corrutina si el usuario cierra la pantalla?** `viewModelScope` se cancela cuando el ViewModel se destruye (al salir de la pantalla de forma definitiva), así que las corrutinas se cancelan solas y no quedan trabajando para nada. Al rotar, el ViewModel sobrevive y la tarea continúa.
 5. **¿Por qué `async` tarda 3 s y no 5 s?** Porque las dos cargas corren al mismo tiempo y se espera a la más lenta: máximo(2 s, 3 s) = 3 s. Si una falla, `coroutineScope` cancela a la otra y propaga la excepción, que el `try/catch` convierte en el estado de error.
+
+## Fase 2 · Con IA
+
+Rama `mejora-ia`. Rediseño de la interfaz (paleta plana verde, crema y amarillo, letra Poppins, imágenes en el encabezado y en cada tarjeta) y tres mejoras:
+
+1. **Progreso desde el Repository:** `tareaConProgreso()` devuelve un `Flow<Float>` con `flowOn(Dispatchers.Default)`.
+2. **Primos con progreso:** `contarPrimos(hasta, alAvanzar)` informa el porcentaje mientras cuenta.
+3. **Comparación de tiempos:** tabla y barras que acumulan los tiempos de Una por una y A la vez.
+
+Los prompts están en [PROMPTS.md](PROMPTS.md).

@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.flores.centrotareas.R
 import com.flores.centrotareas.model.CargaUi
 import com.flores.centrotareas.model.PrimosUi
+import com.flores.centrotareas.model.Tiempos
 import com.flores.centrotareas.ui.theme.*
 import com.flores.centrotareas.viewmodel.TareasViewModel
 
@@ -268,6 +269,7 @@ fun ContenidoCargas(vm: TareasViewModel) {
     val estado by vm.carga.collectAsState()
     val cargando = estado is CargaUi.Cargando
     val simularError by vm.simularError.collectAsState()
+    val tiempos by vm.tiempos.collectAsState()          // Commit 12 (Mejora 3)
 
     // Commit 8 (Paso 7): interruptor para provocar el error
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -298,5 +300,58 @@ fun ContenidoCargas(vm: TareasViewModel) {
             Text(e.mensaje, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onErrorContainer)
             BotonPrincipal("Reintentar", { vm.cargarALaVez() })
         }
+    }    // Commit 12 (Mejora 3): tabla que acumula los tiempos de ambos modos
+    if (tiempos.hayDatos) TablaTiempos(tiempos)
+}
+
+// Commit 12 (Mejora 3): comparación de tiempos Una por una contra A la vez
+@Composable
+fun TablaTiempos(t: Tiempos) {
+    val pUna = t.promedioUnaPorUna
+    val pVez = t.promedioALaVez
+    val mayor = maxOf(pUna ?: 0L, pVez ?: 0L).coerceAtLeast(1L)
+
+    Recuadro(Crema) {
+        Text("Comparación de tiempos", style = MaterialTheme.typography.titleMedium, color = VerdeOscuro)
+        FilaTiempo("Modo", "Última", "Promedio", "Veces", encabezado = true)
+        FilaTiempo("Una por una", t.unaPorUna.lastOrNull().ms(), pUna.ms(), t.unaPorUna.size.toString())
+        FilaTiempo("A la vez", t.aLaVez.lastOrNull().ms(), pVez.ms(), t.aLaVez.size.toString())
+        Spacer(Modifier.height(6.dp))
+        BarraTiempo("Una por una", pUna, mayor, VerdeMedio)
+        BarraTiempo("A la vez", pVez, mayor, Amarillo)
+        if (pUna != null && pVez != null && pUna > pVez) {
+            val ahorro = pUna - pVez
+            Text(
+                "A la vez ahorra $ahorro ms (${ahorro * 100 / pUna} %)",
+                style = MaterialTheme.typography.labelLarge, color = VerdeOscuro
+            )
+        }
     }
+}
+
+private fun Long?.ms() = if (this == null) "—" else "$this ms"
+
+@Composable
+private fun FilaTiempo(modo: String, ultima: String, promedio: String, veces: String, encabezado: Boolean = false) {
+    val estilo = if (encabezado) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodyLarge
+    val color = if (encabezado) TintaSuave else Tinta
+    Row(Modifier.fillMaxWidth()) {
+        Text(modo, Modifier.weight(1.5f), style = estilo, color = color)
+        Text(ultima, Modifier.weight(1.2f), style = estilo, color = color)
+        Text(promedio, Modifier.weight(1.2f), style = estilo, color = color)
+        Text(veces, Modifier.weight(0.7f), style = estilo, color = color)
+    }
+}
+
+@Composable
+private fun BarraTiempo(titulo: String, promedio: Long?, mayor: Long, color: Color) {
+    if (promedio == null) return
+    Text(titulo, style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
+    Box(
+        Modifier
+            .fillMaxWidth(promedio.toFloat() / mayor)
+            .height(14.dp)
+            .clip(RoundedCornerShape(50))
+            .background(color)
+    )
 }
