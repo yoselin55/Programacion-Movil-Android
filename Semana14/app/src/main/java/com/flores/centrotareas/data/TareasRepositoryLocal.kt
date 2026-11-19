@@ -1,13 +1,26 @@
 package com.flores.centrotareas.data
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
 // Commit 1: cargas simuladas con delay (contarPrimos se completa en el Commit 6)
 class TareasRepositoryLocal : TareasRepository {
+
+    // Commit 10 (Mejora 1): flow { emit } con flowOn(Dispatchers.Default): 100 vueltas de 40 ms
+    override fun tareaConProgreso(): Flow<Float> = flow {
+        Log.d("HILO", "Dentro: ${Thread.currentThread().name}")
+        for (i in 1..100) {
+            delay(40)
+            emit(i / 100f)
+        }
+    }.flowOn(Dispatchers.Default)
 
     override suspend fun cargarPerfil(): String {
         delay(2000)

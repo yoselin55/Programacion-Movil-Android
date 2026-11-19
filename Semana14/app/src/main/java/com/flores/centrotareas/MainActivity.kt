@@ -1,10 +1,13 @@
 package com.flores.centrotareas
 
 import android.os.Bundle
+import android.graphics.Color
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.core.view.WindowCompat
 import com.flores.centrotareas.data.TareasRepositoryLocal
 import com.flores.centrotareas.ui.PantallaTareas
 import com.flores.centrotareas.ui.theme.CentroTareasTheme
@@ -20,9 +23,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        // Commit 10 (rediseño): la barra de estado se funde con el encabezado verde
+        enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
         setContent {
-            CentroTareasTheme(dynamicColor = false) {
+            CentroTareasTheme {
                 PantallaTareas(viewModel)
             }
         }

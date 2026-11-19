@@ -7,16 +7,13 @@ import com.flores.centrotareas.data.TareasRepository
 import com.flores.centrotareas.model.CargaUi
 import com.flores.centrotareas.model.PrimosUi
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 // Commit 1: esqueleto del ViewModel; cada paso lo completa en su propio commit
 class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
@@ -34,22 +31,16 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     private val _corriendo = MutableStateFlow(false)
     val corriendo: StateFlow<Boolean> = _corriendo.asStateFlow()
 
-    // Commit 3: la tarea larga pasa a una corrutina con withContext
+    // Commit 10 (Mejora 1): el ViewModel ya no calcula el avance, solo recoge el Flow del Repository
     fun tareaLarga() {
         if (_corriendo.value) return          // Commit 5: ya hay una tarea corriendo
         trabajo = viewModelScope.launch {
             _corriendo.value = true
             try {
                 _mensaje.value = "Trabajando..."
-                _progreso.value = 0f      // Commit 4
+                _progreso.value = 0f
                 Log.d("HILO", "Antes: ${Thread.currentThread().name}")
-                withContext(Dispatchers.Default) {
-                    Log.d("HILO", "Dentro: ${Thread.currentThread().name}")
-                    for (i in 1..100) {
-                        delay(40)
-                        _progreso.value = i / 100f   // Commit 4
-                    }
-                }
+                repo.tareaConProgreso().collect { _progreso.value = it }
                 Log.d("HILO", "Despues: ${Thread.currentThread().name}")
                 _mensaje.value = "Terminó"
             } finally {
