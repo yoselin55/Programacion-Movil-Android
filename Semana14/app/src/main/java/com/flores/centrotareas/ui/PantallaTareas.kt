@@ -193,7 +193,6 @@ fun ContenidoTarea(vm: TareasViewModel) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         // Commit 5 (Paso 4): Iniciar se deshabilita mientras corre; Cancelar solo mientras corre
         BotonPrincipal("Iniciar", { vm.tareaLarga() }, Modifier.weight(1f), enabled = !corriendo)
-        BotonSecundario("Cancelar", { vm.cancelar() }, Modifier.weight(1f), enabled = corriendo)
     }
 
     // Commit 4 (Paso 3): barra de progreso y porcentaje
