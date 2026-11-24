@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -19,8 +20,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.sp
 import com.flores.murocampus.data.PostRepositoryRemote
 import com.flores.murocampus.data.remote.RetrofitClient
+import com.flores.murocampus.ui.PantallaCrear
 import com.flores.murocampus.ui.PantallaDetalle
 import com.flores.murocampus.ui.PantallaLista
 import com.flores.murocampus.ui.theme.MuroCampusTheme
@@ -43,8 +46,18 @@ class MainActivity : ComponentActivity() {
                 // Commit 8: null = se ve la lista; con un id se ve el detalle.
                 var idSeleccionado by rememberSaveable { mutableStateOf<Int?>(null) }
                 BackHandler(enabled = idSeleccionado != null) { idSeleccionado = null }
+                // Commit 10: true = se ve el formulario de crear publicacion.
+                var creando by rememberSaveable { mutableStateOf(false) }
+                BackHandler(enabled = creando) { creando = false }
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
+                    floatingActionButton = {
+                        if (!creando && idSeleccionado == null) {
+                            FloatingActionButton(onClick = { vm.reiniciarCrear(); creando = true }) {
+                                Text("+", fontSize = 24.sp)
+                            }
+                        }
+                    },
                     topBar = {
                         TopAppBar(
                             title = { Text("MuroCampus") },
@@ -56,7 +69,9 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { innerPadding ->
                     val id = idSeleccionado
-                    if (id == null) {
+                    if (creando) {
+                        PantallaCrear(vm = vm, modifier = Modifier.padding(innerPadding))
+                    } else if (id == null) {
                         PantallaLista(
                             vm = vm,
                             onPostClick = { vm.abrir(it); idSeleccionado = it },

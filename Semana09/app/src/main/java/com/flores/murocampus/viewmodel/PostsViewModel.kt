@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flores.murocampus.data.PostRepository
 import com.flores.murocampus.model.Comentario
+import com.flores.murocampus.model.NuevoPost
 import com.flores.murocampus.model.Post
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -25,6 +26,10 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _detalle = MutableStateFlow<UiState<DetalleUi>>(UiState.Cargando)
     val detalle: StateFlow<UiState<DetalleUi>> = _detalle.asStateFlow()
 
+    // Commit 10: resultado del POST (null = aun no se envio nada).
+    private val _crear = MutableStateFlow<UiState<Post>?>(null)
+    val crear: StateFlow<UiState<Post>?> = _crear.asStateFlow()
+
     // Commit 9: filtro por usuario (null = Todos).
     private val _usuarioFiltro = MutableStateFlow<Int?>(null)
     val usuarioFiltro: StateFlow<Int?> = _usuarioFiltro.asStateFlow()
@@ -43,6 +48,21 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
                 .onSuccess { _lista.value = UiState.Exito(it) }
                 .onFailure { _lista.value = UiState.Error(mensajeDe(it)) }
         }
+    }
+
+    // Commit 10: envia la publicacion nueva (userId fijo = 1) y guarda el resultado.
+    fun publicar(titulo: String, texto: String) {
+        viewModelScope.launch {
+            _crear.value = UiState.Cargando
+            repo.crear(NuevoPost(userId = 1, title = titulo, body = texto))
+                .onSuccess { _crear.value = UiState.Exito(it) }
+                .onFailure { _crear.value = UiState.Error(mensajeDe(it)) }
+        }
+    }
+
+    // Commit 10: al abrir el formulario se olvida el resultado anterior.
+    fun reiniciarCrear() {
+        _crear.value = null
     }
 
     // Commit 9: guarda el filtro elegido y recarga la lista.
