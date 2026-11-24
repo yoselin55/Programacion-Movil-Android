@@ -17,7 +17,11 @@ import com.flores.murocampus.viewmodel.UiState
 
 // Commit 7: la pantalla solo dibuja el estado; nunca llama a la API.
 @Composable
-fun PantallaLista(vm: PostsViewModel, modifier: Modifier = Modifier) {
+fun PantallaLista(
+    vm: PostsViewModel,
+    onPostClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val estado by vm.lista.collectAsStateWithLifecycle()
 
     when (val e = estado) {
@@ -36,7 +40,7 @@ fun PantallaLista(vm: PostsViewModel, modifier: Modifier = Modifier) {
             contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(e.datos, key = { it.id }) { post -> TarjetaPost(post) }
+            items(e.datos, key = { it.id }) { post -> TarjetaPost(post, onClick = { onPostClick(post.id) }) }
         }
     }
 }
