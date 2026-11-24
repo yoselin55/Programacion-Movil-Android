@@ -25,6 +25,10 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _detalle = MutableStateFlow<UiState<DetalleUi>>(UiState.Cargando)
     val detalle: StateFlow<UiState<DetalleUi>> = _detalle.asStateFlow()
 
+    // Commit 9: filtro por usuario (null = Todos).
+    private val _usuarioFiltro = MutableStateFlow<Int?>(null)
+    val usuarioFiltro: StateFlow<Int?> = _usuarioFiltro.asStateFlow()
+
     init {
         cargar()
     }
@@ -32,10 +36,19 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     fun cargar() {
         viewModelScope.launch {
             _lista.value = UiState.Cargando
-            repo.listar()
+            // Commit 9: segun el filtro se pide todo (listar) o solo un usuario (porUsuario).
+            val filtro = _usuarioFiltro.value
+            val resultado = if (filtro == null) repo.listar() else repo.porUsuario(filtro)
+            resultado
                 .onSuccess { _lista.value = UiState.Exito(it) }
                 .onFailure { _lista.value = UiState.Error(mensajeDe(it)) }
         }
+    }
+
+    // Commit 9: guarda el filtro elegido y recarga la lista.
+    fun filtrar(userId: Int?) {
+        _usuarioFiltro.value = userId
+        cargar()
     }
 
     // Commit 8: pide la publicacion y sus comentarios a la vez; si una falla, todo es Error.
