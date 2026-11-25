@@ -82,7 +82,7 @@ class MainActivity : ComponentActivity() {
                         when {
                             creando -> Encabezado("Nueva publicación", "Cuéntale algo al campus")
                             id != null -> Encabezado("Detalle", "Publicación y comentarios")
-                            else -> Encabezado("MuroCampus", "Publicaciones de la comunidad")
+                            else -> Encabezado("MuroCampus", "Tu muro del campus")
                         }
                         Box(modifier = Modifier.weight(1f)) {
                             when {
