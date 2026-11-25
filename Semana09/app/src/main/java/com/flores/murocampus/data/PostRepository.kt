@@ -2,6 +2,7 @@ package com.flores.murocampus.data
 
 import com.flores.murocampus.data.remote.PostApi
 import com.flores.murocampus.model.Comentario
+import com.flores.murocampus.model.EditarPost
 import com.flores.murocampus.model.NuevoPost
 import com.flores.murocampus.model.Post
 import kotlinx.coroutines.CancellationException
@@ -15,6 +16,7 @@ interface PostRepository {
     suspend fun porUsuario(userId: Int): Result<List<Post>>
     suspend fun crear(nuevo: NuevoPost): Result<Post>
     suspend fun borrar(id: Int): Result<Unit>
+    suspend fun editar(id: Int, titulo: String): Result<Post>
 }
 
 class PostRepositoryRemote(private val api: PostApi) : PostRepository {
@@ -30,6 +32,10 @@ class PostRepositoryRemote(private val api: PostApi) : PostRepository {
         llamar { api.porUsuario(userId) }
 
     override suspend fun crear(nuevo: NuevoPost): Result<Post> = llamar { api.crear(nuevo) }
+
+    // IA commit 6: edita solo el titulo con PATCH.
+    override suspend fun editar(id: Int, titulo: String): Result<Post> =
+        llamar { api.editar(id, EditarPost(titulo)) }
 
     // IA commit 5: se revisa el codigo de respuesta; si no es 2xx se convierte en Result.failure.
     override suspend fun borrar(id: Int): Result<Unit> = llamar {

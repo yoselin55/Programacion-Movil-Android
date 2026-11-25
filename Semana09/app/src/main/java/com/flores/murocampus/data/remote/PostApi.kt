@@ -1,12 +1,14 @@
 package com.flores.murocampus.data.remote
 
 import com.flores.murocampus.model.Comentario
+import com.flores.murocampus.model.EditarPost
 import com.flores.murocampus.model.NuevoPost
 import com.flores.murocampus.model.Post
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -31,4 +33,8 @@ interface PostApi {
     // IA commit 5: DELETE responde vacio; Response<Unit> deja revisar el codigo HTTP.
     @DELETE("posts/{id}")
     suspend fun borrar(@Path("id") id: Int): Response<Unit>
+
+    // IA commit 6: PATCH modifica solo los campos enviados; devuelve la publicacion actualizada.
+    @PATCH("posts/{id}")
+    suspend fun editar(@Path("id") id: Int, @Body cambios: EditarPost): Post
 }

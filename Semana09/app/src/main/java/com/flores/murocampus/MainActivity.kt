@@ -33,6 +33,7 @@ import com.flores.murocampus.ui.Destino
 import com.flores.murocampus.ui.Encabezado
 import com.flores.murocampus.ui.PantallaCrear
 import com.flores.murocampus.ui.PantallaDetalle
+import com.flores.murocampus.ui.PantallaEditar
 import com.flores.murocampus.ui.PantallaLista
 import com.flores.murocampus.ui.theme.MuroCampusTheme
 import com.flores.murocampus.viewmodel.PostsViewModel
@@ -53,11 +54,14 @@ class MainActivity : ComponentActivity() {
                 var idSeleccionado by rememberSaveable { mutableStateOf<Int?>(null) }
                 // true = se ve el formulario de crear publicacion.
                 var creando by rememberSaveable { mutableStateOf(false) }
+                // IA commit 6: true = se ve la pantalla para editar el titulo del post abierto.
+                var editando by rememberSaveable { mutableStateOf(false) }
                 // IA commit 4: true = menu lateral abierto (icono y nombre).
                 var menuAbierto by rememberSaveable { mutableStateOf(false) }
 
                 BackHandler(enabled = idSeleccionado != null) { idSeleccionado = null }
                 BackHandler(enabled = creando) { creando = false }
+                BackHandler(enabled = editando) { editando = false }
                 BackHandler(enabled = menuAbierto) { menuAbierto = false }
 
                 Box(
@@ -79,6 +83,11 @@ class MainActivity : ComponentActivity() {
                                 "Cuéntale algo al campus",
                                 onVolver = { creando = false }
                             )
+                            id != null && editando -> Encabezado(
+                                "Editar título",
+                                "Cambia el título de la publicación",
+                                onVolver = { editando = false }
+                            )
                             id != null -> Encabezado(
                                 "Detalle",
                                 "Publicación y comentarios",
@@ -89,10 +98,12 @@ class MainActivity : ComponentActivity() {
                         Box(modifier = Modifier.weight(1f)) {
                             when {
                                 creando -> PantallaCrear(vm = vm)
+                                id != null && editando -> PantallaEditar(vm = vm)
                                 id != null -> PantallaDetalle(
                                     vm = vm,
                                     idPost = id,
-                                    onBorrado = { idSeleccionado = null }
+                                    onBorrado = { idSeleccionado = null },
+                                    onEditar = { editando = true }
                                 )
                                 else -> PantallaLista(
                                     vm = vm,
@@ -131,6 +142,7 @@ class MainActivity : ComponentActivity() {
                                     creando = true
                                 }
                             }
+                            editando = false
                             menuAbierto = false
                         },
                         modifier = Modifier.align(Alignment.CenterStart)

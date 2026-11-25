@@ -27,6 +27,12 @@ data class NuevoPost(
     val body: String
 )
 
+// IA commit 6: cuerpo parcial del PATCH (solo el titulo cambia).
+@Serializable
+data class EditarPost(
+    val title: String
+)
+
 // Ejemplo entregado del laboratorio.
 @Serializable
 data class Usuario(

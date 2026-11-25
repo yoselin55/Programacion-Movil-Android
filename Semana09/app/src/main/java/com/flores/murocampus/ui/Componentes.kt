@@ -61,6 +61,8 @@ private val ColoresUsuario = listOf(
 fun TarjetaInteractiva(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    colorBase: Color = Color.White,
+    colorHover: Color = RosaPastel,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val fuente = remember { MutableInteractionSource() }
@@ -68,7 +70,7 @@ fun TarjetaInteractiva(
     val presionada by fuente.collectIsPressedAsState()
     val activa = encima || presionada
 
-    val fondo by animateColorAsState(if (activa) RosaPastel else Color.White, label = "fondo")
+    val fondo by animateColorAsState(if (activa) colorHover else colorBase, label = "fondo")
     val escala by animateFloatAsState(if (activa) 1.015f else 1f, label = "escala")
 
     val base = modifier.fillMaxWidth().scale(escala).hoverable(fuente)

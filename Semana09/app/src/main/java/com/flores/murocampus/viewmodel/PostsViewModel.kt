@@ -31,6 +31,15 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     val borrado: StateFlow<UiState<Unit>?> = _borrado.asStateFlow()
     private val _eliminados = MutableStateFlow<Set<Int>>(emptySet())
 
+    // IA commit 6: resultado del PATCH (null = aun no se edito) y titulos nuevos por id.
+    // JSONPlaceholder no guarda el cambio, asi que la app recuerda los titulos mientras esta abierta.
+    private val _edicion = MutableStateFlow<UiState<Post>?>(null)
+    val edicion: StateFlow<UiState<Post>?> = _edicion.asStateFlow()
+    private val _titulos = MutableStateFlow<Map<Int, String>>(emptyMap())
+
+    private fun conEdicion(post: Post): Post =
+        _titulos.value[post.id]?.let { post.copy(title = it) } ?: post
+
     // IA commit 4: texto de busqueda y lista filtrada por titulo, sin volver a llamar a la API.
     private val _busqueda = MutableStateFlow("")
     val busqueda: StateFlow<String> = _busqueda.asStateFlow()
@@ -79,9 +88,34 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
             val filtro = _usuarioFiltro.value
             val resultado = if (filtro == null) repo.listar() else repo.porUsuario(filtro)
             resultado
-                .onSuccess { _lista.value = UiState.Exito(it) }
+                .onSuccess { _lista.value = UiState.Exito(it.map(::conEdicion)) }
                 .onFailure { _lista.value = UiState.Error(mensajeDe(it)) }
         }
+    }
+
+    // IA commit 6: cambia el titulo con PATCH y muestra el cambio en la lista y el detalle.
+    fun editar(id: Int, titulo: String) {
+        viewModelScope.launch {
+            _edicion.value = UiState.Cargando
+            repo.editar(id, titulo)
+                .onSuccess { post ->
+                    _titulos.value = _titulos.value + (id to post.title)
+                    (_lista.value as? UiState.Exito)?.let { estado ->
+                        _lista.value = UiState.Exito(estado.datos.map(::conEdicion))
+                    }
+                    (_detalle.value as? UiState.Exito)?.let { estado ->
+                        _detalle.value = UiState.Exito(
+                            estado.datos.copy(post = conEdicion(estado.datos.post))
+                        )
+                    }
+                    _edicion.value = UiState.Exito(post)
+                }
+                .onFailure { _edicion.value = UiState.Error(mensajeDe(it)) }
+        }
+    }
+
+    fun reiniciarEdicion() {
+        _edicion.value = null
     }
 
     // IA commit 5: pide borrar la publicacion; si el servidor responde bien, se oculta de la lista.
@@ -136,7 +170,7 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
             _detalle.value = if (error != null) {
                 UiState.Error(mensajeDe(error))
             } else {
-                UiState.Exito(DetalleUi(rPost.getOrThrow(), rComentarios.getOrThrow()))
+                UiState.Exito(DetalleUi(conEdicion(rPost.getOrThrow()), rComentarios.getOrThrow()))
             }
         }
     }

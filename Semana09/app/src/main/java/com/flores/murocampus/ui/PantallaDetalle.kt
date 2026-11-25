@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -46,6 +47,7 @@ fun PantallaDetalle(
     vm: PostsViewModel,
     idPost: Int,
     onBorrado: () -> Unit,
+    onEditar: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val estado by vm.detalle.collectAsStateWithLifecycle()
@@ -74,6 +76,7 @@ fun PantallaDetalle(
             detalle = e.datos,
             borrado = borrado,
             onEliminar = { vm.borrar(idPost) },
+            onEditar = { vm.reiniciarEdicion(); onEditar() },
             modifier = modifier
         )
     }
@@ -85,6 +88,7 @@ private fun ContenidoDetalle(
     detalle: DetalleUi,
     borrado: UiState<Unit>?,
     onEliminar: () -> Unit,
+    onEditar: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -112,15 +116,27 @@ private fun ContenidoDetalle(
                 }
             }
         }
-        item { BotonEliminar(borrado = borrado, onConfirmar = onEliminar) }
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                BotonEditar(onClick = onEditar)
+                BotonEliminar(borrado = borrado, onConfirmar = onEliminar)
+            }
+        }
         item {
             Text(
                 text = "Comentarios (${detalle.comentarios.size})",
                 fontFamily = FuenteTitulos,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.primary,
+                color = ColorRespuesta,
                 modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+        item {
+            Text(
+                text = "Respuestas de otros usuarios a esta publicación",
+                fontSize = 15.sp,
+                color = ColorRespuesta.copy(alpha = 0.8f)
             )
         }
         items(detalle.comentarios, key = { it.id }) { TarjetaComentario(it) }
@@ -129,11 +145,11 @@ private fun ContenidoDetalle(
 
 @Composable
 private fun TarjetaComentario(comentario: Comentario) {
-    TarjetaInteractiva {
+    TarjetaInteractiva(colorBase = FondoRespuesta, colorHover = FondoRespuestaHover) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = comentario.email,
-                color = MaterialTheme.colorScheme.primary,
+                color = ColorRespuesta,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )
@@ -190,3 +206,23 @@ private fun BotonEliminar(borrado: UiState<Unit>?, onConfirmar: () -> Unit) {
         )
     }
 }
+
+// IA commit 6: abre la pantalla para cambiar el titulo.
+@Composable
+private fun BotonEditar(onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+    ) {
+        Icon(Icons.Default.Edit, contentDescription = null)
+        Spacer(Modifier.width(8.dp))
+        Text("Editar título", fontSize = 16.sp)
+    }
+}
+
+// Color lavanda para las respuestas, distinto del rosa/vino de la publicacion.
+private val ColorRespuesta = Color(0xFF5B3F8C)
+private val FondoRespuesta = Color(0xFFF1ECF8)
+private val FondoRespuestaHover = Color(0xFFE4DAF2)
