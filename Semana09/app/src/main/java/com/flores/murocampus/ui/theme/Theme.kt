@@ -7,10 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-    primary = AzulMuroCampus,
+    primary = RosaOscuro,
     onPrimary = Color.White,
-    primaryContainer = AzulClaro,
-    background = FondoClaro,
+    primaryContainer = RosaPastel,
+    background = FondoSuave,
     onBackground = TextoPrincipal,
     surface = Color.White,
     onSurface = TextoPrincipal,
@@ -19,13 +19,13 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = AzulMuroCampus,
+    primary = RosaOscuro,
     onPrimary = Color.White,
-    primaryContainer = AzulClaro,
-    onPrimaryContainer = AzulMuroCampus,
-    secondary = AzulMuroCampus,
+    primaryContainer = RosaPastel,
+    onPrimaryContainer = RosaTexto,
+    secondary = Rosa,
     onSecondary = Color.White,
-    background = FondoClaro,
+    background = FondoSuave,
     onBackground = TextoPrincipal,
     surface = Color.White,
     onSurface = TextoPrincipal,
@@ -33,7 +33,7 @@ private val LightColorScheme = lightColorScheme(
     onError = Color.White
 )
 
-// Commit 1: tema MuroCampus sin colores dinámicos para conservar la paleta del PDF.
+// Tema MuroCampus sin colores dinamicos para conservar la paleta propia.
 @Composable
 fun MuroCampusTheme(
     darkTheme: Boolean = false,

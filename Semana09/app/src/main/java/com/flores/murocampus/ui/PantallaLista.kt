@@ -10,11 +10,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.flores.murocampus.viewmodel.PostsViewModel
@@ -76,15 +79,24 @@ private fun FiltroUsuarios(filtro: Int?, onFiltrar: (Int?) -> Unit) {
             FilterChip(
                 selected = filtro == null,
                 onClick = { onFiltrar(null) },
-                label = { Text("Todos") }
+                label = { Text("Todos") },
+                colors = chipColores()
             )
         }
         items((1..10).toList()) { usuario ->
             FilterChip(
                 selected = filtro == usuario,
                 onClick = { onFiltrar(usuario) },
-                label = { Text("Usuario $usuario") }
+                label = { Text("Usuario $usuario") },
+                colors = chipColores()
             )
         }
     }
 }
+
+// IA commit 1: el chip seleccionado se ve relleno de rosa.
+@Composable
+private fun chipColores() = FilterChipDefaults.filterChipColors(
+    selectedContainerColor = MaterialTheme.colorScheme.primary,
+    selectedLabelColor = Color.White
+)
