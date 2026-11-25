@@ -5,13 +5,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.flores.murocampus.model.Comentario
+import com.flores.murocampus.ui.theme.FuenteTitulos
 import com.flores.murocampus.viewmodel.DetalleUi
 import com.flores.murocampus.viewmodel.PostsViewModel
 import com.flores.murocampus.viewmodel.UiState
@@ -52,29 +49,29 @@ fun PantallaDetalle(
     }
 }
 
+// IA commit 4: letras mas grandes, titulos en serif y comentarios que reaccionan al mouse.
 @Composable
 private fun ContenidoDetalle(detalle: DetalleUi, modifier: Modifier = Modifier) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
-            ) {
-                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            TarjetaInteractiva {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         text = detalle.post.title,
+                        fontFamily = FuenteTitulos,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
-                        color = Color(0xFF1F2430)
+                        fontSize = 20.sp,
+                        lineHeight = 26.sp,
+                        color = Color(0xFF3B2A30)
                     )
                     Text(
                         text = detalle.post.body,
-                        fontSize = 13.sp,
+                        fontSize = 16.sp,
+                        lineHeight = 23.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -83,8 +80,9 @@ private fun ContenidoDetalle(detalle: DetalleUi, modifier: Modifier = Modifier) 
         item {
             Text(
                 text = "Comentarios (${detalle.comentarios.size})",
+                fontFamily = FuenteTitulos,
                 fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
+                fontSize = 20.sp,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -95,21 +93,18 @@ private fun ContenidoDetalle(detalle: DetalleUi, modifier: Modifier = Modifier) 
 
 @Composable
 private fun TarjetaComentario(comentario: Comentario) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F3F6))
-    ) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    TarjetaInteractiva {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = comentario.email,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
-                fontSize = 12.sp
+                fontSize = 16.sp
             )
             Text(
                 text = comentario.body.replace("\n", " "),
-                fontSize = 12.sp,
+                fontSize = 16.sp,
+                lineHeight = 23.sp,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }

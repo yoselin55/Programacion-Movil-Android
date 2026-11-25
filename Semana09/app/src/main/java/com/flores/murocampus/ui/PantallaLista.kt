@@ -19,34 +19,38 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.flores.murocampus.ui.theme.FuenteTitulos
 import com.flores.murocampus.ui.theme.RosaTexto
 import com.flores.murocampus.viewmodel.PostsViewModel
 import com.flores.murocampus.viewmodel.UiState
 
-// Commit 7: la pantalla solo dibuja el estado; nunca llama a la API.
-// Commit 9: chips para filtrar por usuario y mensaje cuando no hay publicaciones.
+// La pantalla solo dibuja el estado; nunca llama a la API.
 // IA commit 3: portada y fotos del campus arriba; todo se desplaza en una sola lista.
+// IA commit 4: busqueda por titulo arriba de todo.
 @Composable
 fun PantallaLista(
     vm: PostsViewModel,
     onPostClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val estado by vm.lista.collectAsStateWithLifecycle()
+    val estado by vm.listaVisible.collectAsStateWithLifecycle()
     val filtro by vm.usuarioFiltro.collectAsStateWithLifecycle()
+    val busqueda by vm.busqueda.collectAsStateWithLifecycle()
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        item { BarraBusqueda(texto = busqueda, onCambio = { vm.buscar(it) }) }
         item { PortadaHero() }
         item { ExploraCampus() }
         item {
             Text(
                 text = "Publicaciones de la comunidad",
                 color = RosaTexto,
-                fontSize = 17.sp,
+                fontFamily = FuenteTitulos,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -60,7 +64,13 @@ fun PantallaLista(
             }
 
             is UiState.Exito -> if (e.datos.isEmpty()) {
-                item { Text("Sin publicaciones", modifier = Modifier.padding(16.dp)) }
+                item {
+                    Text(
+                        text = if (busqueda.isNotBlank()) "Sin resultados para “$busqueda”" else "Sin publicaciones",
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             } else {
                 items(e.datos, key = { it.id }) { post ->
                     TarjetaPost(post, onClick = { onPostClick(post.id) })
@@ -78,7 +88,7 @@ private fun FiltroUsuarios(filtro: Int?, onFiltrar: (Int?) -> Unit) {
             FilterChip(
                 selected = filtro == null,
                 onClick = { onFiltrar(null) },
-                label = { Text("Todos") },
+                label = { Text("Todos", fontSize = 16.sp) },
                 colors = chipColores()
             )
         }
@@ -86,7 +96,7 @@ private fun FiltroUsuarios(filtro: Int?, onFiltrar: (Int?) -> Unit) {
             FilterChip(
                 selected = filtro == usuario,
                 onClick = { onFiltrar(usuario) },
-                label = { Text("Usuario $usuario") },
+                label = { Text("Usuario $usuario", fontSize = 16.sp) },
                 colors = chipColores()
             )
         }

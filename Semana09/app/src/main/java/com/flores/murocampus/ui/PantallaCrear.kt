@@ -87,7 +87,7 @@ fun PantallaCrear(vm: PostsViewModel, modifier: Modifier = Modifier) {
                     text = e.mensaje,
                     color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center,
-                    fontSize = 13.sp,
+                    fontSize = 15.sp,
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -119,7 +119,7 @@ private fun MensajeExito(texto: String) {
             text = texto,
             color = Color(0xFF1B5E20),
             fontWeight = FontWeight.Bold,
-            fontSize = 13.sp,
+            fontSize = 15.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(16.dp)
         )

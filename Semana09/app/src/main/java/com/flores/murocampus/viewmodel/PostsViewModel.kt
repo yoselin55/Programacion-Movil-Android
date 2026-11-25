@@ -9,8 +9,11 @@ import com.flores.murocampus.model.Post
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 // Commit 8: publicacion y comentarios que se muestran juntos en el detalle.
@@ -21,6 +24,26 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
 
     private val _lista = MutableStateFlow<UiState<List<Post>>>(UiState.Cargando)
     val lista: StateFlow<UiState<List<Post>>> = _lista.asStateFlow()
+
+    // IA commit 4: texto de busqueda y lista filtrada por titulo, sin volver a llamar a la API.
+    private val _busqueda = MutableStateFlow("")
+    val busqueda: StateFlow<String> = _busqueda.asStateFlow()
+
+    val listaVisible: StateFlow<UiState<List<Post>>> =
+        combine(_lista, _busqueda) { estado, texto ->
+            val buscado = texto.trim()
+            val resultado: UiState<List<Post>> =
+                if (estado is UiState.Exito && buscado.isNotEmpty()) {
+                    UiState.Exito(estado.datos.filter { it.title.contains(buscado, ignoreCase = true) })
+                } else {
+                    estado
+                }
+            resultado
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UiState.Cargando)
+
+    fun buscar(texto: String) {
+        _busqueda.value = texto
+    }
 
     // Commit 8: estado del detalle (publicacion + comentarios).
     private val _detalle = MutableStateFlow<UiState<DetalleUi>>(UiState.Cargando)

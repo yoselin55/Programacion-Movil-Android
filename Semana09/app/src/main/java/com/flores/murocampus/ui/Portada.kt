@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.flores.murocampus.R
+import com.flores.murocampus.ui.theme.FuenteTitulos
 import com.flores.murocampus.ui.theme.RosaOscuro
 import com.flores.murocampus.ui.theme.RosaTexto
 
@@ -37,7 +38,7 @@ fun PortadaHero(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(170.dp)
+            .height(190.dp)
             .clip(RoundedCornerShape(24.dp))
     ) {
         Image(
@@ -70,21 +71,22 @@ fun PortadaHero(modifier: Modifier = Modifier) {
             Text(
                 text = "TU MURO DEL CAMPUS",
                 color = Color.White,
-                fontSize = 20.sp,
-                lineHeight = 24.sp,
+                fontFamily = FuenteTitulos,
+                fontSize = 24.sp,
+                lineHeight = 28.sp,
                 fontWeight = FontWeight.ExtraBold
             )
             Text(
                 text = "Consulta, comparte y entérate de lo que pasa en TECSUP",
                 color = Color.White.copy(alpha = 0.92f),
-                fontSize = 12.sp,
-                lineHeight = 16.sp
+                fontSize = 16.sp,
+                lineHeight = 22.sp
             )
             Surface(shape = RoundedCornerShape(50), color = Color.White) {
                 Text(
                     text = "Publicaciones de la comunidad",
                     color = RosaOscuro,
-                    fontSize = 11.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                 )
@@ -109,13 +111,14 @@ fun ExploraCampus(modifier: Modifier = Modifier) {
             Text(
                 text = "Explora el campus",
                 color = RosaTexto,
-                fontSize = 17.sp,
+                fontFamily = FuenteTitulos,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = "¿Qué te gustaría consultar hoy?",
                 color = RosaTexto.copy(alpha = 0.7f),
-                fontSize = 12.sp
+                fontSize = 15.sp
             )
         }
         LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -152,8 +155,8 @@ private fun TarjetaLugar(lugar: Lugar) {
                 .align(Alignment.BottomStart)
                 .padding(10.dp)
         ) {
-            Text(lugar.nombre, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Text(lugar.detalle, color = Color.White.copy(alpha = 0.9f), fontSize = 11.sp)
+            Text(lugar.nombre, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(lugar.detalle, color = Color.White.copy(alpha = 0.9f), fontSize = 14.sp)
         }
     }
 }
