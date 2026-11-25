@@ -89,7 +89,11 @@ class MainActivity : ComponentActivity() {
                         Box(modifier = Modifier.weight(1f)) {
                             when {
                                 creando -> PantallaCrear(vm = vm)
-                                id != null -> PantallaDetalle(vm = vm, idPost = id)
+                                id != null -> PantallaDetalle(
+                                    vm = vm,
+                                    idPost = id,
+                                    onBorrado = { idSeleccionado = null }
+                                )
                                 else -> PantallaLista(
                                     vm = vm,
                                     onPostClick = { vm.abrir(it); idSeleccionado = it }

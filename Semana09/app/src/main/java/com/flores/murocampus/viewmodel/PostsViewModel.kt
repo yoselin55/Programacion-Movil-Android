@@ -25,16 +25,27 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _lista = MutableStateFlow<UiState<List<Post>>>(UiState.Cargando)
     val lista: StateFlow<UiState<List<Post>>> = _lista.asStateFlow()
 
+    // IA commit 5: resultado del DELETE (null = aun no se pidio borrar) e ids ya eliminados.
+    // JSONPlaceholder no borra de verdad, asi que la app recuerda los eliminados mientras esta abierta.
+    private val _borrado = MutableStateFlow<UiState<Unit>?>(null)
+    val borrado: StateFlow<UiState<Unit>?> = _borrado.asStateFlow()
+    private val _eliminados = MutableStateFlow<Set<Int>>(emptySet())
+
     // IA commit 4: texto de busqueda y lista filtrada por titulo, sin volver a llamar a la API.
     private val _busqueda = MutableStateFlow("")
     val busqueda: StateFlow<String> = _busqueda.asStateFlow()
 
     val listaVisible: StateFlow<UiState<List<Post>>> =
-        combine(_lista, _busqueda) { estado, texto ->
+        combine(_lista, _busqueda, _eliminados) { estado, texto, eliminados ->
             val buscado = texto.trim()
             val resultado: UiState<List<Post>> =
-                if (estado is UiState.Exito && buscado.isNotEmpty()) {
-                    UiState.Exito(estado.datos.filter { it.title.contains(buscado, ignoreCase = true) })
+                if (estado is UiState.Exito) {
+                    UiState.Exito(
+                        estado.datos.filter {
+                            it.id !in eliminados &&
+                                (buscado.isEmpty() || it.title.contains(buscado, ignoreCase = true))
+                        }
+                    )
                 } else {
                     estado
                 }
@@ -73,6 +84,23 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
         }
     }
 
+    // IA commit 5: pide borrar la publicacion; si el servidor responde bien, se oculta de la lista.
+    fun borrar(id: Int) {
+        viewModelScope.launch {
+            _borrado.value = UiState.Cargando
+            repo.borrar(id)
+                .onSuccess {
+                    _eliminados.value = _eliminados.value + id
+                    _borrado.value = UiState.Exito(Unit)
+                }
+                .onFailure { _borrado.value = UiState.Error(mensajeDe(it)) }
+        }
+    }
+
+    fun reiniciarBorrado() {
+        _borrado.value = null
+    }
+
     // Commit 10: envia la publicacion nueva (userId fijo = 1) y guarda el resultado.
     fun publicar(titulo: String, texto: String) {
         viewModelScope.launch {
@@ -96,6 +124,7 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
 
     // Commit 8: pide la publicacion y sus comentarios a la vez; si una falla, todo es Error.
     fun abrir(id: Int) {
+        _borrado.value = null
         viewModelScope.launch {
             _detalle.value = UiState.Cargando
             val (rPost, rComentarios) = coroutineScope {
