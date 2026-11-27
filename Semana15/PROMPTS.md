@@ -1,0 +1,15 @@
+# PROMPTS.md · Fase 2 (con IA)
+
+Asistente usado en esta fase: **Claude (Claude Code)**. El lab menciona Gemini; aquí se registra la IA que realmente se usó.
+
+Mejoras elegidas: **1) Dos canales**, **2) Texto largo**, **3) Receptor del cargador** (más un cambio de interfaz con ilustración de fondo).
+
+La IA propone y yo decido: probé cada cambio en el emulador y revisé que se cumplieran las reglas (nada de `Context` ni `NotificationManager` en el ViewModel, y todo receptor se quita en `onDispose`).
+
+| Prompt que escribí | Qué respondió la IA | Qué cambié o descarté | Por qué |
+|---|---|---|---|
+| "Haz 3 mejoras de la Fase 2 (las que quieras) y dame un commit por cada una" | Propuso dos canales, texto largo con `BigTextStyle` y receptor del cargador, porque tocan Notificador, Repository, ViewModel, Receiver y pantalla. | Acepté las tres. Descarté el historial persistente y la push de Firebase. | El lab pide mínimo 3 mejoras y que una cambie el ViewModel o el Repository. Las dos descartadas necesitan más dependencias (DataStore o Firebase). |
+| "Mejora 1: un canal Urgentes con `IMPORTANCE_HIGH` y que el recordatorio lo use" | Creó el canal `urgentes` en `Notificador` y agregó el campo `urgente` al modelo `Aviso` y al `registrar(...)` del Repository. El ViewModel marca el recordatorio con `urgente = true`. | Revisé que el ViewModel **no** elige el canal ni toca el `NotificationManager`: solo marca el aviso, y el `Notificador` decide el canal. | Mantiene la regla de MVVM del lab. El ViewModel decide *qué* avisar y la pantalla/Notificador decide *cómo* mostrarlo. |
+| "Mejora 2: mostrar el texto completo al expandir la notificación" | Usó `BigTextStyle` y una función `textoLargo` que agrega "Origen · hora" al texto. | Mantuve los textos del lab ("Tu entrega fue registrada") y solo agregué la línea de detalle. | Los textos del lab son cortos, así que el detalle extra permite ver la diferencia al expandir. Comprobado en el panel del emulador. |
+| "Mejora 3: avisar cuando conecto o desconecto el cargador, con su propio switch" | Creó `CargadorReceiver` (con `ACTION_POWER_CONNECTED` y `ACTION_POWER_DISCONNECTED`), el estado `escuchandoCargador` en el ViewModel y un segundo `DisposableEffect` en la pantalla. | Revisé que el receptor se registre con `RECEIVER_NOT_EXPORTED` y se quite con `unregisterReceiver` en `onDispose`. Agregué el origen `CARGADOR` al historial con su propio color. | Un receptor sin quitar se filtra en memoria. Probé con `dumpsys battery`: sin el switch no avisa, con el switch avisa Conectado y Desconectado. |
+| "Mejora la interfaz y pon esta imagen de fondo" | Puso la ilustración en `drawable-nodpi`, un composable `FondoIlustrado` y el `Scaffold` transparente. Las tarjetas pasaron a ser semitransparentes con esquinas redondeadas. | La primera versión tenía sombra en las tarjetas y se veía un rectángulo claro a través de la transparencia. Lo corregí con elevación 0. | Con una tarjeta transparente, la sombra se ve por debajo y se ve mal. Sin sombra queda limpio y el texto se lee bien. |
