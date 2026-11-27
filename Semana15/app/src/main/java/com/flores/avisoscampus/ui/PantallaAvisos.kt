@@ -52,6 +52,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     val permiso by vm.permiso.collectAsState()
     val faltan by vm.faltan.collectAsState()
     val escuchando by vm.escuchandoAvion.collectAsState()
+    val avisos by vm.avisos.collectAsState()
 
     // El receptor solo está registrado mientras el switch está activo
     // y se quita siempre en onDispose para no filtrar memoria.
@@ -195,10 +196,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            // TODO Paso 7: HistorialAvisos(avisos)
-            TarjetaAviso("Historial") {
-                Text("Sin funciones todavía")
-            }
+            HistorialAvisos(avisos)
         }
     }
 }
