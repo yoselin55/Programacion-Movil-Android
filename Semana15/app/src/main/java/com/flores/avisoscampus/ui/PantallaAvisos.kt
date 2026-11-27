@@ -115,9 +115,14 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                     Text("Permitir notificaciones")
                 }
             }
-            // TODO Paso 3 y 8: botón "Mostrar aviso" y mensaje de error
+            // TODO Paso 8: mensaje de error cuando no se pudo mostrar
             TarjetaAviso("Avisos") {
-                Text("Sin funciones todavía")
+                Button(
+                    onClick = { vm.avisarAhora() },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text("Mostrar aviso")
+                }
             }
             // TODO Paso 5: Recordar en 10 s, Cancelar y "Faltan N s"
             TarjetaAviso("Recordatorio") {
@@ -142,7 +147,9 @@ private fun TarjetaAviso(titulo: String, contenido: @Composable ColumnScope.() -
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
