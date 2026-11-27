@@ -43,6 +43,10 @@ object Notificador {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    // Texto que se muestra cuando la notificación está expandida
+    private fun textoLargo(aviso: Aviso): String =
+        "${aviso.texto}\nOrigen: ${aviso.origen.texto} · ${aviso.hora}"
+
     @SuppressLint("MissingPermission")
     fun mostrar(context: Context, aviso: Aviso): Boolean {
         if (!tienePermiso(context)) return false
@@ -68,6 +72,8 @@ object Notificador {
             .setSmallIcon(R.drawable.ic_notificacion)
             .setContentTitle(aviso.titulo)
             .setContentText(aviso.texto)
+            // Al expandir la notificación se ve el texto completo y el detalle
+            .setStyle(NotificationCompat.BigTextStyle().bigText(textoLargo(aviso)))
             .setPriority(prioridad)
             .setAutoCancel(true)
             .setContentIntent(pendiente)
