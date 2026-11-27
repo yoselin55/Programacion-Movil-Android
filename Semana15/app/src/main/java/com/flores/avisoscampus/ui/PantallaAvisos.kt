@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -43,6 +44,7 @@ import com.flores.avisoscampus.viewmodel.AvisosViewModel
 fun PantallaAvisos(vm: AvisosViewModel) {
     val contexto = LocalContext.current
     val permiso by vm.permiso.collectAsState()
+    val faltan by vm.faltan.collectAsState()
 
     val lanzador = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -124,9 +126,32 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                     Text("Mostrar aviso")
                 }
             }
-            // TODO Paso 5: Recordar en 10 s, Cancelar y "Faltan N s"
             TarjetaAviso("Recordatorio") {
-                Text("Sin funciones todavía")
+                val activo = faltan != null
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+                ) {
+                    Button(
+                        onClick = { vm.recordarEn(10) },
+                        enabled = !activo
+                    ) {
+                        Text("Recordar en 10 s")
+                    }
+                    OutlinedButton(
+                        onClick = { vm.cancelarRecordatorio() },
+                        enabled = activo
+                    ) {
+                        Text("Cancelar")
+                    }
+                }
+                if (faltan != null) {
+                    Text(
+                        text = "Faltan $faltan s",
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
             }
             // TODO Paso 6: Switch "Escuchar el modo avión" + receptor
             TarjetaAviso("Receptor de anuncios") {
