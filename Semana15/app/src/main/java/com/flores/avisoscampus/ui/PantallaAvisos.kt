@@ -7,6 +7,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.Switch
+import com.flores.avisoscampus.receiver.CargadorReceiver
 import androidx.compose.runtime.DisposableEffect
 import androidx.core.content.ContextCompat
 import com.flores.avisoscampus.receiver.ModoAvionReceiver
@@ -54,6 +55,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     val permiso by vm.permiso.collectAsState()
     val faltan by vm.faltan.collectAsState()
     val escuchando by vm.escuchandoAvion.collectAsState()
+    val escuchandoCargador by vm.escuchandoCargador.collectAsState()
     val avisos by vm.avisos.collectAsState()
     val mensaje by vm.mensaje.collectAsState()
 
@@ -66,6 +68,26 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 contexto,
                 receptor,
                 IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED),
+                ContextCompat.RECEIVER_NOT_EXPORTED
+            )
+            onDispose { contexto.unregisterReceiver(receptor) }
+        } else {
+            onDispose { }
+        }
+    }
+
+    // Mismo patrón para el cargador: se registra con el switch y se quita en onDispose.
+    DisposableEffect(escuchandoCargador) {
+        if (escuchandoCargador) {
+            val receptor = CargadorReceiver { conectado -> vm.alCambiarCargador(conectado) }
+            val filtro = IntentFilter().apply {
+                addAction(Intent.ACTION_POWER_CONNECTED)
+                addAction(Intent.ACTION_POWER_DISCONNECTED)
+            }
+            ContextCompat.registerReceiver(
+                contexto,
+                receptor,
+                filtro,
                 ContextCompat.RECEIVER_NOT_EXPORTED
             )
             onDispose { contexto.unregisterReceiver(receptor) }
@@ -93,6 +115,8 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        // Transparente para que se vea la ilustración de fondo
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = { Text("AvisosCampus", fontWeight = FontWeight.Bold) },
@@ -225,6 +249,22 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Escuchar el cargador")
+                    Switch(
+                        checked = escuchandoCargador,
+                        onCheckedChange = { vm.cambiarEscuchaCargador(it) }
+                    )
+                }
+                Text(
+                    text = "Avisa cuando conectas o desconectas el cargador",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             HistorialAvisos(avisos)
         }
@@ -235,7 +275,13 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 private fun TarjetaAviso(titulo: String, contenido: @Composable ColumnScope.() -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = RoundedCornerShape(20.dp),
+        // Algo transparente: deja ver la ilustración pero el texto se lee bien
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+        ),
+        // Sin sombra: con la tarjeta semitransparente la sombra se vería a través
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier

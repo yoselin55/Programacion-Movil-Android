@@ -27,7 +27,11 @@ import com.flores.avisoscampus.model.Origen
 fun HistorialAvisos(avisos: List<Aviso>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier
@@ -94,4 +98,5 @@ private fun colorOrigen(origen: Origen): Color = when (origen) {
     Origen.BOTON -> Color(0xFF2F7FD0)
     Origen.RECORDATORIO -> Color(0xFFE09A12)
     Origen.MODO_AVION -> Color(0xFF7B4FC9)
+    Origen.CARGADOR -> Color(0xFF2E9E5B)
 }

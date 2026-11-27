@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flores.avisoscampus.data.AvisosRepositoryMemoria
+import com.flores.avisoscampus.ui.FondoIlustrado
 import com.flores.avisoscampus.ui.PantallaAvisos
 import com.flores.avisoscampus.ui.theme.AvisosCampusTheme
 import com.flores.avisoscampus.viewmodel.AvisosViewModel
@@ -20,7 +21,9 @@ class MainActivity : ComponentActivity() {
                 val vm: AvisosViewModel = viewModel(
                     factory = AvisosViewModelFactory(AvisosRepositoryMemoria())
                 )
-                PantallaAvisos(vm)
+                FondoIlustrado {
+                    PantallaAvisos(vm)
+                }
             }
         }
     }
